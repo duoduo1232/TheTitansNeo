@@ -20,7 +20,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class RenderExperienceOrbTitan extends EntityRenderer<EntityExperienceOrbTitan, ExperienceOrbRenderState> {
 
-	public static final Identifier EXPERIENCE_ORB = Identifier.withDefaultNamespace("textures/entity/experience_orb.png");
+	public static final Identifier EXPERIENCE_ORB = Identifier.withDefaultNamespace("textures/entity/experience/experience_orb.png");
 	// 26.1.2: 贴图与 RenderType 在类加载期固定下来，submit 阶段只做几何提交。
 	private static final RenderType RENDER_TYPE = RenderTypes.entityTranslucentCullItemTarget(EXPERIENCE_ORB);
 

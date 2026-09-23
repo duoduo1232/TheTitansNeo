@@ -18,11 +18,11 @@ public class RenderOmegafishMinion extends SilverfishRenderer {
 	private Identifier currentTexture;
 
 
-	public static final Identifier SILVERFISH = Identifier.withDefaultNamespace("textures/entity/silverfish.png");
-	public static final Identifier SILVERFISH_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish_priest.png");
-	public static final Identifier SILVERFISH_ZEALOT = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish_zealot.png");
-	public static final Identifier SILVERFISH_BISHOP = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish_bishop.png");
-	public static final Identifier SILVERFISH_TEMPLAR = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish_templar.png");
+	public static final Identifier SILVERFISH = Identifier.withDefaultNamespace("textures/entity/silverfish/silverfish.png");
+	public static final Identifier SILVERFISH_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish/silverfish_priest.png");
+	public static final Identifier SILVERFISH_ZEALOT = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish/silverfish_zealot.png");
+	public static final Identifier SILVERFISH_BISHOP = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish/silverfish_bishop.png");
+	public static final Identifier SILVERFISH_TEMPLAR = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/silverfish/silverfish_templar.png");
 
 	public RenderOmegafishMinion(EntityRendererProvider.Context context) {
 		super(context);

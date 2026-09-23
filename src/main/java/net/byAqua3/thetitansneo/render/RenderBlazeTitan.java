@@ -14,7 +14,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class RenderBlazeTitan extends LivingEntityRenderer<EntityBlazeTitan, TitanRenderState, ModelBlazeTitan> {
 
-	public static final Identifier BLAZE_TITAN = Identifier.withDefaultNamespace("textures/entity/blaze.png");
+	public static final Identifier BLAZE_TITAN = Identifier.withDefaultNamespace("textures/entity/blaze/blaze.png");
 
 	public RenderBlazeTitan(Context context) {
 		super(context, new ModelBlazeTitan(0.0F), 0.5F);

@@ -37,6 +37,10 @@ public class RenderWitherzilla extends LivingEntityRenderer<EntityWitherzilla, T
 		state.affectTicks = entity.affectTicks;
 		state.isInOmegaForm = entity.isInOmegaForm();
 		state.worldTicks = (int) entity.level().getOverworldClockTime();
+		// 26.1.2: 模型要按 RenderState 取三颗头颅的偏航/俯仰，必须在提取阶段拷进来，
+		// 否则 state.headYRot / headXRot 还是空数组，setupAnim 会越界崩溃。
+		state.headYRot = new float[] { entity.getHeadYRot(0), entity.getHeadYRot(1) };
+		state.headXRot = new float[] { entity.getHeadXRot(0), entity.getHeadXRot(1) };
 	}
 
 	@Override

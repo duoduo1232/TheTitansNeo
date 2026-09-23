@@ -2,12 +2,12 @@
   "layers": {
     "humanoid": [
       {
-        "texture": "thetitansneo:absence"
+        "texture": "thetitansneo:void"
       }
     ],
     "humanoid_leggings": [
       {
-        "texture": "thetitansneo:absence"
+        "texture": "thetitansneo:void"
       }
     ]
   }

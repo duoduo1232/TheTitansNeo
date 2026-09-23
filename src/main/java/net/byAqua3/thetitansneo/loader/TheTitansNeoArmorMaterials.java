@@ -56,17 +56,17 @@ public class TheTitansNeoArmorMaterials {
 
 	/** 原 1.21.1 注册名 "thetitansneo:copper"，贴图前缀 copper。 */
 	public static final ArmorMaterial COPPER = new ArmorMaterial(
-			11, defense(1, 2, 3, 1), 12, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			6, defense(1, 2, 3, 1), 12, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
 			repairs("copper"), asset("copper"));
 
 	/** 原 1.21.1 注册名 "thetitansneo:tin"，贴图前缀 tin。 */
 	public static final ArmorMaterial TIN = new ArmorMaterial(
-			13, defense(1, 2, 3, 1), 18, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			6, defense(1, 2, 3, 1), 18, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
 			repairs("tin"), asset("tin"));
 
 	/** 原 1.21.1 注册名 "thetitansneo:bronze"，贴图前缀 bronze。 */
 	public static final ArmorMaterial BRONZE = new ArmorMaterial(
-			22, defense(2, 4, 6, 2), 14, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			12, defense(2, 4, 6, 2), 14, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
 			repairs("bronze"), asset("bronze"));
 
 	/** 原 1.21.1 注册名 "thetitansneo:steel"，贴图前缀 steel。 */
@@ -76,17 +76,17 @@ public class TheTitansNeoArmorMaterials {
 
 	/** 原 1.21.1 注册名 "thetitansneo:harcadium"，贴图前缀 harcadium。 */
 	public static final ArmorMaterial HARCADIUM = new ArmorMaterial(
-			45, defense(8, 12, 15, 9), 30, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			5000, defense(8, 12, 15, 9), 30, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
 			repairs("harcadium"), asset("harcadium"));
 
 	/** 原 1.21.1 注册名 "thetitansneo:void"，贴图前缀 absence。 */
 	public static final ArmorMaterial VOID = new ArmorMaterial(
-			60, defense(9, 13, 17, 11), 50, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			100000, defense(9, 13, 17, 11), 50, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
 			repairs("void"), asset("absence"));
 
 	/** 原 1.21.1 注册名 "thetitansneo:adminium"，贴图前缀 adminium。 */
 	public static final ArmorMaterial ADMINIUM = new ArmorMaterial(
-			100, defense(100000, 100000, 100000, 100000), 60, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			100000000, defense(100000, 100000, 100000, 100000), 60, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
 			repairs("adminium"), asset("adminium"));
 
 	private TheTitansNeoArmorMaterials() {

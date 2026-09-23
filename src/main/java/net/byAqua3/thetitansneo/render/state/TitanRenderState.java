@@ -61,9 +61,9 @@ public boolean isAggressive;
 	public net.minecraft.world.phys.Vec3 lookVector = net.minecraft.world.phys.Vec3.ZERO;
 	public boolean isAlive = true;
 	/** 凋灵斯拉三颗头颅的偏航/俯仰（角度制）。 */
-	public float[] headYRot = new float[0];
-	public float[] headXRot = new float[0];
-	public float[] headGauss = new float[0];
+	public float[] headYRot = new float[2];
+	public float[] headXRot = new float[2];
+	public float[] headGauss = new float[2];
 	/** 26.1.2: 雪傀儡泰坦头顶的南瓜方块（原版方块模型改为预解析进 RenderState）。 */
 	public final BlockModelRenderState pumpkinBlock = new BlockModelRenderState();
 }

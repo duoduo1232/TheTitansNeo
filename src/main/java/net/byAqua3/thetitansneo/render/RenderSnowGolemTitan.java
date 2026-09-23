@@ -19,7 +19,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class RenderSnowGolemTitan extends LivingEntityRenderer<EntitySnowGolemTitan, TitanRenderState, SnowGolemModel> {
 
-	private static final Identifier SNOW_GOLEM_TTIAN = Identifier.withDefaultNamespace("textures/entity/snow_golem.png");
+	private static final Identifier SNOW_GOLEM_TTIAN = Identifier.withDefaultNamespace("textures/entity/snow_golem/snow_golem.png");
 	/** 26.1.2: 方块模型需要在 extract 阶段预解析进 BlockModelRenderState。 */
 	private static final BlockDisplayContext BLOCK_DISPLAY_CONTEXT = BlockDisplayContext.create();
 	private final BlockModelResolver blockModelResolver;
