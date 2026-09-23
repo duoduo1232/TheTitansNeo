@@ -76,7 +76,7 @@
 		},
 		"fluid_level_floodedness": 0,
 		"fluid_level_spread": 0,
-		"initial_density_without_jaggedness": {
+		"preliminary_surface_level": {
 			"type": "minecraft:add",
 			"argument1": -0.234375,
 			"argument2": {
