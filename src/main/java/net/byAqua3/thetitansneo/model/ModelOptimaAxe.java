@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -13,7 +14,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.LivingEntity;
 
-public class ModelOptimaAxe extends EntityModel<LivingEntity> {
+public class ModelOptimaAxe extends EntityModel<LivingEntityRenderState> {
 
 	public final ModelPart grip;
 	public final ModelPart handle;
@@ -21,8 +22,8 @@ public class ModelOptimaAxe extends EntityModel<LivingEntity> {
 	public final ModelPart blade2;
 
 	public ModelOptimaAxe() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.grip = root.getChild("grip");
 		this.handle = root.getChild("grip").getChild("handle");
 		this.blade1 = root.getChild("grip").getChild("handle").getChild("blade1");
@@ -41,11 +42,8 @@ public class ModelOptimaAxe extends EntityModel<LivingEntity> {
 	}
 
 	@Override
-	public void setupAnim(LivingEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
+	public void setupAnim(LivingEntityRenderState state) {
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.grip.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 }

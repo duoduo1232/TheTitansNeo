@@ -11,7 +11,6 @@ import net.byAqua3.thetitansneo.entity.titan.EntityZombifiedPiglinTitan;
 import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -33,8 +32,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.ItemStack;
 
 public class EntityGhastGuardMinion extends Ghast implements IMinion {
 
@@ -94,15 +94,15 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setMinionType(tag.getInt("MinionType"));
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setMinionType(input.getIntOr("MinionType", 0));
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("MinionType", this.getMinionTypeInt());
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("MinionType", this.getMinionTypeInt());
 	}
 
 	public float rotlerp(float angle, float targetAngle, float maxIncrease) {
@@ -123,11 +123,11 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 		int j = this.getRandom().nextInt(2) + this.getRandom().nextInt(1 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.GHAST_TEAR, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GHAST_TEAR, 1));
 		}
 		j = this.getRandom().nextInt(3) + this.getRandom().nextInt(1 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.GUNPOWDER, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GUNPOWDER, 1));
 		}
 	}
 
@@ -141,13 +141,9 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 		if (this.getMaster() != null) {
 			return this.getMaster().canAttack(target);
 		}
-		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
+		return !target.is(TheTitansNeoEntities.ZOMBIFIED_PIGLIN_TITAN.get()) && !target.is(TheTitansNeoEntities.ZOMBIFIED_PIGLIN_TITAN_MINION.get()) && !target.is(TheTitansNeoEntities.GHAST_GUARD_MINION.get()) && target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType != TheTitansNeoEntities.ZOMBIFIED_PIGLIN_TITAN.get() && entityType != TheTitansNeoEntities.ZOMBIFIED_PIGLIN_TITAN_MINION.get() && entityType != TheTitansNeoEntities.GHAST_GUARD_MINION.get();
-	}
 
 	@Override
 	public int getExplosionPower() {
@@ -201,7 +197,7 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (this.isInvulnerable()) {
@@ -217,11 +213,11 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 				this.setTarget(livingEntity);
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		return false;
 	}
 
@@ -263,9 +259,9 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 	@Override
 	protected void dropAllDeathLoot(ServerLevel level, DamageSource damageSource) {
 		this.captureDrops(new java.util.ArrayList<>());
-		boolean flag = this.lastHurtByPlayerTime > 0;
-		if (this.shouldDropLoot() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.dropFromLootTable(damageSource, flag);
+		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
+		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
 			int i = 0;
@@ -288,13 +284,13 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 			}
 		}
 
-		this.dropEquipment();
+		dropEquipment(level);
 
-		int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.lastHurtByPlayer, this.getExperienceReward(level, damageSource.getEntity()));
+		int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
 		ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
 
 		Collection<ItemEntity> drops = captureDrops(null);
-		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, lastHurtByPlayerTime > 0)) {
+		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, this.getLastHurtByPlayerMemoryTime() > 0)) {
 			for (ItemEntity drop : drops) {
 				this.level().addFreshEntity(drop);
 			}

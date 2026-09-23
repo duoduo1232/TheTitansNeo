@@ -1,74 +1,94 @@
 package net.byAqua3.thetitansneo.loader;
 
-import java.util.EnumMap;
-import java.util.List;
+import java.util.Map;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
-import net.minecraft.Util;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 
+/**
+ * 26.1.2 适配说明：
+ * <p>
+ * 1.21.1 的 {@code ArmorMaterial} 是一个<b>可注册对象</b>（DeferredRegister&lt;ArmorMaterial&gt;），
+ * 且带 {@code List<ArmorMaterial.Layer>} 用于定位贴图。
+ * <p>
+ * 26.1.2 中它被改成不可变 record，并<b>不再走注册表</b>——由
+ * {@code Item.Properties.humanoidArmor(material, type)} 直接把属性、装备信息
+ * 写进物品的 DataComponents。贴图改由 assets 侧的 equipment JSON 描述（见
+ * {@code assets/thetitansneo/equipment/<name>.json}）。
+ * <p>
+ * 因此本类由 DeferredRegister 持有者改为纯静态常量持有者。
+ * 原先的 {@code Ingredient} 修复材料也改为 {@code TagKey<Item>}；
+ * 本 mod 原本用的是「具体物品」而非标签，这里为每种材质新建了
+ * {@code thetitansneo:repairs_<name>_armor} 标签作为承接点——
+ * 请把对应的修理材料物品加进该标签的数据包文件。
+ */
 public class TheTitansNeoArmorMaterials {
 
-	public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(BuiltInRegistries.ARMOR_MATERIAL, TheTitansNeo.MODID);
+	/** 本 mod 的 equipment 贴图命名空间根。 */
+	private static final ResourceKey<EquipmentAsset> asset(String name) {
+		return ResourceKey.create(EquipmentAssets.ROOT_ID, Identifier.fromNamespaceAndPath(TheTitansNeo.MODID, name));
+	}
 
-	public static final DeferredHolder<ArmorMaterial, ArmorMaterial> COPPER = ARMOR_MATERIALS.register("copper", () -> new ArmorMaterial(Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, 1);
-		enumMap.put(ArmorItem.Type.LEGGINGS, 2);
-		enumMap.put(ArmorItem.Type.CHESTPLATE, 3);
-		enumMap.put(ArmorItem.Type.HELMET, 1);
-	}), 12, SoundEvents.ARMOR_EQUIP_GENERIC, () -> Ingredient.of(TheTitansNeoItems.COPPER_INGOT.get()), List.of(new ArmorMaterial.Layer(ResourceLocation.tryBuild(TheTitansNeo.MODID, "copper"))), 0.0F, 0.0F));
+	/** 修复材料标签工厂：对应原 Ingredient.of(具体物品)。 */
+	private static TagKey<Item> repairs(String name) {
+		return ItemTags.create(Identifier.fromNamespaceAndPath(TheTitansNeo.MODID, "repairs_" + name + "_armor"));
+	}
 
-	public static final DeferredHolder<ArmorMaterial, ArmorMaterial> TIN = ARMOR_MATERIALS.register("tin", () -> new ArmorMaterial(Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, 1);
-		enumMap.put(ArmorItem.Type.LEGGINGS, 2);
-		enumMap.put(ArmorItem.Type.CHESTPLATE, 3);
-		enumMap.put(ArmorItem.Type.HELMET, 1);
-	}), 18, SoundEvents.ARMOR_EQUIP_GENERIC, () -> Ingredient.of(TheTitansNeoItems.TIN_INGOT.get()), List.of(new ArmorMaterial.Layer(ResourceLocation.tryBuild(TheTitansNeo.MODID, "tin"))), 0.0F, 0.0F));
+	private static Map<ArmorType, Integer> defense(int boots, int legs, int chest, int helm) {
+		// 原版 ArmorMaterials.makeDefense 的入参顺序即 boots, legs, chest, helm, body
+		return Map.of(
+				ArmorType.BOOTS, boots,
+				ArmorType.LEGGINGS, legs,
+				ArmorType.CHESTPLATE, chest,
+				ArmorType.HELMET, helm,
+				ArmorType.BODY, 0);
+	}
 
-	public static final DeferredHolder<ArmorMaterial, ArmorMaterial> BRONZE = ARMOR_MATERIALS.register("bronze", () -> new ArmorMaterial(Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, 2);
-		enumMap.put(ArmorItem.Type.LEGGINGS, 4);
-		enumMap.put(ArmorItem.Type.CHESTPLATE, 6);
-		enumMap.put(ArmorItem.Type.HELMET, 2);
-	}), 14, SoundEvents.ARMOR_EQUIP_GENERIC, () -> Ingredient.of(TheTitansNeoItems.BRONZE_INGOT.get()), List.of(new ArmorMaterial.Layer(ResourceLocation.tryBuild(TheTitansNeo.MODID, "bronze"))), 0.0F, 0.0F));
+	/** 原 1.21.1 注册名 "thetitansneo:copper"，贴图前缀 copper。 */
+	public static final ArmorMaterial COPPER = new ArmorMaterial(
+			11, defense(1, 2, 3, 1), 12, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			repairs("copper"), asset("copper"));
 
-	public static final DeferredHolder<ArmorMaterial, ArmorMaterial> STEEL = ARMOR_MATERIALS.register("steel", () -> new ArmorMaterial(Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, 3);
-		enumMap.put(ArmorItem.Type.LEGGINGS, 6);
-		enumMap.put(ArmorItem.Type.CHESTPLATE, 8);
-		enumMap.put(ArmorItem.Type.HELMET, 3);
-	}), 20, SoundEvents.ARMOR_EQUIP_GENERIC, () -> Ingredient.of(TheTitansNeoItems.STEEL_INGOT.get()), List.of(new ArmorMaterial.Layer(ResourceLocation.tryBuild(TheTitansNeo.MODID, "steel"))), 0.0F, 0.0F));
+	/** 原 1.21.1 注册名 "thetitansneo:tin"，贴图前缀 tin。 */
+	public static final ArmorMaterial TIN = new ArmorMaterial(
+			13, defense(1, 2, 3, 1), 18, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			repairs("tin"), asset("tin"));
 
-	public static final DeferredHolder<ArmorMaterial, ArmorMaterial> HARCADIUM = ARMOR_MATERIALS.register("harcadium", () -> new ArmorMaterial(Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, 8);
-		enumMap.put(ArmorItem.Type.LEGGINGS, 12);
-		enumMap.put(ArmorItem.Type.CHESTPLATE, 15);
-		enumMap.put(ArmorItem.Type.HELMET, 9);
-	}), 30, SoundEvents.ARMOR_EQUIP_GENERIC, () -> Ingredient.of(TheTitansNeoItems.HARCADIUM.get()), List.of(new ArmorMaterial.Layer(ResourceLocation.tryBuild(TheTitansNeo.MODID, "harcadium"))), 0.0F, 0.0F));
+	/** 原 1.21.1 注册名 "thetitansneo:bronze"，贴图前缀 bronze。 */
+	public static final ArmorMaterial BRONZE = new ArmorMaterial(
+			22, defense(2, 4, 6, 2), 14, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			repairs("bronze"), asset("bronze"));
 
-	public static final DeferredHolder<ArmorMaterial, ArmorMaterial> VOID = ARMOR_MATERIALS.register("void", () -> new ArmorMaterial(Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, 9);
-		enumMap.put(ArmorItem.Type.LEGGINGS, 13);
-		enumMap.put(ArmorItem.Type.CHESTPLATE, 17);
-		enumMap.put(ArmorItem.Type.HELMET, 11);
-	}), 50, SoundEvents.ARMOR_EQUIP_GENERIC, () -> Ingredient.of(TheTitansNeoItems.VOID.get()), List.of(new ArmorMaterial.Layer(ResourceLocation.tryBuild(TheTitansNeo.MODID, "absence"))), 0.0F, 0.0F));
-	
-	public static final DeferredHolder<ArmorMaterial, ArmorMaterial> ADMINIUM = ARMOR_MATERIALS.register("adminium", () -> new ArmorMaterial(Util.make(new EnumMap<>(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, 100000);
-		enumMap.put(ArmorItem.Type.LEGGINGS, 100000);
-		enumMap.put(ArmorItem.Type.CHESTPLATE, 100000);
-		enumMap.put(ArmorItem.Type.HELMET, 100000);
-	}), 60, SoundEvents.ARMOR_EQUIP_GENERIC, () -> Ingredient.of(TheTitansNeoItems.VOID.get()), List.of(new ArmorMaterial.Layer(ResourceLocation.tryBuild(TheTitansNeo.MODID, "adminium"))), 0.0F, 0.0F));
+	/** 原 1.21.1 注册名 "thetitansneo:steel"，贴图前缀 steel。 */
+	public static final ArmorMaterial STEEL = new ArmorMaterial(
+			30, defense(3, 6, 8, 3), 20, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			repairs("steel"), asset("steel"));
 
+	/** 原 1.21.1 注册名 "thetitansneo:harcadium"，贴图前缀 harcadium。 */
+	public static final ArmorMaterial HARCADIUM = new ArmorMaterial(
+			45, defense(8, 12, 15, 9), 30, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			repairs("harcadium"), asset("harcadium"));
 
-	public static void registerArmorMaterials(IEventBus modEventBus) {
-		ARMOR_MATERIALS.register(modEventBus);
-	}}
+	/** 原 1.21.1 注册名 "thetitansneo:void"，贴图前缀 absence。 */
+	public static final ArmorMaterial VOID = new ArmorMaterial(
+			60, defense(9, 13, 17, 11), 50, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			repairs("void"), asset("absence"));
+
+	/** 原 1.21.1 注册名 "thetitansneo:adminium"，贴图前缀 adminium。 */
+	public static final ArmorMaterial ADMINIUM = new ArmorMaterial(
+			100, defense(100000, 100000, 100000, 100000), 60, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F,
+			repairs("adminium"), asset("adminium"));
+
+	private TheTitansNeoArmorMaterials() {
+	}
+}

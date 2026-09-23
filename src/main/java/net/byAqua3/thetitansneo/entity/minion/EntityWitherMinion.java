@@ -9,7 +9,6 @@ import net.byAqua3.thetitansneo.entity.titan.EntitySkeletonTitan;
 import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -25,10 +24,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityWitherMinion extends WitherBoss implements IMinion {
 
 	private static final EntityDataAccessor<Integer> MINION_TYPE = SynchedEntityData.defineId(EntityWitherMinion.class, EntityDataSerializers.INT);
@@ -86,15 +86,15 @@ public class EntityWitherMinion extends WitherBoss implements IMinion {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setMinionType(tag.getInt("MinionType"));
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setMinionType(input.getIntOr("MinionType", 0));
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("MinionType", this.getMinionTypeInt());
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("MinionType", this.getMinionTypeInt());
 	}
 
 	private double getHeadX(int head) {
@@ -132,13 +132,9 @@ public class EntityWitherMinion extends WitherBoss implements IMinion {
 		if (this.getMaster() != null) {
 			return this.getMaster().canAttack(target);
 		}
-		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
+		return !target.is(TheTitansNeoEntities.SKELETON_TITAN.get()) && !target.is(TheTitansNeoEntities.WITHER_SKELETON_TITAN_MINION.get()) && !target.is(TheTitansNeoEntities.WITHER_MINION.get()) && target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType != TheTitansNeoEntities.SKELETON_TITAN.get() && entityType != TheTitansNeoEntities.WITHER_SKELETON_TITAN_MINION.get() && entityType != TheTitansNeoEntities.WITHER_MINION.get();
-	}
 
 	@Override
 	public boolean fireImmune() {
@@ -187,7 +183,7 @@ public class EntityWitherMinion extends WitherBoss implements IMinion {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (this.isInvulnerable()) {
@@ -215,7 +211,7 @@ public class EntityWitherMinion extends WitherBoss implements IMinion {
 				}
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
@@ -247,7 +243,7 @@ public class EntityWitherMinion extends WitherBoss implements IMinion {
 			this.performRangedAttack(head, target.getX(), target.getY() + target.getEyeHeight(), target.getZ(), false);
 		} else {
 			this.performRangedAttack(head, target.getX(), target.getY() + target.getEyeHeight() * 0.5D, target.getZ(), (head == 0 && this.getRandom().nextFloat() < 0.001F));
-			target.hurt(this.damageSources().mobAttack(this), 100.0F);
+			target.hurtServer((ServerLevel) target.level(), this.damageSources().mobAttack(this), 100.0F);
 			target.invulnerableTime = 0;
 		}
 	}

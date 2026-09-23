@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -95,24 +94,24 @@ public class EntityTitanPart extends PartEntity<EntityTitan> {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		if (tag.hasUUID("Owner")) {
-			this.ownerUUID = tag.getUUID("Owner");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		if (input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+			this.ownerUUID = input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 			this.cachedOwner = null;
 		}
-		this.setPartName(tag.getString("PartName"));
-		this.setWidth(tag.getFloat("Width"));
-		this.setHeight(tag.getFloat("Height"));
+		this.setPartName(input.getStringOr("PartName", ""));
+		this.setWidth(input.getFloatOr("Width", 0.0F));
+		this.setHeight(input.getFloatOr("Height", 0.0F));
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
 		if (this.ownerUUID != null) {
-			tag.putUUID("Owner", this.ownerUUID);
+			output.store("Owner", net.minecraft.core.UUIDUtil.CODEC, this.ownerUUID);
 		}
-		tag.putString("PartName", this.getPartName());
-		tag.putFloat("Width", this.getWidth());
-		tag.putFloat("Height", this.getHeight());
+		output.putString("PartName", this.getPartName());
+		output.putFloat("Width", this.getWidth());
+		output.putFloat("Height", this.getHeight());
 	}
 
 	@Override
@@ -150,9 +149,6 @@ public class EntityTitanPart extends PartEntity<EntityTitan> {
 		return false;
 	}
 
-	@Override
-	public void updateFluidHeightAndDoFluidPushing() {
-	}
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -171,8 +167,8 @@ public class EntityTitanPart extends PartEntity<EntityTitan> {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
-		if (!this.isInvulnerableTo(damageSource)) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
+		if (!this.isInvulnerableTo(level, damageSource)) {
 			if (this.getOwner() != null && this.getOwner() instanceof IEntityMultiPartTitan) {
 				IEntityMultiPartTitan multiPartTitan = (IEntityMultiPartTitan) this.getOwner();
 				return multiPartTitan.attackEntityFromPart(this, damageSource, amount);

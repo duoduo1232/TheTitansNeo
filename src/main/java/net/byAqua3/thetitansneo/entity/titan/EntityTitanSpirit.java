@@ -12,7 +12,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -36,6 +35,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityTitanSpirit extends EntityFlying {
 
 	private static final EntityDataAccessor<String> SPIRIT_NAME = SynchedEntityData.defineId(EntityTitanSpirit.class, EntityDataSerializers.STRING);
@@ -136,25 +136,21 @@ public class EntityTitanSpirit extends EntityFlying {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		if (tag.contains("SpiritName", Tag.TAG_STRING)) {
-			this.setSpiritName(tag.getString("SpiritName"));
-		}
-		if (tag.contains("Soul", Tag.TAG_FLOAT)) {
-			this.setSoul(tag.getFloat("Soul"));
-		}
-		if (tag.contains("IsVesselHunting", Tag.TAG_BYTE)) {
-			this.setVesselHunting(tag.getBoolean("IsVesselHunting"));
-		}
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.setSpiritName(input.getStringOr("SpiritName", ""));
+					this.setSoul(input.getFloatOr("Soul", 0.0F));
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.setVesselHunting(input.getBooleanOr("IsVesselHunting", false));
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putString("SpiritName", this.getSpiritName());
-		tag.putFloat("Soul", this.getSoul());
-		tag.putBoolean("IsVesselHunting", this.isVesselHunting());
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putString("SpiritName", this.getSpiritName());
+		output.putFloat("Soul", this.getSoul());
+		output.putBoolean("IsVesselHunting", this.isVesselHunting());
 	}
 
 	public boolean transformTitan() {
@@ -455,20 +451,19 @@ public class EntityTitanSpirit extends EntityFlying {
 	@Override
 	public void baseTick() {
 		super.baseTick();
-		this.level().getProfiler().push("mobBaseTick");
+		net.minecraft.util.profiling.Profiler.get().push("mobBaseTick");
 		if (this.isAlive() && this.random.nextInt(1000) < this.ambientSoundTime++) {
 			this.resetAmbientSoundTime();
 			this.playAmbientSound();
 		}
 
-		this.level().getProfiler().pop();
+		net.minecraft.util.profiling.Profiler.get().pop();
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
 		this.noPhysics = true;
-		this.noCulling = true;
 		this.stuckSpeedMultiplier = Vec3.ZERO;
 		this.deathTime = 0;
 
@@ -491,7 +486,7 @@ public class EntityTitanSpirit extends EntityFlying {
 			this.level().addParticle(ParticleTypes.FIREWORK, this.getX() + f, this.getY() + 4.0D + f1, this.getZ() + f2, this.getDeltaMovement().x, this.getDeltaMovement().y, this.getDeltaMovement().z);
 		}
 
-		Holder<DamageType> damageType = this.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(TheTitansNeoDamageTypes.TITAN_SPIRIT_ATTACK);
+		Holder<DamageType> damageType = this.level().registryAccess().holderOrThrow(TheTitansNeoDamageTypes.TITAN_SPIRIT_ATTACK);
 
 		List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(32.0D, 32.0D, 32.0D));
 		for (Entity entity : entities) {
@@ -499,7 +494,7 @@ public class EntityTitanSpirit extends EntityFlying {
 				LivingEntity livingEntity = (LivingEntity) entity;
 
 				if (this.tickCount % 40 == 0) {
-					livingEntity.hurt(new DamageSource(damageType, this), 2.0F);
+					livingEntity.hurtServer((ServerLevel) this.level(), new DamageSource(damageType, this), 2.0F);
 					this.setSoul(this.getSoul() + 2.0F);
 				}
 				double speed = livingEntity.isCrouching() ? 0.2D : 0.4D;
@@ -528,16 +523,25 @@ public class EntityTitanSpirit extends EntityFlying {
 				if (entity instanceof LivingEntity && !(entity instanceof EntityTitan) && !(entity instanceof EntityTitanSpirit) && !this.transformTitan(entity)) {
 					LivingEntity livingEntity = (LivingEntity) entity;
 
-					livingEntity.hurt(new DamageSource(damageType, this), 100.0F);
+					livingEntity.hurtServer((ServerLevel) this.level(), new DamageSource(damageType, this), 100.0F);
 					if (!this.level().isClientSide()) {
 						livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 300, 3));
 					}
 				} else if (entity instanceof EndCrystal) {
 					EndCrystal endCrystal = (EndCrystal) entity;
 
-					endCrystal.hurt(new DamageSource(damageType, this), 100.0F);
+					endCrystal.hurtServer((ServerLevel) this.level(), new DamageSource(damageType, this), 100.0F);
 				}
 			}
 		}
+	}
+
+	/**
+	 * 26.1.2: Entity.noCulling 字段已删除。原语义是「大体积实体不做视锥剔除，任何距离都渲染」，
+	 * 对应到新版本的正确扩展点是覆写 shouldRenderAtSqrDistance 恒返回 true。
+	 */
+	@Override
+	public boolean shouldRenderAtSqrDistance(double distance) {
+		return true;
 	}
 }

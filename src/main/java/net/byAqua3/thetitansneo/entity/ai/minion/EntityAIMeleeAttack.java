@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.server.level.ServerLevel;
 
 public class EntityAIMeleeAttack extends Goal {
 	protected final PathfinderMob mob;
@@ -68,7 +69,10 @@ public class EntityAIMeleeAttack extends Goal {
 		} else if (!this.followingTargetEvenIfNotSeen) {
 			return !this.mob.getNavigation().isDone();
 		} else {
-			return this.mob.isWithinRestriction(target.blockPosition());
+			// 26.1.2: Mob.isWithinRestriction(BlockPos) 已随「家/活动范围限制」系统一并删除。
+			// 本 minion 从未调用过 restrictTo()/setHomePos()，即没有配置任何活动范围限制，
+			// 旧实现恒返回 true，故此处直接返回 true 保持语义等价。
+			return true;
 		}
 	}
 
@@ -139,7 +143,7 @@ public class EntityAIMeleeAttack extends Goal {
 		if (this.canPerformAttack(target)) {
 			this.resetAttackCooldown();
 			this.mob.swing(InteractionHand.MAIN_HAND);
-			this.mob.doHurtTarget(target);
+			this.mob.doHurtTarget((ServerLevel) this.mob.level(), target);
 		}
 	}
 

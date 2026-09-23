@@ -7,6 +7,7 @@ import net.byAqua3.thetitansneo.animation.Animator;
 import net.byAqua3.thetitansneo.entity.titan.EntitySpiderTitan;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -16,7 +17,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelSpiderTitan extends EntityModel<EntitySpiderTitan> {
+public class ModelSpiderTitan extends EntityModel<TitanRenderState> {
 
 	public Animator animator;
 
@@ -41,8 +42,8 @@ public class ModelSpiderTitan extends EntityModel<EntitySpiderTitan> {
 	public ModelPart backleftlowerleg2;
 
 	public ModelSpiderTitan(float grow) {
-		super();
-		ModelPart root = createBodyLayer(grow).bakeRoot();
+		super(createBodyLayer(grow).bakeRoot());
+		ModelPart root = this.root;
 		this.thorax = root.getChild("thorax");
 		this.head = root.getChild("thorax").getChild("head");
 		this.abdoman = root.getChild("thorax").getChild("abdoman");
@@ -92,14 +93,11 @@ public class ModelSpiderTitan extends EntityModel<EntitySpiderTitan> {
 	}
 
 	@Override
-	public void setupAnim(EntitySpiderTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.animate(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch);
+	public void setupAnim(TitanRenderState state) {
+		this.animate((EntitySpiderTitan) state.titan, state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.thorax.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 
 	public void setAngles() {
 		this.thorax.y = 15.0F;
@@ -135,11 +133,11 @@ public class ModelSpiderTitan extends EntityModel<EntitySpiderTitan> {
 	}
 
 	public void animate(EntitySpiderTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		this.animator.update(entity);
 		this.setAngles();
 		if (entity.deathTicks <= 0) {
-			if (this.riding) {
+			if (entity.isPassenger()) {
 				this.frontrightupperarm.yRot = 0.87266463F;
 				this.frontleftupperarm.yRot = -0.87266463F;
 				this.frontrightupperleg.yRot = 1.3089969F;
@@ -174,7 +172,7 @@ public class ModelSpiderTitan extends EntityModel<EntitySpiderTitan> {
 				this.backrightupperleg2.xRot = -1.2217305F + Mth.cos(limbSwing * 0.5F + 2.0F) * 0.15F * limbSwingAmount;
 				this.backleftupperleg2.xRot = -1.2217305F + Mth.cos(limbSwing * 0.5F) * 0.15F * limbSwingAmount;
 			}
-			if (!entity.onGround() && !this.riding) {
+			if (!entity.onGround() && !entity.isPassenger()) {
 				this.abdoman.xRot -= Math.cos(limbSwing * 0.35F - 1.5F) * 0.1F * limbSwingAmount - 0.25F + entity.walkAnimation.speed(partialTicks);
 				this.frontrightupperarm.yRot = 0.5F;
 				this.frontleftupperarm.yRot = -0.5F;
@@ -1068,4 +1066,5 @@ public class ModelSpiderTitan extends EntityModel<EntitySpiderTitan> {
 		this.animator.rotate(this.backrightlowerleg2, 0.75F, 0.0F, 0.0F);
 		this.animator.endPhase();
 		this.animator.resetPhase(60);
-	}}
+	}
+}

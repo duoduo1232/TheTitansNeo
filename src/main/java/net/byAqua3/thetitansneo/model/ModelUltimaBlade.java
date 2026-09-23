@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -13,7 +14,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.LivingEntity;
 
-public class ModelUltimaBlade extends EntityModel<LivingEntity> {
+public class ModelUltimaBlade extends EntityModel<LivingEntityRenderState> {
 
 	public final ModelPart handle;
 	public final ModelPart guard;
@@ -21,8 +22,8 @@ public class ModelUltimaBlade extends EntityModel<LivingEntity> {
 	public final ModelPart bladeTip;
 
 	public ModelUltimaBlade() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.handle = root.getChild("handle");
 		this.guard = root.getChild("handle").getChild("guard");
 		this.bladeLower = root.getChild("handle").getChild("guard").getChild("bladeLower");
@@ -41,11 +42,8 @@ public class ModelUltimaBlade extends EntityModel<LivingEntity> {
 	}
 
 	@Override
-	public void setupAnim(LivingEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
+	public void setupAnim(LivingEntityRenderState state) {
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.handle.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 }

@@ -1,10 +1,12 @@
 package net.byAqua3.thetitansneo.render.minion;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
+import net.byAqua3.thetitansneo.entity.minion.EnumMinionType;
 import net.byAqua3.thetitansneo.entity.minion.IMinion;
-import net.minecraft.client.renderer.entity.EndermanRenderer;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.EndermanRenderer;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -12,18 +14,29 @@ import net.neoforged.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class RenderEnderColossusMinion extends EndermanRenderer {
 
-	public static final ResourceLocation ENDERMAN = ResourceLocation.withDefaultNamespace("textures/entity/enderman/enderman.png");
-	public static final ResourceLocation ENDERMAN_PRIEST = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_priest.png");
-	public static final ResourceLocation ENDERMAN_ZEALOT = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_zealot.png");
-	public static final ResourceLocation ENDERMAN_BISHOP = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_bishop.png");
-	public static final ResourceLocation ENDERMAN_TEMPLAR = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_templar.png");
+	public static final Identifier ENDERMAN = Identifier.withDefaultNamespace("textures/entity/enderman/enderman.png");
+	public static final Identifier ENDERMAN_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_priest.png");
+	public static final Identifier ENDERMAN_ZEALOT = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_zealot.png");
+	public static final Identifier ENDERMAN_BISHOP = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_bishop.png");
+	public static final Identifier ENDERMAN_TEMPLAR = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/enderman/enderman_templar.png");
 
 	public RenderEnderColossusMinion(EntityRendererProvider.Context context) {
 		super(context);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EnderMan entity) {
+	public TitanRenderState createRenderState() {
+		return new TitanRenderState();
+	}
+
+	@Override
+	public void extractRenderState(EnderMan entity, TitanRenderState state, float partialTicks) {
+		super.extractRenderState(entity, state, partialTicks);
+		// 26.1.2: getTextureLocation 改为按 RenderState 取，所以纹理在这里选定。
+		state.texture = getMinionTexture(entity);
+	}
+
+	private static Identifier getMinionTexture(EnderMan entity) {
 		if (entity instanceof IMinion) {
 			IMinion minion = (IMinion) entity;
 			switch (minion.getMinionType()) {
@@ -39,5 +52,11 @@ public class RenderEnderColossusMinion extends EndermanRenderer {
 				return ENDERMAN;
 			}
 		}
-		return super.getTextureLocation(entity);
-	}}
+		return ENDERMAN;
+	}
+
+	@Override
+	public Identifier getTextureLocation(TitanRenderState state) {
+		return state.texture;
+	}
+}

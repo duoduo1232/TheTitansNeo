@@ -1,6 +1,6 @@
 package net.byAqua3.thetitansneo.entity.ai.minion;
 
-import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.spider.Spider;
 
 public class EntityAISpiderAttack extends EntityAIMeleeAttack {
 	

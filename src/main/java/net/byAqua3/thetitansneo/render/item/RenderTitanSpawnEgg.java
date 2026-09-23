@@ -1,53 +1,74 @@
 package net.byAqua3.thetitansneo.render.item;
 
-import java.util.List;
+import java.util.function.Consumer;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.mojang.serialization.MapCodec;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.byAqua3.thetitansneo.item.ItemTitanSpawnEgg;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.model.ModelTitanSpawnEgg;
-import net.byAqua3.thetitansneo.util.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.model.BlockDisplayContext;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.client.resources.model.sprite.SpriteGetter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import org.joml.Vector3fc;
 
+/**
+ * 26.1.2: ported from NeoForge's deleted {@code IItemRenderer} extension (hijacked through a mixin on
+ * {@code ItemRenderer}) to the vanilla {@link net.minecraft.client.renderer.special.SpecialModelRenderer}
+ * pipeline. The per-context {@code PoseStack} transforms below are carried over verbatim; what changed is how
+ * the geometry reaches the GPU and how the egg texture is resolved.
+ */
 public class RenderTitanSpawnEgg implements IItemRenderer {
 
 	public ModelTitanSpawnEgg model = new ModelTitanSpawnEgg();
 
-	public void renderItem(ResourceLocation itemTexture, boolean itemFlipped, PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay) {
-		Minecraft mc = Minecraft.getInstance();
-		TextureAtlas textureAtlas = mc.getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
+	private final SpriteGetter sprites;
 
+	public RenderTitanSpawnEgg(SpriteGetter sprites) {
+		this.sprites = sprites;
+	}
+
+	/** 26.1.2: atlases are addressed by {@link SpriteId} instead of a hand-built {@code TextureAtlasSprite}. */
+	public TextureAtlasSprite sprite(Identifier texture) {
+		return this.sprites.get(new SpriteId(InventoryMenu.BLOCK_ATLAS, texture));
+	}
+
+	/** 26.1.2: {@code RenderType::entityTranslucentCull} no longer exists as a method reference. */
+	public static RenderType entityTranslucentCull(Identifier texture) {
+		return RenderTypes.entityTranslucentCullItemTarget(texture);
+	}
+
+	/** 26.1.2: {@code RenderType::entityTranslucentCull} no longer exists as a method reference. */
+	public static RenderType translucentItemSheet() {
+		return RenderTypes.itemTranslucent(InventoryMenu.BLOCK_ATLAS);
+	}
+
+	public void renderItem(Identifier itemTexture, boolean itemFlipped, PoseStack poseStack, int packedLight, int packedOverlay, SubmitNodeCollector submitNodeCollector) {
 		poseStack.pushPose();
 
 		this.model.item.translateAndRotate(poseStack);
-		
+
 		if (itemFlipped) {
 			poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 			poseStack.translate(0.0F, 0.5F, 0.0F);
@@ -62,22 +83,21 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 		poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
 		poseStack.mulPose(Axis.ZP.rotationDegrees(25.0F));
 
-		TextureAtlasSprite textureAtlasSprite = textureAtlas.getSprite(itemTexture);
-		List<BakedQuad> quads = RenderUtils.bakeItem(textureAtlasSprite);
-
-		PoseStack.Pose poseStack$pose = poseStack.last();
-
-		for (BakedQuad quad : quads) {
-			vertexConsumer.putBulkData(poseStack$pose, quad, 1.0F, 1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY, true);
-		}
+		// 26.1.2: geometry is emitted inside submitCustomGeometry, which hands back a live VertexConsumer.
+		final TextureAtlasSprite textureAtlasSprite = this.sprite(itemTexture);
+		final PoseStack frozen = poseStack;
+		submitNodeCollector.submitCustomGeometry(frozen, translucentItemSheet(), (pose, buffer) ->
+				ItemSpriteGeometry.renderSprite(frozen, buffer, textureAtlasSprite, packedLight));
 
 		poseStack.popPose();
 	}
 
-	public void renderFire(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay) {
-		Minecraft mc = Minecraft.getInstance();
-		BlockRenderDispatcher blockRenderDispatcher = mc.getBlockRenderer();
-
+	public void renderFire(PoseStack poseStack, int packedLight, int packedOverlay, SubmitNodeCollector submitNodeCollector) {
+		// 26.1.2: BlockRenderDispatcher + ModelRenderer.renderModel(pose, buf, state, model, r, g, b, light,
+		// overlay, ModelData, renderType) are gone. The replacement is a two-step resolve-then-submit:
+		// Minecraft.getBlockModelResolver().update(renderState, state, displayContext) fills a
+		// BlockModelRenderState, and BlockModelRenderState.submit(pose, collector, light, overlay, outline)
+		// hands it to the deferred node collector. Same block state, same transforms, same atlas.
 		poseStack.pushPose();
 
 		this.model.fire.translateAndRotate(poseStack);
@@ -88,26 +108,26 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 		poseStack.scale(0.8F, -0.625F, -0.8F);
 		poseStack.translate(-0.5F, -0.5F, -0.5F);
 
-		Block block = Blocks.FIRE;
-		BlockState blockState = block.defaultBlockState();
-		BakedModel bakedModel = blockRenderDispatcher.getBlockModel(blockState);
-
-		PoseStack.Pose poseStack$pose = poseStack.last();
-
-		blockRenderDispatcher.getModelRenderer().renderModel(poseStack$pose, vertexConsumer, blockState, bakedModel, 1.0F, 1.0F, 1.0F, packedLight, packedOverlay, ModelData.EMPTY, null);
+		Minecraft mc = Minecraft.getInstance();
+		BlockModelRenderState blockRenderState = new BlockModelRenderState();
+		BlockState blockState = Blocks.FIRE.defaultBlockState();
+		mc.getBlockModelResolver().update(blockRenderState, blockState, BlockDisplayContext.create());
+		blockRenderState.submit(poseStack, submitNodeCollector, packedLight, packedOverlay, 0);
 
 		poseStack.popPose();
 	}
 
 	@Override
-	public void render(ItemStack stack, ItemDisplayContext context, boolean leftHand, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, int packedOverlay, BakedModel bakedModel) {
+	public void submit(ItemStack stack, ItemDisplayContext context, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
 		Minecraft mc = Minecraft.getInstance();
 		Item item = stack.getItem();
 
-		this.model.ticksExisted = mc.player.tickCount;
+		// 26.1.2: the caller passes the live pose, so the model tick is advanced here instead of relying on
+		// the removed ItemRenderer#render mixin.
+		this.model.ticksExisted = mc.player != null ? mc.player.tickCount : 0;
 
-		ResourceLocation texture = null;
-		ResourceLocation itemTexture = null;
+		Identifier texture = null;
+		Identifier itemTexture = null;
 		boolean itemFlipped = false;
 
 		if (item instanceof ItemTitanSpawnEgg) {
@@ -116,67 +136,67 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 
 			if (entityType == TheTitansNeoEntities.SNOW_GOLEM_TITAN.get()) {
 				this.model.eggType = 0;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/snow_golem_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/snow_golem_titan_egg");
 			} else if (entityType == TheTitansNeoEntities.SLIME_TITAN.get()) {
 				this.model.eggType = 0;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/slime_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/slime_titan_egg");
 			} else if (entityType == TheTitansNeoEntities.MAGMACUBE_TITAN.get()) {
 				this.model.eggType = 0;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/magma_cube_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/magma_cube_titan_egg");
 			} else if (entityType == TheTitansNeoEntities.OMEGAFISH.get()) {
 				this.model.eggType = 3;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/omegafish_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/omegafish_egg");
 			} else if (entityType == TheTitansNeoEntities.ZOMBIE_TITAN.get()) {
 				this.model.eggType = 0;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/zombie_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/zombie_titan_egg");
 			} else if (entityType == TheTitansNeoEntities.SKELETON_TITAN.get()) {
 				if (spawnEgg.getSpecialId() == 1) {
 					this.model.eggType = 4;
-					texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/wither_skeleton_titan_egg");
-					itemTexture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/stone_sword_256");
+					texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/wither_skeleton_titan_egg");
+					itemTexture = Identifier.tryBuild(TheTitansNeo.MODID, "item/stone_sword_256");
 				} else {
 					this.model.eggType = 4;
-					texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/skeleton_titan_egg");
-					itemTexture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_2_256");
+					texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/skeleton_titan_egg");
+					itemTexture = Identifier.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_2_256");
 					itemFlipped = true;
 				}
 			} else if (entityType == TheTitansNeoEntities.CREEPER_TITAN.get()) {
 				if (spawnEgg.getSpecialId() == 1) {
 					this.model.eggType = 1;
-					texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/charged_creeper_titan_egg");
+					texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/charged_creeper_titan_egg");
 				} else {
 					this.model.eggType = 0;
-					texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/creeper_titan_egg");
+					texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/creeper_titan_egg");
 				}
 			} else if (entityType == TheTitansNeoEntities.SPIDER_TITAN.get()) {
 				if (spawnEgg.getSpecialId() == 1) {
 					this.model.eggType = 4;
-					texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/spider_jockey_titan_egg");
-					itemTexture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_2_256");
+					texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/spider_jockey_titan_egg");
+					itemTexture = Identifier.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_2_256");
 					itemFlipped = true;
 				} else {
 					this.model.eggType = 0;
-					texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/spider_titan_egg");
+					texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/spider_titan_egg");
 				}
 			} else if (entityType == TheTitansNeoEntities.CAVE_SPIDER_TITAN.get()) {
 				this.model.eggType = 0;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/cave_spider_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/cave_spider_titan_egg");
 			} else if (entityType == TheTitansNeoEntities.ZOMBIFIED_PIGLIN_TITAN.get()) {
 				this.model.eggType = 4;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/zombified_piglin_titan_egg");
-				itemTexture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/gold_sword_256");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/zombified_piglin_titan_egg");
+				itemTexture = Identifier.tryBuild(TheTitansNeo.MODID, "item/gold_sword_256");
 			} else if (entityType == TheTitansNeoEntities.BLAZE_TITAN.get()) {
 				this.model.eggType = 2;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/blaze_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/blaze_titan_egg");
 			} else if (entityType == TheTitansNeoEntities.ENDER_COLOSSUS.get()) {
 				this.model.eggType = 5;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/ender_colossus_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/ender_colossus_egg");
 			} else if (entityType == TheTitansNeoEntities.GHAST_TITAN.get()) {
 				this.model.eggType = 3;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/ghast_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/ghast_titan_egg");
 			} else if (entityType == TheTitansNeoEntities.IRON_GOLEM_TITAN.get()) {
 				this.model.eggType = 0;
-				texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/iron_golem_titan_egg");
+				texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/iron_golem_titan_egg");
 			}
 		}
 
@@ -185,17 +205,19 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				this.model.item.visible = true;
 			}
 		} else if (itemTexture != null) {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(Sheets.translucentItemSheet());
-
+			// 26.1.2: the legacy GUI-only endBatch()/Lighting juggling is unnecessary; custom geometry is
+			// already submitted as an ordered, separately batched node.
 			this.model.item.visible = false;
 
+			final Identifier resolved = itemTexture;
+			final boolean flipped = itemFlipped;
 			switch (context) {
 			case FIRST_PERSON_LEFT_HAND:
 				poseStack.pushPose();
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(190.0F));
 				poseStack.translate(0.57F, -0.8F, 0.1F);
-				this.renderItem(itemTexture, itemFlipped, poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderItem(resolved, flipped, poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case FIRST_PERSON_RIGHT_HAND:
@@ -203,7 +225,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(190.0F));
 				poseStack.translate(-0.55F, -0.8F, 0.1F);
-				this.renderItem(itemTexture, itemFlipped, poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderItem(resolved, flipped, poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case THIRD_PERSON_LEFT_HAND:
@@ -211,7 +233,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.translate(0.1F, -0.7F, -0.4F);
-				this.renderItem(itemTexture, itemFlipped, poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderItem(resolved, flipped, poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case THIRD_PERSON_RIGHT_HAND:
@@ -219,7 +241,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.translate(0.1F, -0.7F, -0.4F);
-				this.renderItem(itemTexture, itemFlipped, poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderItem(resolved, flipped, poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case GROUND:
@@ -229,7 +251,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 				poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
 				poseStack.translate(-0.15F, -0.6F, 0.2F);
-				this.renderItem(itemTexture, itemFlipped, poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderItem(resolved, flipped, poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case GUI:
@@ -239,15 +261,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
 				poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
 				poseStack.translate(0.05F, -0.75F, 0.3F);
-				Lighting.setupForFlatItems();
-				this.renderItem(itemTexture, itemFlipped, poseStack, vertexConsumer, packedLight, packedOverlay);
-				RenderSystem.disableDepthTest();
-				if (multiBufferSource instanceof MultiBufferSource.BufferSource) {
-					MultiBufferSource.BufferSource bufferSource = (MultiBufferSource.BufferSource) multiBufferSource;
-					bufferSource.endBatch();
-				}
-				RenderSystem.enableDepthTest();
-				Lighting.setupFor3DItems();
+				this.renderItem(resolved, flipped, poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case FIXED:
@@ -256,7 +270,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 				poseStack.translate(-0.9F, -0.5F, 0.25F);
-				this.renderItem(itemTexture, itemFlipped, poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderItem(resolved, flipped, poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			default:
@@ -265,7 +279,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 		}
 
 		if (this.model.eggType == 2) {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucentCull(InventoryMenu.BLOCK_ATLAS));
+			final RenderType fireType = entityTranslucentCull(InventoryMenu.BLOCK_ATLAS);
 
 			this.model.fire.visible = false;
 
@@ -275,7 +289,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(190.0F));
 				poseStack.translate(1.12F, -0.4F, 0.1F);
-				this.renderFire(poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderFire(poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case FIRST_PERSON_RIGHT_HAND:
@@ -283,7 +297,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(190.0F));
 				poseStack.translate(0.0F, -0.4F, 0.1F);
-				this.renderFire(poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderFire(poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case THIRD_PERSON_LEFT_HAND:
@@ -291,7 +305,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.translate(0.5F, -0.3F, -0.2F);
-				this.renderFire(poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderFire(poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case THIRD_PERSON_RIGHT_HAND:
@@ -299,7 +313,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(1.0F, 1.0F, 1.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.translate(0.5F, -0.3F, -0.2F);
-				this.renderFire(poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderFire(poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case GROUND:
@@ -309,25 +323,17 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 				poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
 				poseStack.translate(0.5F, -0.3F, 0.4F);
-				this.renderFire(poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderFire(poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case GUI:
 				poseStack.pushPose();
-				poseStack.scale(0.7F, 0.7F, 0.7F);	
+				poseStack.scale(0.7F, 0.7F, 0.7F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
 				poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
 				poseStack.translate(0.2F, -0.35F, 0.8F);
-				Lighting.setupForFlatItems();
-				this.renderFire(poseStack, vertexConsumer, packedLight, packedOverlay);
-				RenderSystem.disableDepthTest();
-				if (multiBufferSource instanceof MultiBufferSource.BufferSource) {
-					MultiBufferSource.BufferSource bufferSource = (MultiBufferSource.BufferSource) multiBufferSource;
-					bufferSource.endBatch();
-				}
-				RenderSystem.enableDepthTest();
-				Lighting.setupFor3DItems();
+				this.renderFire(poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			case FIXED:
@@ -336,7 +342,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 				poseStack.translate(-0.5F, -0.1F, 0.5F);
-				this.renderFire(poseStack, vertexConsumer, packedLight, packedOverlay);
+				this.renderFire(poseStack, packedLight, packedOverlay, submitNodeCollector);
 				poseStack.popPose();
 				break;
 			default:
@@ -345,8 +351,11 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 		}
 
 		if (texture != null) {
-			Material material = new Material(InventoryMenu.BLOCK_ATLAS, texture);
-			VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entityTranslucentCull);
+			// 26.1.2: Material.buffer(MultiBufferSource, ...) is gone; the model is now submitted through
+			// submitModelPart, which resolves the sprite and render type for us.
+			final Material material = new Material(InventoryMenu.BLOCK_ATLAS, texture);
+			final SpriteId spriteId = new SpriteId(material.sprite(), material.sprite());
+			final ModelTitanSpawnEgg eggModel = this.model;
 
 			switch (context) {
 			case FIRST_PERSON_LEFT_HAND:
@@ -354,7 +363,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(2.0F, 2.0F, 2.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(190.0F));
 				poseStack.translate(0.56F, -0.4F, 0.1F);
-				this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+				submitNodeCollector.submitModel(eggModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 				poseStack.popPose();
 				break;
 			case FIRST_PERSON_RIGHT_HAND:
@@ -362,7 +371,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(2.0F, 2.0F, 2.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(190.0F));
 				poseStack.translate(0.0F, -0.4F, 0.1F);
-				this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+				submitNodeCollector.submitModel(eggModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 				poseStack.popPose();
 				break;
 			case THIRD_PERSON_LEFT_HAND:
@@ -370,7 +379,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(2.0F, 2.0F, 2.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.translate(0.25F, -0.3F, -0.1F);
-				this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+				submitNodeCollector.submitModel(eggModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 				poseStack.popPose();
 				break;
 			case THIRD_PERSON_RIGHT_HAND:
@@ -378,7 +387,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.scale(2.0F, 2.0F, 2.0F);
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.translate(0.25F, -0.3F, -0.1F);
-				this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+				submitNodeCollector.submitModel(eggModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 				poseStack.popPose();
 				break;
 			case GROUND:
@@ -388,7 +397,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 				poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
 				poseStack.translate(0.25F, -0.3F, 0.2F);
-				this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+				submitNodeCollector.submitModel(eggModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 				poseStack.popPose();
 				break;
 			case GUI:
@@ -398,15 +407,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
 				poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
 				poseStack.translate(0.25F, -0.45F, 0.3F);
-				Lighting.setupForFlatItems();
-				this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
-				RenderSystem.disableDepthTest();
-				if (multiBufferSource instanceof MultiBufferSource.BufferSource) {
-					MultiBufferSource.BufferSource bufferSource = (MultiBufferSource.BufferSource) multiBufferSource;
-					bufferSource.endBatch();
-				}
-				RenderSystem.enableDepthTest();
-				Lighting.setupFor3DItems();
+				submitNodeCollector.submitModel(eggModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 				poseStack.popPose();
 				break;
 			case FIXED:
@@ -415,11 +416,34 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 				poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 				poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 				poseStack.translate(-0.25F, -0.25F, 0.25F);
-				this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+				submitNodeCollector.submitModel(eggModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 				poseStack.popPose();
 				break;
 			default:
 				break;
 			}
 		}
-	}}
+	}
+
+	@Override
+	public void getExtents(Consumer<Vector3fc> output) {
+		PoseStack poseStack = new PoseStack();
+		this.model.root().getExtentsForGui(poseStack, output);
+	}
+
+	/** 26.1.2: replaces the deleted per-item renderer registry with the data-driven special model route. */
+	public static final class Unbaked implements SpecialModelUnbaked {
+
+		public static final MapCodec<RenderTitanSpawnEgg.Unbaked> MAP_CODEC = MapCodec.unit(new RenderTitanSpawnEgg.Unbaked());
+
+		@Override
+		public MapCodec<RenderTitanSpawnEgg.Unbaked> type() {
+			return MAP_CODEC;
+		}
+
+		@Override
+		public RenderTitanSpawnEgg bake(SpecialModelRenderer.BakingContext context) {
+			return new RenderTitanSpawnEgg(context.sprites());
+		}
+	}
+}

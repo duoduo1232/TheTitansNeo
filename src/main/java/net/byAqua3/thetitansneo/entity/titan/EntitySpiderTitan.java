@@ -36,11 +36,10 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.byAqua3.thetitansneo.util.AnimationUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -53,12 +52,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -70,6 +69,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(EntitySpiderTitan.class, EntityDataSerializers.BYTE);
@@ -103,11 +103,11 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
+	public Identifier getBossBarTexture() {
 		if (this.isInvisible()) {
 			return null;
 		}
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/spider_titan.png");
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/spider_titan.png");
 	}
 
 	@Override
@@ -195,23 +195,23 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setBonusID(tag.getInt("SpawnedBonusID"));
-		this.damageToLegs = tag.getInt("DamageToLegs");
-		this.isStunned = tag.getBoolean("IsStunned");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setBonusID(input.getIntOr("SpawnedBonusID", 0));
+		this.damageToLegs = input.getIntOr("DamageToLegs", 0);
+		this.isStunned = input.getBooleanOr("IsStunned", false);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("SpawnedBonusID", this.getBonusID());
-		tag.putInt("DamageToLegs", this.damageToLegs);
-		tag.putBoolean("IsStunned", this.isStunned);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("SpawnedBonusID", this.getBonusID());
+		output.putInt("DamageToLegs", this.damageToLegs);
+		output.putBoolean("IsStunned", this.isStunned);
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.setWaiting(true);
 		if (this.level().getRandom().nextInt(10) == 0) {
@@ -398,10 +398,10 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 		if (entityTitanPart == this.head) {
 			amount *= 2.0F;
 		}
-		if (this.hurt(damageSource, amount)) {
+		if (this.hurtServer((ServerLevel) this.level(), damageSource, amount)) {
 			if (damageSource.getEntity() != null && damageSource.getEntity() instanceof Player && this.damageToLegs < 8 && !this.isStunned && (entityTitanPart == this.leftlegs || entityTitanPart == this.rightlegs)) {
 				this.damageToLegs++;
-				this.hurt(damageSource, 100.0F);
+				this.hurtServer((ServerLevel) this.level(), damageSource, 100.0F);
 				this.setTarget((LivingEntity) damageSource.getEntity());
 				if (this.damageToLegs >= 8) {
 					this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());
@@ -414,14 +414,14 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (this.isArmored()) {
 			amount /= 2.0F;
 		}
 		if (this.isStunned) {
 			amount *= 3.0F;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
@@ -514,14 +514,14 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 		if (minionType != EnumMinionType.SPECIAL) {
 			if (entity instanceof EntitySpiderTitanMinion) {
 				EntitySpiderTitanMinion spiderTitanMinion = (EntitySpiderTitanMinion) entity;
-				spiderTitanMinion.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, 4, true, false));
+				spiderTitanMinion.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, true, false));
 
 				if (this.getFirstPassenger() != null && this.getFirstPassenger() instanceof EntitySkeletonTitan) {
 					EntitySkeletonTitan skeletonTitan = (EntitySkeletonTitan) this.getFirstPassenger();
 					Mob mob = skeletonTitan.getSkeletonType() == 1 ? new EntityWitherSkeletonTitanMinion(this.level()) : new EntitySkeletonTitanMinion(this.level());
 					mob.setPos(spiderTitanMinion.getX(), spiderTitanMinion.getY(), spiderTitanMinion.getZ());
 					mob.setYRot(spiderTitanMinion.getYRot());
-					mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.SPAWNER, null);
+					mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.SPAWNER, null);
 					if (mob instanceof IMinion) {
 						IMinion minion = (IMinion) mob;
 						minion.setMinionType(spiderTitanMinion.getMinionTypeInt());
@@ -619,7 +619,7 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 						double d5 = this.getTarget().getZ() - d2;
 						double d6 = Math.sqrt(d3 * d3 + d5 * d5);
 
-						ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
+						ThrownSplashPotion thrownPotion = new ThrownSplashPotion(this.level(), this, this.getMainHandItem());
 						ItemStack itemStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.LONG_POISON);
 						thrownPotion.setItem(itemStack);
 						thrownPotion.setPos(d0, d1, d2);
@@ -879,11 +879,11 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 			float f = this.yBodyRot * Mth.PI / 180.0F;
 			float f1 = Mth.sin(f);
 			float f2 = Mth.cos(f);
-			this.head.moveTo(this.getX() - (Math.sin(f) * 7.0F * size), this.getY() + ((this.getAnimationID() == 8) ? 0.0D : 5.0D) * size - (Math.sin(this.getYRot() * Math.PI / 180.0F) * 4.0F * size), this.getZ() + (Math.cos(f) * 7.0F * size));
-			this.thorax.moveTo(this.getX(), this.getY() + ((this.getAnimationID() == 8) ? 1.0D : 6.25D) * size, this.getZ());
-			this.abdomen.moveTo(this.getX() + (f1 * 9.0F * size), this.getY() + ((this.getAnimationID() == 8) ? 1.0D : 5.0D) * size, this.getZ() - (f2 * 9.0F * size));
-			this.leftlegs.moveTo(this.getX() - (f2 * 10.0F * size), this.getY(), this.getZ() - (f1 * 10.0F * size));
-			this.rightlegs.moveTo(this.getX() + (f2 * 10.0F * size), this.getY(), this.getZ() + (f1 * 10.0F * size));
+			this.head.setPos(this.getX() - (Math.sin(f) * 7.0F * size), this.getY() + ((this.getAnimationID() == 8) ? 0.0D : 5.0D) * size - (Math.sin(this.getYRot() * Math.PI / 180.0F) * 4.0F * size), this.getZ() + (Math.cos(f) * 7.0F * size));
+			this.thorax.setPos(this.getX(), this.getY() + ((this.getAnimationID() == 8) ? 1.0D : 6.25D) * size, this.getZ());
+			this.abdomen.setPos(this.getX() + (f1 * 9.0F * size), this.getY() + ((this.getAnimationID() == 8) ? 1.0D : 5.0D) * size, this.getZ() - (f2 * 9.0F * size));
+			this.leftlegs.setPos(this.getX() - (f2 * 10.0F * size), this.getY(), this.getZ() - (f1 * 10.0F * size));
+			this.rightlegs.setPos(this.getX() + (f2 * 10.0F * size), this.getY(), this.getZ() + (f1 * 10.0F * size));
 
 			if (this.isAlive() && !this.isStunned) {
 				this.collideWithEntities(this.head, this.level().getEntities(this, this.head.getBoundingBox().inflate(1.0D, 0.0D, 1.0D)));
@@ -968,4 +968,5 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 		}
 
 		this.animationTick();
-	}}
+	}
+}

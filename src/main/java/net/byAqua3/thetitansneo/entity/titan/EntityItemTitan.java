@@ -25,8 +25,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.DataComponentUtil;
-
 public class EntityItemTitan extends ItemEntity {
 
 	public static final Codec<ItemStack> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(ItemStack.ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder), ExtraCodecs.intRange(1, Integer.MAX_VALUE).fieldOf("count").orElse(1).forGetter(ItemStack::getCount), DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.getComponentsPatch())).apply(instance, ItemStack::new)));
@@ -55,27 +53,23 @@ public class EntityItemTitan extends ItemEntity {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		this.health = tag.getShort("Health");
-		this.age = tag.getShort("Age");
-		if (tag.contains("PickupDelay")) {
-			this.pickupDelay = tag.getShort("PickupDelay");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		this.health = input.getShortOr("Health", (short) 0);
+		this.age = input.getShortOr("Age", (short) 0);
+		if (input.contains("PickupDelay")) {
+			this.pickupDelay = input.getShortOr("PickupDelay", (short) 0);
 		}
-		if (tag.contains("Lifespan")) {
-			this.lifespan = tag.getInt("Lifespan");
-		}
-
-		if (tag.hasUUID("Owner")) {
-			this.target = tag.getUUID("Owner");
+		if (input.contains("Lifespan")) {
+			this.lifespan = input.getIntOr("Lifespan", 0);
 		}
 
-		if (tag.hasUUID("Thrower")) {
-			this.thrower = tag.getUUID("Thrower");
-			this.cachedThrower = null;
-		}
+		this.target = input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 
-		if (tag.contains("Item", 10)) {
-			CompoundTag compoundTag = tag.getCompound("Item");
+		this.thrower = input.read("Thrower", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
+		this.cachedThrower = null;
+
+		if (input.contains("Item", 10)) {
+			CompoundTag compoundTag = input.childOrEmpty("Item");
 			ItemStack itemStack = CODEC.parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), compoundTag).resultOrPartial(error -> TheTitansNeo.LOGGER.error("Tried to load invalid item: '{}'", error)).orElse(ItemStack.EMPTY);
 			this.setItem(itemStack);
 		} else {
@@ -88,21 +82,23 @@ public class EntityItemTitan extends ItemEntity {
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		tag.putShort("Health", (short) this.health);
-		tag.putShort("Age", (short) this.age);
-		tag.putShort("PickupDelay", (short) this.pickupDelay);
-		tag.putInt("Lifespan", this.lifespan);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		output.putShort("Health", (short) this.health);
+		output.putShort("Age", (short) this.age);
+		output.putShort("PickupDelay", (short) this.pickupDelay);
+		output.putInt("Lifespan", this.lifespan);
 		if (this.thrower != null) {
-			tag.putUUID("Thrower", this.thrower);
+			output.store("Thrower", net.minecraft.core.UUIDUtil.CODEC, this.thrower);
 		}
 
 		if (this.target != null) {
-			tag.putUUID("Owner", this.target);
+			output.store("Owner", net.minecraft.core.UUIDUtil.CODEC, this.target);
 		}
 
 		if (!this.getItem().isEmpty()) {
-			tag.put("Item", DataComponentUtil.wrapEncodingExceptions(this.getItem(), CODEC, this.registryAccess()));
+			// 26.1.2: 原 DataComponentUtil.wrapEncodingExceptions(...) 已删除，
+			// ValueOutput 直接支持按 Codec 写入子节点。
+			output.store("Item", ItemStack.CODEC, this.getItem());
 		}
 	}
 
@@ -120,15 +116,9 @@ public class EntityItemTitan extends ItemEntity {
 	public boolean fireImmune() {
 		return true;
 	}
+	// 26.1.2: ItemEntity.hurtServer 已被声明为 final，子类不可覆写。
 
-	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
-		return false;
-	}
 
-	@Override
-	public void updateFluidHeightAndDoFluidPushing() {
-	}
 
 	@Override
 	public void playerTouch(Player player) {
@@ -143,8 +133,8 @@ public class EntityItemTitan extends ItemEntity {
 		if (!this.hasPickUpDelay() && (this.getTarget() == null || this.getTarget().equals(player.getUUID())) && player.getInventory().add(itemStack)) {
 			ServerLevel serverLevel = (ServerLevel) this.level();
 			ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
-			Holder<SoundEvent> holder = serverLevel.registryAccess().registryOrThrow(Registries.SOUND_EVENT).wrapAsHolder(SoundEvents.ITEM_PICKUP);
-			serverChunkCache.broadcastAndSend(player, new ClientboundSoundPacket(holder, SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 5.0F, (this.random.nextFloat() - this.random.nextFloat()) * 1.4F + 2.0F, serverLevel.getServer().getWorldData().worldGenOptions().seed()));
+			Holder<SoundEvent> holder = serverLevel.registryAccess().lookupOrThrow(Registries.SOUND_EVENT).wrapAsHolder(SoundEvents.ITEM_PICKUP);
+			serverChunkCache.sendToTrackingPlayersAndSelf(player, new ClientboundSoundPacket(holder, SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 5.0F, (this.random.nextFloat() - this.random.nextFloat()) * 1.4F + 2.0F, serverLevel.getServer().getWorldGenSettings().options().seed()));
 
 			if (itemStack.isEmpty()) {
 				this.discard();

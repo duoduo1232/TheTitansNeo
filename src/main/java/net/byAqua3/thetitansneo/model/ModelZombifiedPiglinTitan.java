@@ -7,6 +7,7 @@ import net.byAqua3.thetitansneo.animation.Animator;
 import net.byAqua3.thetitansneo.entity.titan.EntityZombifiedPiglinTitan;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -16,7 +17,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelZombifiedPiglinTitan extends EntityModel<EntityZombifiedPiglinTitan> {
+public class ModelZombifiedPiglinTitan extends EntityModel<TitanRenderState> {
 
 	public Animator animator;
 
@@ -37,8 +38,8 @@ public class ModelZombifiedPiglinTitan extends EntityModel<EntityZombifiedPiglin
 	public ModelPart rightCalf;
 
 	public ModelZombifiedPiglinTitan(float grow) {
-		super();
-		ModelPart root = createBodyLayer(grow).bakeRoot();
+		super(createBodyLayer(grow).bakeRoot());
+		ModelPart root = this.root;
 		this.torso = root.getChild("torso");
 		this.leftThigh = root.getChild("leftThigh");
 		this.rightThigh = root.getChild("rightThigh");
@@ -80,32 +81,16 @@ public class ModelZombifiedPiglinTitan extends EntityModel<EntityZombifiedPiglin
 	}
 
 	@Override
-	public void setupAnim(EntityZombifiedPiglinTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.animate(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch);
+	public void setupAnim(TitanRenderState state) {
+		this.animate((EntityZombifiedPiglinTitan) state.titan, state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 		float f = 1.2F;
-		float f1 = ageInTicks * 0.1F + limbSwing * 0.5F;
-		float f2 = 0.08F + limbSwingAmount * 0.4F;
+		float f1 = state.ageInTicks * 0.1F + state.walkAnimationPos * 0.5F;
+		float f2 = 0.08F + state.walkAnimationSpeed * 0.4F;
 		this.leftEar.zRot = -Mth.PI / 6.0F - Mth.cos(f1 * f) * f2;
 		this.rightEar.zRot = Mth.PI / 6.0F + Mth.cos(f1) * f2;
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		if (this.young) {
-			float f6 = 2.0F;
-			poseStack.pushPose();
-			poseStack.scale(1.0F / f6, 1.0F / f6, 1.0F / f6);
-			poseStack.translate(0.0F, 24.0F * 0.0625F, 0.0F);
-			this.torso.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.leftThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.rightThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			poseStack.popPose();
-		} else {
-			this.torso.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.leftThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.rightThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		}
-	}
 
 	public void setAngles() {
 		this.leftShoulder.xRot = -1.5707964F;
@@ -124,7 +109,7 @@ public class ModelZombifiedPiglinTitan extends EntityModel<EntityZombifiedPiglin
 	}
 
 	public void animate(EntityZombifiedPiglinTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		if (!entity.onGround()) {
 			limbSwingAmount = 0.0F;
 		}
@@ -141,7 +126,7 @@ public class ModelZombifiedPiglinTitan extends EntityModel<EntityZombifiedPiglin
 				this.rightShoulder.yRot = (-0.001F + 0.01F * f6) * Mth.PI;
 				this.leftShoulder.yRot = (0.001F + -0.01F * f6) * Mth.PI;
 			}
-			if (this.riding) {
+			if (entity.isPassenger()) {
 				this.rightThigh.xRot = -1.5707964F;
 				this.leftThigh.xRot = -1.5707964F;
 				this.rightThigh.yRot = 0.31415927F;
@@ -179,7 +164,7 @@ public class ModelZombifiedPiglinTitan extends EntityModel<EntityZombifiedPiglin
 				this.head.xRot += facePitch * 0.9F;
 				this.head.yRot += faceYaw * 0.9F;
 			}
-			if (!entity.onGround() && !this.riding && entity.getY() > -63.0D) {
+			if (!entity.onGround() && !entity.isPassenger() && entity.getY() > -63.0D) {
 				this.torso.zRot = 0.0F;
 				this.middleBody.zRot = 0.0F;
 				this.topBody.zRot = 0.0F;

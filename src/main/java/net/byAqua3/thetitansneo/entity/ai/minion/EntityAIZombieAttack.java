@@ -1,6 +1,6 @@
 package net.byAqua3.thetitansneo.entity.ai.minion;
 
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 
 public class EntityAIZombieAttack extends EntityAIMeleeAttack {
 	

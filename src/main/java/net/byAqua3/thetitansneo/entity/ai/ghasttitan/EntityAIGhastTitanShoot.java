@@ -63,7 +63,7 @@ public class EntityAIGhastTitanShoot extends Goal {
 						ServerLevel serverLevel = (ServerLevel) this.entity.level();
 						ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 						for (ServerPlayer player : serverLevel.players()) {
-							serverChunkCache.broadcastAndSend(player, new ClientboundSoundPacket(TheTitansNeoSounds.TITAN_GHAST_FIREBALL, SoundSource.MASTER, this.entity.getX(), this.entity.getY(), this.entity.getZ(), Float.MAX_VALUE, 1.0F, serverLevel.getServer().getWorldData().worldGenOptions().seed()));
+							serverChunkCache.sendToTrackingPlayersAndSelf(player, new ClientboundSoundPacket(TheTitansNeoSounds.TITAN_GHAST_FIREBALL, SoundSource.MASTER, this.entity.getX(), this.entity.getY(), this.entity.getZ(), Float.MAX_VALUE, 1.0F, serverLevel.getServer().getWorldGenSettings().options().seed()));
 						}
 					}
 

@@ -9,9 +9,8 @@ import net.byAqua3.thetitansneo.entity.ai.EntityAINearestTargetTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoItems;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
@@ -27,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityMagmaCubeTitan extends EntitySlimeTitan {
 
 	public EntityMagmaCubeTitan(EntityType<? extends EntityTitan> entityType, Level level) {
@@ -42,8 +42,8 @@ public class EntityMagmaCubeTitan extends EntitySlimeTitan {
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/magma_cube_titan.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/magma_cube_titan.png");
 	}
 	
 	@Override
@@ -96,13 +96,13 @@ public class EntityMagmaCubeTitan extends EntitySlimeTitan {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 	}
 	
 	@Override
@@ -189,18 +189,18 @@ public class EntityMagmaCubeTitan extends EntitySlimeTitan {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (damageSource.is(DamageTypes.IN_FIRE) || damageSource.is(DamageTypes.ON_FIRE)) {
 			this.heal(amount);
 			return false;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
 	public void jumpFromGround() {
 		this.setTitanDeltaMovement(this.getDeltaMovement().x, 4.0D + (this.getSlimeSize() * 0.33F), this.getDeltaMovement().z);
-		this.hasImpulse = true;
+		this.needsSync = true;
 		if (this.getTarget() != null) {
 			double d0 = this.getTarget().getX() - this.getX();
 			double d1 = this.getTarget().getZ() - this.getZ();

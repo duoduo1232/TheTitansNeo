@@ -16,7 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -24,6 +24,7 @@ import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityProtoBall extends ThrowableProjectile {
 
 	public EntityProtoBall(EntityType<? extends EntityProtoBall> entityType, Level level) {
@@ -51,7 +52,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 						mob.setPos(this.getX(), this.getY(), this.getZ());
 						mob.setXRot(-this.getXRot());
 						mob.setYRot(-this.getYRot());
-						mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+						mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						minion.setMaster(titan);
 						minion.setMinionType(0);
 						titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -82,7 +83,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(0);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -103,7 +104,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(1);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -125,7 +126,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(2);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -147,7 +148,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(3);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());

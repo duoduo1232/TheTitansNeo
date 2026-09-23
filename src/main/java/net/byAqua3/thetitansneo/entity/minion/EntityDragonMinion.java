@@ -11,7 +11,6 @@ import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -32,7 +31,7 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class EntityDragonMinion extends EnderDragon implements IMinion {
@@ -93,15 +92,15 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setMinionType(tag.getInt("MinionType"));
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setMinionType(input.getIntOr("MinionType", 0));
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("MinionType", this.getMinionTypeInt());
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("MinionType", this.getMinionTypeInt());
 	}
 
 	@Override
@@ -114,13 +113,9 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 		if (this.getMaster() != null) {
 			return this.getMaster().canAttack(target);
 		}
-		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
+		return !target.is(TheTitansNeoEntities.ENDER_COLOSSUS.get()) && !target.is(TheTitansNeoEntities.ENDER_COLOSSUS_MINION.get()) && !target.is(TheTitansNeoEntities.DRAGON_MINION.get()) && target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType != TheTitansNeoEntities.ENDER_COLOSSUS.get() && entityType != TheTitansNeoEntities.ENDER_COLOSSUS_MINION.get() && entityType != TheTitansNeoEntities.DRAGON_MINION.get();
-	}
 
 	@Override
 	public boolean fireImmune() {
@@ -169,7 +164,7 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (this.isInvulnerable()) {
@@ -192,17 +187,17 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 				}
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public void hurt(List<Entity> entities) {
+	public void hurtEntities(List<Entity> entities) {
 		for (Entity entity : entities) {
 			if (entity instanceof LivingEntity) {
 				this.flapTime++;
 				this.playAmbientSound();
 				DamageSource damageSource = this.damageSources().mobAttack(this);
-				entity.hurt(damageSource, 200.0F);
+				entity.hurtServer((ServerLevel) this.level(), damageSource, 200.0F);
 				entity.invulnerableTime = 0;
 				if (this.level() instanceof ServerLevel serverlevel) {
 					EnchantmentHelper.doPostAttackEffects(serverlevel, entity, damageSource);
@@ -242,7 +237,7 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 			int y = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
 			BlockPos blockPos = new BlockPos(x, y, z);
 
-			this.setDragonFight(new EndDragonFight(serverLevel, serverLevel.getServer().getWorldData().worldGenOptions().seed(), new EndDragonFight.Data(true, false, false, false, Optional.of(this.getUUID()), Optional.of(blockPos), Optional.empty()), blockPos));
+			this.setDragonFight(new EnderDragonFight(serverLevel, serverLevel.getServer().getWorldGenSettings().options().seed(), new EnderDragonFight.Data(true, false, false, false, Optional.of(this.getUUID()), Optional.of(blockPos), Optional.empty()), blockPos));
 		}
 		super.tickDeath();
 	}

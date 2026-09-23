@@ -246,7 +246,7 @@ public class ChunkGeneratorVoid extends NoiseBasedChunkGenerator implements IChu
 		int height = this.settings.value().noiseSettings().height();
 
 		for (int i = 0; i < height; i++) {
-			int j = chunk.getMinBuildHeight() + i;
+			int j = chunk.getMinY() + i;
 
 			for (int k = 0; k < 16; k++) {
 				for (int l = 0; l < 16; l++) {

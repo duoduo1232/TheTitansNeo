@@ -1,6 +1,7 @@
 package net.byAqua3.thetitansneo.effect;
 
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.EntityType;
@@ -20,9 +21,9 @@ public class MobEffectElectricJudgment extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+	public boolean applyEffectTick(net.minecraft.server.level.ServerLevel serverLevel, LivingEntity entity, int amplifier) {
 		entity.setRemainingFireTicks(20);
-		entity.hurt(entity.damageSources().lightningBolt(), 5.0F * (amplifier + 1));
+		entity.hurtServer((ServerLevel) serverLevel, entity.damageSources().lightningBolt(), 5.0F * (amplifier + 1));
 		if (!(TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.electricJudgmentIfStorm, true) && !entity.level().isRaining())) {
 			LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, entity.level());
 			lightningBolt.setPos(entity.getX() - 0.5D, entity.getY(), entity.getZ() - 0.5D);
@@ -31,4 +32,5 @@ public class MobEffectElectricJudgment extends MobEffect {
 			}
 		}
 		return true;
-	}}
+	}
+}

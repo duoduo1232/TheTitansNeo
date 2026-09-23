@@ -22,7 +22,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoMobEffects;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -43,7 +42,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -54,14 +53,14 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.Level.ExplosionInteraction;
@@ -153,17 +152,17 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setMinionType(tag.getInt("MinionType"));
-		this.deathTicks = tag.getInt("DeathTicks");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setMinionType(input.getIntOr("MinionType", 0));
+		this.deathTicks = input.getIntOr("DeathTicks", 0);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("MinionType", this.getMinionTypeInt());
-		tag.putInt("DeathTicks", this.deathTicks);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("MinionType", this.getMinionTypeInt());
+		output.putInt("DeathTicks", this.deathTicks);
 	}
 
 	public float rotlerp(float angle, float targetAngle, float maxIncrease) {
@@ -184,11 +183,11 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 		int j = this.getRandom().nextInt(2) + this.getRandom().nextInt(1 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.GHAST_TEAR, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GHAST_TEAR, 1));
 		}
 		j = this.getRandom().nextInt(3) + this.getRandom().nextInt(1 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.GUNPOWDER, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GUNPOWDER, 1));
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(4);
@@ -196,7 +195,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(Items.EXPERIENCE_BOTTLE, 1);
+				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -205,9 +204,9 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 				}
 				for (k = 0; k < j; k++) {
 					if (this.getRandom().nextInt(10) == 0) {
-						this.spawnAtLocation(Items.ENCHANTED_GOLDEN_APPLE, 1);
+						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ENCHANTED_GOLDEN_APPLE, 1));
 					} else {
-						this.spawnAtLocation(Items.GOLDEN_APPLE, 1);
+						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
 					}
 				}
 				if (this.getMinionTypeInt() >= 3) {
@@ -218,28 +217,28 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
 							break;
 						case 1:
-							this.spawnAtLocation(new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
 							break;
 						case 2:
-							this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						case 3:
-							this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						case 4:
-							this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -248,17 +247,17 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
 								break;
 							case 1:
-								this.spawnAtLocation(new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
 								break;
 							case 2:
-								this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 								break;
 							}
 						}
-						this.spawnAtLocation(new ItemStack(Blocks.OBSIDIAN), 0.0F);
+						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.OBSIDIAN), 0.0F);
 					}
 				}
 			}
@@ -267,7 +266,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.setRandomMinionType();
 		this.setHealth(this.getMaxHealth());
@@ -342,13 +341,9 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 		if (this.getMaster() != null) {
 			return this.getMaster().canAttack(target);
 		}
-		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
+		return !target.is(TheTitansNeoEntities.GHAST_TITAN.get()) && !target.is(TheTitansNeoEntities.GHAST_TITAN_MINION.get()) && target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType != TheTitansNeoEntities.GHAST_TITAN.get() && entityType != TheTitansNeoEntities.GHAST_TITAN_MINION.get();
-	}
 
 	@Override
 	public int getArmorValue() {
@@ -450,8 +445,8 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		if (super.doHurtTarget(entity)) {
+	public boolean doHurtTarget(ServerLevel level, Entity entity) {
+		if (super.doHurtTarget(level, entity)) {
 			if (entity instanceof LivingEntity && this.getMinionTypeInt() >= 3) {
 				LivingEntity livingEntity = (LivingEntity) entity;
 
@@ -471,7 +466,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (this.isInvulnerable()) {
@@ -487,11 +482,11 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 				this.setTarget(livingEntity);
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		return false;
 	}
 
@@ -500,7 +495,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 		this.attackCounter = 10;
 		this.swing(InteractionHand.MAIN_HAND);
 		if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 36.0D) {
-			this.doHurtTarget(target);
+			this.doHurtTarget((ServerLevel) this.level(), target);
 		} else {
 			int randomInt = this.getRandom().nextInt(4);
 
@@ -525,10 +520,10 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 				}
 			} else if (randomInt == 1) {
 				for (int i = 0; i < 200; i++) {
-					ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
+					ThrownSplashPotion thrownPotion = new ThrownSplashPotion(this.level(), this, this.getMainHandItem());
 					ItemStack itemStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HARMING);
 					thrownPotion.setItem(itemStack);
-					if (target.getType().is(EntityTypeTags.UNDEAD)) {
+					if (target.is(EntityTypeTags.UNDEAD)) {
 						itemStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HEALING);
 						thrownPotion.setItem(itemStack);
 					}
@@ -565,7 +560,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 				if (!this.level().isClientSide()) {
 					this.level().explode(this, target.getX(), target.getY(), target.getZ(), 2.0F * target.getBbWidth(), false, Level.ExplosionInteraction.MOB);
 				}
-				target.hurt(this.damageSources().lightningBolt(), 100.0F);
+				target.hurtServer((ServerLevel) this.level(), this.damageSources().lightningBolt(), 100.0F);
 				for (int i = 0; i < 4; i++) {
 					LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
 					lightningBolt.setPos(target.getX(), target.getY(), target.getZ());
@@ -603,9 +598,9 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 			return;
 		}
 		this.captureDrops(new java.util.ArrayList<>());
-		boolean flag = this.lastHurtByPlayerTime > 0;
-		if (this.shouldDropLoot() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.dropFromLootTable(damageSource, flag);
+		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
+		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
 			int i = 0;
@@ -628,15 +623,15 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 			}
 		}
 
-		this.dropEquipment();
+		dropEquipment(level);
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
-			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.lastHurtByPlayer, this.getExperienceReward(level, damageSource.getEntity()));
+			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
 			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
-		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, lastHurtByPlayerTime > 0)) {
+		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, this.getLastHurtByPlayerMemoryTime() > 0)) {
 			for (ItemEntity drop : drops) {
 				this.level().addFreshEntity(drop);
 			}
@@ -736,7 +731,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 						EntityGhastTitanMinion ghastTitanMinion = new EntityGhastTitanMinion(this.level());
 						ghastTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						ghastTitanMinion.setYRot(this.getYRot());
-						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						ghastTitanMinion.setMinionType(0);
 						ghastTitanMinion.setHealth(ghastTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(ghastTitanMinion);
@@ -747,7 +742,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 						EntityGhastTitanMinion ghastTitanMinion = new EntityGhastTitanMinion(this.level());
 						ghastTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						ghastTitanMinion.setYRot(this.getYRot());
-						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						ghastTitanMinion.setMinionType(1);
 						ghastTitanMinion.setHealth(ghastTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(ghastTitanMinion);
@@ -784,7 +779,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 						EntityGhastTitanMinion ghastTitanMinion = new EntityGhastTitanMinion(this.level());
 						ghastTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						ghastTitanMinion.setYRot(this.getYRot());
-						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						ghastTitanMinion.setMinionType(0);
 						ghastTitanMinion.setHealth(ghastTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(ghastTitanMinion);
@@ -795,7 +790,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 						EntityGhastTitanMinion ghastTitanMinion = new EntityGhastTitanMinion(this.level());
 						ghastTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						ghastTitanMinion.setYRot(this.getYRot());
-						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						ghastTitanMinion.setMinionType(1);
 						ghastTitanMinion.setHealth(ghastTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(ghastTitanMinion);
@@ -806,7 +801,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 						EntityGhastTitanMinion ghastTitanMinion = new EntityGhastTitanMinion(this.level());
 						ghastTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						ghastTitanMinion.setYRot(this.getYRot());
-						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						ghastTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(ghastTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						ghastTitanMinion.setMinionType(2);
 						ghastTitanMinion.setHealth(ghastTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(ghastTitanMinion);
@@ -818,7 +813,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 					this.level().addParticle(ParticleTypes.POOF, this.getX() + (this.getRandom().nextDouble() - 0.5D) * this.getBbWidth(), this.getY(), this.getZ() + (this.getRandom().nextDouble() - 0.5D) * this.getBbWidth(), 0.0D, 0.0D, 0.0D);
 				}
 			} else {
-				this.hasImpulse = false;
+				this.needsSync = false;
 			}
 			if (this.getTarget() != null && this.getRandom().nextInt(60) == 0) {
 				this.goalSelector.removeGoal(this.rangedAttackGoal);
@@ -841,7 +836,7 @@ public class EntityGhastTitanMinion extends Ghast implements RangedAttackMob, IM
 			if (this.attackPattern == 0 && this.getTarget() != null) {
 				if (this.getTarget().getY() + this.getTarget().getEyeHeight() > this.getY() + this.getEyeHeight() + this.heightOffset) {
 					this.push(0.0D, 0.4D - this.getDeltaMovement().y, 0.0D);
-					this.hasImpulse = true;
+					this.needsSync = true;
 				}
 				this.getLookControl().setLookAt(this.getTarget(), 180.0F, 40.0F);
 				double d0 = this.getTarget().getX() - this.getX();

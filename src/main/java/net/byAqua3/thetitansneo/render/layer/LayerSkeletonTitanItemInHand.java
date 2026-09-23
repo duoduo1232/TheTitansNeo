@@ -1,41 +1,34 @@
 package net.byAqua3.thetitansneo.render.layer;
 
-import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
-import net.byAqua3.thetitansneo.entity.titan.EntitySkeletonTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
 import net.byAqua3.thetitansneo.model.ModelSkeletonTitan;
-import net.byAqua3.thetitansneo.util.RenderUtils;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
+import net.byAqua3.thetitansneo.util.RenderWeapon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class LayerSkeletonTitanItemInHand extends RenderLayer<EntitySkeletonTitan, ModelSkeletonTitan> {
+public class LayerSkeletonTitanItemInHand extends RenderLayer<TitanRenderState, ModelSkeletonTitan> {
 
-	public LayerSkeletonTitanItemInHand(RenderLayerParent<EntitySkeletonTitan, ModelSkeletonTitan> renderer) {
+	public LayerSkeletonTitanItemInHand(RenderLayerParent<TitanRenderState, ModelSkeletonTitan> renderer) {
 		super(renderer);
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, EntitySkeletonTitan entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, TitanRenderState state, float yRot, float xRot) {
 		if (TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.titanWeaponOldModel, false)) {
-			if (entity.getSkeletonType() == 1) {
+			if (state.skeletonType == 1) {
 				if (!this.getParentModel().heldItem2.visible) {
 					this.getParentModel().heldItem2.visible = true;
 				}
@@ -46,11 +39,8 @@ public class LayerSkeletonTitanItemInHand extends RenderLayer<EntitySkeletonTita
 			}
 			return;
 		}
-		Minecraft mc = Minecraft.getInstance();
-		TextureAtlas textureAtlas = mc.getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(Sheets.translucentItemSheet());
 
-		if (entity.getSkeletonType() == 1) {
+		if (state.skeletonType == 1) {
 			this.getParentModel().heldItem2.visible = false;
 		} else {
 			this.getParentModel().heldItem.visible = false;
@@ -74,13 +64,13 @@ public class LayerSkeletonTitanItemInHand extends RenderLayer<EntitySkeletonTita
 		this.getParentModel().rightShoulder.translateAndRotate(poseStack);
 		this.getParentModel().rightForearm.translateAndRotate(poseStack);
 
-		if (entity.getSkeletonType() == 1) {
+		if (state.skeletonType == 1) {
 			this.getParentModel().heldItem2.translateAndRotate(poseStack);
 		} else {
 			this.getParentModel().heldItem.translateAndRotate(poseStack);
 		}
 
-		if (entity.getSkeletonType() == 1) {
+		if (state.skeletonType == 1) {
 			poseStack.mulPose(Axis.XP.rotationDegrees(-145.0F));
 			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 			poseStack.translate(0.425F, -0.5F, 0.0F);
@@ -94,23 +84,16 @@ public class LayerSkeletonTitanItemInHand extends RenderLayer<EntitySkeletonTita
 		poseStack.translate(0.0F, 0.25F, 0.03125F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
 		poseStack.mulPose(Axis.ZP.rotationDegrees(55.0F));
+		Identifier texture = (state.skeletonType == 1)
+			? Identifier.tryBuild(TheTitansNeo.MODID, "item/stone_sword_256")
+			: ((state.attackTimer < 20 && state.attackTimer >= 10) ? Identifier.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_0_256")
+				: ((state.attackTimer < 30 && state.attackTimer >= 20) ? Identifier.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_1_256")
+					: ((state.attackTimer >= 30) ? Identifier.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_2_256")
+						: (state.isStunned ? Identifier.tryBuild(TheTitansNeo.MODID, "item/broken_bow_256")
+							: Identifier.tryBuild(TheTitansNeo.MODID, "item/bow_256")))));
+		// 26.1.2: 旧的 BakedQuad 烘焙 API 已移除，直接按 sprite UV 提交平面 quad。
+		RenderWeapon.submitItemSprite(texture, poseStack, submitNodeCollector, lightCoords);
 
-		ResourceLocation texture = null;
-
-		if (entity.getSkeletonType() == 1) {
-			texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/stone_sword_256");
-		} else {
-			texture = ((entity.attackTimer < 20 && entity.attackTimer >= 10) ? ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_0_256") : ((entity.attackTimer < 30 && entity.attackTimer >= 20) ? ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_1_256") : ((entity.attackTimer >= 30) ? ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/bow_pulling_2_256") : (entity.isStunned ? ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/broken_bow_256") : ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/bow_256")))));
-		}
-
-		TextureAtlasSprite textureAtlasSprite = textureAtlas.getSprite(texture);
-		List<BakedQuad> quads = RenderUtils.bakeItem(textureAtlasSprite);
-
-		PoseStack.Pose poseStack$pose = poseStack.last();
-
-		for (BakedQuad quad : quads) {
-			vertexConsumer.putBulkData(poseStack$pose, quad, 1.0F, 1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY, true);
-		}
 		poseStack.popPose();
 
 		poseStack.popPose();

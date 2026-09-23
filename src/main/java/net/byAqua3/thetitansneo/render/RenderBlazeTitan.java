@@ -1,20 +1,20 @@
 package net.byAqua3.thetitansneo.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-
+import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.byAqua3.thetitansneo.entity.titan.EntityBlazeTitan;
 import net.byAqua3.thetitansneo.model.ModelBlazeTitan;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderBlazeTitan extends LivingEntityRenderer<EntityBlazeTitan, ModelBlazeTitan> {
+public class RenderBlazeTitan extends LivingEntityRenderer<EntityBlazeTitan, TitanRenderState, ModelBlazeTitan> {
 
-	public static final ResourceLocation BLAZE_TITAN = ResourceLocation.withDefaultNamespace("textures/entity/blaze.png");
+	public static final Identifier BLAZE_TITAN = Identifier.withDefaultNamespace("textures/entity/blaze.png");
 
 	public RenderBlazeTitan(Context context) {
 		super(context, new ModelBlazeTitan(0.0F), 0.5F);
@@ -22,39 +22,43 @@ public class RenderBlazeTitan extends LivingEntityRenderer<EntityBlazeTitan, Mod
 	}
 
 	@Override
-	public void render(EntityBlazeTitan entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
-		super.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+	public TitanRenderState createRenderState() {
+		return new TitanRenderState();
 	}
 
 	@Override
-	protected void scale(EntityBlazeTitan entity, PoseStack poseStack, float partialTick) {
+	public void extractRenderState(EntityBlazeTitan entity, TitanRenderState state, float partialTicks) {
+		super.extractRenderState(entity, state, partialTicks);
+		state.titan = entity;
+		state.invulTime = entity.getInvulTime();
+		state.extraPower = entity.getExtraPower();
+	}
+
+	@Override
+	protected void scale(TitanRenderState state, PoseStack poseStack) {
 		float f1 = 16.0F;
-		int i = entity.getInvulTime();
+		int i = state.invulTime;
 		if (i > 0) {
-			f1 -= (i - partialTick) / 440.0F * 7.75F;
+			f1 -= (i - state.partialTick) / 440.0F * 7.75F;
 		}
 		if (i > 900) {
 			poseStack.scale(1.0F, -1.0F, 1.0F);
 		}
-		int i2 = entity.getExtraPower();
+		int i2 = state.extraPower;
 		if (i2 > 0) {
 			f1 += i2 * 0.5F;
 		}
 		poseStack.scale(f1, f1, f1);
 		poseStack.translate(0.0F, 1.26F, 0.0F);
 	}
-	
-	@Override
-	protected float getShadowRadius(EntityBlazeTitan entity) {
-		return this.shadowRadius * entity.getBbWidth();
-    }
 
 	@Override
-	protected boolean shouldShowName(EntityBlazeTitan entity) {
+	protected boolean shouldShowName(EntityBlazeTitan entity, double distanceToCameraSq) {
 		return false;
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EntityBlazeTitan entity) {
+	protected Identifier getTextureLocation(TitanRenderState state) {
 		return BLAZE_TITAN;
-	}}
+	}
+}

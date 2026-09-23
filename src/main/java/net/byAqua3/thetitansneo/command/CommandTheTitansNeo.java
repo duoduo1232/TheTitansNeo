@@ -14,11 +14,12 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 
+import net.minecraft.server.level.ServerLevel;
 public class CommandTheTitansNeo {
 	
 	private static int kill(CommandSourceStack source, Collection<? extends Entity> targets) {
         for (Entity entity : targets) {
-            entity.kill();
+            entity.kill((ServerLevel) entity.level());
             
             if (entity instanceof EntityTitan) {
 				EntityTitan titan = (EntityTitan) entity;
@@ -68,7 +69,7 @@ public class CommandTheTitansNeo {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             Commands.literal(TheTitansNeo.MODID)
-                .requires(sourceStack -> sourceStack.hasPermission(2))
+                .requires(net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS))
                 .then(
                 		Commands.literal("kill")
                 		.then(Commands.argument("targets", EntityArgument.entities())

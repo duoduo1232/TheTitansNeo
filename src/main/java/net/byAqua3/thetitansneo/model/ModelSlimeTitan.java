@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.byAqua3.thetitansneo.entity.titan.EntitySlimeTitan;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -14,7 +15,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelSlimeTitan extends EntityModel<EntitySlimeTitan> {
+public class ModelSlimeTitan extends EntityModel<TitanRenderState> {
 
 	public ModelPart slimeBodies;
 	public ModelPart slimeLeftEye;
@@ -22,8 +23,8 @@ public class ModelSlimeTitan extends EntityModel<EntitySlimeTitan> {
 	public ModelPart slimeMouth;
 
 	public ModelSlimeTitan(int y) {
-		super();
-		ModelPart root = createBodyLayer(y).bakeRoot();
+		super(createBodyLayer(y).bakeRoot());
+		ModelPart root = this.root;
 		this.slimeBodies = root.getChild("slimeBodies");
 		if (y > 0) {
 			this.slimeLeftEye = root.getChild("slimeLeftEye");
@@ -47,23 +48,16 @@ public class ModelSlimeTitan extends EntityModel<EntitySlimeTitan> {
 	}
 
 	@Override
-	public void setupAnim(EntitySlimeTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
+	public void setupAnim(TitanRenderState state) {
 		if (this.slimeLeftEye != null) {
-			this.slimeLeftEye.yRot = headYaw * Mth.PI / 180.0F;
-			this.slimeLeftEye.xRot = headPitch * Mth.PI / 180.0F;
+			this.slimeLeftEye.yRot = state.yRot * Mth.PI / 180.0F;
+			this.slimeLeftEye.xRot = state.xRot * Mth.PI / 180.0F;
 		}
 		if (this.slimeRightEye != null) {
-			this.slimeRightEye.yRot = headYaw * Mth.PI / 180.0F;
-			this.slimeRightEye.xRot = headPitch * Mth.PI / 180.0F;
+			this.slimeRightEye.yRot = state.yRot * Mth.PI / 180.0F;
+			this.slimeRightEye.xRot = state.xRot * Mth.PI / 180.0F;
 		}
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.slimeBodies.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		if (this.slimeLeftEye != null) {
-			this.slimeLeftEye.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.slimeRightEye.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.slimeMouth.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		}
-	}}
+}

@@ -38,11 +38,10 @@ import net.byAqua3.thetitansneo.util.ItemUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -57,12 +56,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -118,8 +117,8 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/ender_colossus.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/ender_colossus.png");
 	}
 
 	@Override
@@ -223,27 +222,27 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setEyeLaserTime(tag.getInt("EyeLaserTime"));
-		this.setRoarCooldownTimer(tag.getInt("RoarCooldownTimer"));
-		this.setCanCallBackUp(tag.getBoolean("CanCallBackUp"));
-		this.setScreaming(tag.getBoolean("Screaming"));
-		this.destroyedCrystals = tag.getInt("DestroyedCrystals");
-		this.healCrystals = tag.getBoolean("HealCrystals");
-		this.isStunned = tag.getBoolean("IsStunned");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setEyeLaserTime(input.getIntOr("EyeLaserTime", 0));
+		this.setRoarCooldownTimer(input.getIntOr("RoarCooldownTimer", 0));
+		this.setCanCallBackUp(input.getBooleanOr("CanCallBackUp", false));
+		this.setScreaming(input.getBooleanOr("Screaming", false));
+		this.destroyedCrystals = input.getIntOr("DestroyedCrystals", 0);
+		this.healCrystals = input.getBooleanOr("HealCrystals", false);
+		this.isStunned = input.getBooleanOr("IsStunned", false);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("EyeLaserTime", this.getEyeLaserTime());
-		tag.putInt("RoarCooldownTimer", this.getRoarCooldownTimer());
-		tag.putBoolean("CanCallBackUp", this.getCanCallBackUp());
-		tag.putBoolean("Screaming", this.isScreaming());
-		tag.putInt("DestroyedCrystals", this.destroyedCrystals);
-		tag.putBoolean("HealCrystals", this.healCrystals);
-		tag.putBoolean("IsStunned", this.isStunned);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("EyeLaserTime", this.getEyeLaserTime());
+		output.putInt("RoarCooldownTimer", this.getRoarCooldownTimer());
+		output.putBoolean("CanCallBackUp", this.getCanCallBackUp());
+		output.putBoolean("Screaming", this.isScreaming());
+		output.putInt("DestroyedCrystals", this.destroyedCrystals);
+		output.putBoolean("HealCrystals", this.healCrystals);
+		output.putBoolean("IsStunned", this.isStunned);
 	}
 
 	protected boolean isLookingAtMe(Player player, EntityTitanPart entityTitanPart) {
@@ -270,8 +269,8 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 
 					if (!this.level().isClientSide()) {
 						this.level().explode(this, player.getX(), player.getY(), player.getZ(), 8.0F, true, Level.ExplosionInteraction.MOB);
-						player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 400, 1));
-						player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 400, 99));
+						player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 400, 1));
+						player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 400, 99));
 						player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 400, 1));
 					}
 				}
@@ -282,7 +281,7 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.setScreaming(true);
 		this.setCanCallBackUp(true);
@@ -474,26 +473,26 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 
 	@Override
 	public boolean attackEntityFromPart(EntityTitanPart entityTitanPart, DamageSource damageSource, float amount) {
-		this.hurt(damageSource, amount);
+		this.hurtServer((ServerLevel) this.level(), damageSource, amount);
 		return true;
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (this.isStunned) {
 			amount *= 2.0F;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		this.setOnGround(true);
-		this.hasImpulse = false;
+		this.needsSync = false;
 		if (fallDistance <= 0.0F) {
 			return false;
 		}
-		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP);
+		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP_BOOST);
 		float f1 = (mobEffectInstance != null) ? (mobEffectInstance.getAmplifier() + 1) : 0.0F;
 		int i = Mth.ceil(fallDistance - 24.0F - f1);
 		if (i > 0) {
@@ -533,7 +532,7 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerLevel level) {
 		this.playSound(SoundEvents.ENDERMAN_TELEPORT, 100.0F, 0.6F);
 		if (this.level().dimension() == Level.END || this.level().dimension() == TheTitansNeoDimensions.THE_VOID) {
 			this.setPos(0.0D, 128.0D, 0.0D);
@@ -887,7 +886,7 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 			if (this.getAnimationTick() > 80) {
 				if (!this.level().isClientSide()) {
 					ServerLevel serverLevel = (ServerLevel) this.level();
-					serverLevel.setWeatherParameters(0, 0, false, false);
+					serverLevel.getServer().setWeatherParameters(0, 0, false, false);
 				}
 				this.setScreaming(false);
 
@@ -908,8 +907,8 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 						livingEntity.setXRot(livingEntity.getXRot() + 1);
 
 						if (!this.level().isClientSide()) {
-							livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 400, 1));
-							livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 400, 99));
+							livingEntity.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 400, 1));
+							livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 400, 99));
 							livingEntity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 400, 1));
 						}
 					}
@@ -1174,8 +1173,10 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 			this.setScreaming(true);
 			if (!this.level().isClientSide()) {
 				ServerLevel level = (ServerLevel) this.level();
-				if (level.dimensionType().hasSkyLight() && level.isDay()) {
-					level.setDayTime(level.getDayTime() + 14000L);
+				if (level.dimensionType().hasSkyLight() && (level.getOverworldClockTime() % 24000L < 12000L)) {
+					// 26.1.2: 时钟体系替代 setDayTime/getDayTime。
+					((ServerLevel) level).getServer().clockManager().addTicks(
+							((ServerLevel) level).getServer().registryAccess().getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD), 14000);
 				}
 			}
 		}
@@ -1185,7 +1186,7 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 		}
 
 		float fl = this.getLightLevelDependentMagicValue();
-		if (fl > 0.5F && !this.level().isClientSide() && this.level().dimensionType().hasSkyLight() && this.level().isDay() && this.tickCount % 1 == 0) {
+		if (fl > 0.5F && !this.level().isClientSide() && this.level().dimensionType().hasSkyLight() && (this.level().getOverworldClockTime() % 24000L < 12000L) && this.tickCount % 1 == 0) {
 			this.setXRot(this.yHeadRot / 6.0F);
 			this.yHeadRot = -90.0F;
 		}
@@ -1214,14 +1215,14 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 			float f1 = Mth.sin(f);
 			float f2 = Mth.cos(f);
 
-			this.head.moveTo(this.getX(), this.getY() + 60.0D, this.getZ());
-			this.body.moveTo(this.getX(), this.getY() + 42.0D, this.getZ());
-			this.leftEye.moveTo(this.getX() - (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 7.0F), this.getY() + this.getEyeHeight() - 1.0D, this.getZ() - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 8.0F));
-			this.rightEye.moveTo(this.getX() + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 7.0F), this.getY() + this.getEyeHeight() - 1.0D, this.getZ() + (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 8.0F));
-			this.leftArm.moveTo(this.getX() - (f2 * 8.0F), this.getY() + 56.0D, this.getZ() - (f1 * 8.0F));
-			this.rightArm.moveTo(this.getX() + (f2 * 8.0F), this.getY() + 56.0D, this.getZ() + (f1 * 8.0F));
-			this.leftLeg.moveTo(this.getX() - (f2 * 3.0F), this.getY(), this.getZ() - (f1 * 3.0F));
-			this.rightLeg.moveTo(this.getX() + (f2 * 3.0F), this.getY(), this.getZ() + (f1 * 3.0F));
+			this.head.setPos(this.getX(), this.getY() + 60.0D, this.getZ());
+			this.body.setPos(this.getX(), this.getY() + 42.0D, this.getZ());
+			this.leftEye.setPos(this.getX() - (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 7.0F), this.getY() + this.getEyeHeight() - 1.0D, this.getZ() - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 8.0F));
+			this.rightEye.setPos(this.getX() + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 7.0F), this.getY() + this.getEyeHeight() - 1.0D, this.getZ() + (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 4.0F) + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 8.0F));
+			this.leftArm.setPos(this.getX() - (f2 * 8.0F), this.getY() + 56.0D, this.getZ() - (f1 * 8.0F));
+			this.rightArm.setPos(this.getX() + (f2 * 8.0F), this.getY() + 56.0D, this.getZ() + (f1 * 8.0F));
+			this.leftLeg.setPos(this.getX() - (f2 * 3.0F), this.getY(), this.getZ() - (f1 * 3.0F));
+			this.rightLeg.setPos(this.getX() + (f2 * 3.0F), this.getY(), this.getZ() + (f1 * 3.0F));
 
 			for (EntityTitanPart part : this.parts) {
 				if (this.isAlive() && !this.isStunned) {

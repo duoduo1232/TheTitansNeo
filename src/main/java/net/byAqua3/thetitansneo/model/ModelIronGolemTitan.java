@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.byAqua3.thetitansneo.animation.Animator;
 import net.byAqua3.thetitansneo.entity.titan.EntityIronGolemTitan;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -15,7 +16,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelIronGolemTitan extends EntityModel<EntityIronGolemTitan> {
+public class ModelIronGolemTitan extends EntityModel<TitanRenderState> {
 
 	private Animator animator;
 
@@ -37,8 +38,8 @@ public class ModelIronGolemTitan extends EntityModel<EntityIronGolemTitan> {
 	public ModelPart rightLeg2;
 
 	public ModelIronGolemTitan() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.torso = root.getChild("torso");
 		this.body = root.getChild("torso").getChild("body");
 		this.head = root.getChild("torso").getChild("body").getChild("head");
@@ -82,16 +83,11 @@ public class ModelIronGolemTitan extends EntityModel<EntityIronGolemTitan> {
 	}
 
 	@Override
-	public void setupAnim(EntityIronGolemTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.animate(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch);
+	public void setupAnim(TitanRenderState state) {
+		this.animate((EntityIronGolemTitan) state.titan, state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.torso.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.leftLeg1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.rightLeg1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 
 	public void setAngles() {
 		this.body.setRotation(attackTime, attackTime, attackTime);

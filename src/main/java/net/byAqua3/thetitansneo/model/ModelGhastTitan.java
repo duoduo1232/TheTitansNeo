@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.byAqua3.thetitansneo.entity.titan.EntityGhastTitan;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -14,7 +15,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelGhastTitan extends EntityModel<EntityGhastTitan> {
+public class ModelGhastTitan extends EntityModel<TitanRenderState> {
 
 	public ModelPart body;
 	public ModelPart tentacle1;
@@ -49,8 +50,8 @@ public class ModelGhastTitan extends EntityModel<EntityGhastTitan> {
 	public ModelPart tentacle9999;
 
 	public ModelGhastTitan() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.body = root.getChild("body");
 		this.tentacle1 = root.getChild("body").getChild("tentacle1");
 		this.tentacle11 = root.getChild("body").getChild("tentacle1").getChild("tentacle11");
@@ -123,42 +124,40 @@ public class ModelGhastTitan extends EntityModel<EntityGhastTitan> {
 	}
 
 	@Override
-	public void setupAnim(EntityGhastTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.body.yRot = headYaw * Mth.PI / 180.0F;
-	    this.body.xRot = headPitch * Mth.PI / 180.0F;
-	    this.tentacle1.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 1.0F) + 0.5F;
-	    this.tentacle11.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 2.0F) + 0.2F;
-	    this.tentacle111.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 3.0F) + 0.2F;
-	    this.tentacle2.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 1.5F) + 0.5F;
-	    this.tentacle22.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 2.5F) + 0.2F;
-	    this.tentacle222.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 3.5F) + 0.2F;
-	    this.tentacle2222.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 4.5F) + 0.2F;
-	    this.tentacle3.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 2.0F) + 0.5F;
-	    this.tentacle33.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 3.0F) + 0.2F;
-	    this.tentacle333.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 4.0F) + 0.2F;
-	    this.tentacle4.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 2.5F) + 0.5F;
-	    this.tentacle44.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 3.5F) + 0.2F;
-	    this.tentacle444.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 4.5F) + 0.2F;
-	    this.tentacle5.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 3.0F) + 0.5F;
-	    this.tentacle55.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 4.0F) + 0.2F;
-	    this.tentacle555.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 5.0F) + 0.2F;
-	    this.tentacle6.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 3.5F) + 0.5F;
-	    this.tentacle66.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 4.5F) + 0.2F;
-	    this.tentacle666.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 5.5F) + 0.2F;
-	    this.tentacle7.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 4.0F) + 0.5F;
-	    this.tentacle77.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 5.0F) + 0.2F;
-	    this.tentacle777.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 6.0F) + 0.2F;
-	    this.tentacle7777.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 7.0F) + 0.2F;
-	    this.tentacle8.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 4.5F) + 0.5F;
-	    this.tentacle88.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 5.5F) + 0.2F;
-	    this.tentacle888.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 6.5F) + 0.2F;
-	    this.tentacle9.xRot = 0.1F * Mth.sin(ageInTicks * 0.075F - 5.0F) + 0.5F;
-	    this.tentacle99.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 6.0F) + 0.2F;
-	    this.tentacle999.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 7.0F) + 0.2F;
-	    this.tentacle9999.xRot = 0.2F * Mth.sin(ageInTicks * 0.075F - 8.0F) + 0.2F;
+	public void setupAnim(TitanRenderState state) {
+		this.body.yRot = state.yRot * Mth.PI / 180.0F;
+	    this.body.xRot = state.xRot * Mth.PI / 180.0F;
+	    this.tentacle1.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 1.0F) + 0.5F;
+	    this.tentacle11.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 2.0F) + 0.2F;
+	    this.tentacle111.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 3.0F) + 0.2F;
+	    this.tentacle2.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 1.5F) + 0.5F;
+	    this.tentacle22.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 2.5F) + 0.2F;
+	    this.tentacle222.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 3.5F) + 0.2F;
+	    this.tentacle2222.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 4.5F) + 0.2F;
+	    this.tentacle3.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 2.0F) + 0.5F;
+	    this.tentacle33.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 3.0F) + 0.2F;
+	    this.tentacle333.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 4.0F) + 0.2F;
+	    this.tentacle4.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 2.5F) + 0.5F;
+	    this.tentacle44.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 3.5F) + 0.2F;
+	    this.tentacle444.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 4.5F) + 0.2F;
+	    this.tentacle5.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 3.0F) + 0.5F;
+	    this.tentacle55.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 4.0F) + 0.2F;
+	    this.tentacle555.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 5.0F) + 0.2F;
+	    this.tentacle6.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 3.5F) + 0.5F;
+	    this.tentacle66.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 4.5F) + 0.2F;
+	    this.tentacle666.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 5.5F) + 0.2F;
+	    this.tentacle7.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 4.0F) + 0.5F;
+	    this.tentacle77.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 5.0F) + 0.2F;
+	    this.tentacle777.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 6.0F) + 0.2F;
+	    this.tentacle7777.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 7.0F) + 0.2F;
+	    this.tentacle8.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 4.5F) + 0.5F;
+	    this.tentacle88.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 5.5F) + 0.2F;
+	    this.tentacle888.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 6.5F) + 0.2F;
+	    this.tentacle9.xRot = 0.1F * Mth.sin(state.ageInTicks * 0.075F - 5.0F) + 0.5F;
+	    this.tentacle99.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 6.0F) + 0.2F;
+	    this.tentacle999.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 7.0F) + 0.2F;
+	    this.tentacle9999.xRot = 0.2F * Mth.sin(state.ageInTicks * 0.075F - 8.0F) + 0.2F;
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}}
+}

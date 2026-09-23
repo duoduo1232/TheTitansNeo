@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -13,7 +14,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.LivingEntity;
 
-public class ModelTitanSpawnEgg extends EntityModel<LivingEntity> {
+public class ModelTitanSpawnEgg extends EntityModel<LivingEntityRenderState> {
 
 	public int eggType = 0;
 	public float ticksExisted = 0;
@@ -39,8 +40,8 @@ public class ModelTitanSpawnEgg extends EntityModel<LivingEntity> {
 	public ModelPart eggTip;
 
 	public ModelTitanSpawnEgg() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.eggCore = root.getChild("eggCore");
 		this.eggBottom = root.getChild("eggBottom");
 		this.eggSide1 = root.getChild("eggSide1");
@@ -89,45 +90,8 @@ public class ModelTitanSpawnEgg extends EntityModel<LivingEntity> {
 	}
 
 	@Override
-	public void setupAnim(LivingEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
+	public void setupAnim(LivingEntityRenderState state) {
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.eggCore.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.eggBottom.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.eggSide1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.eggSide2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.eggSide3.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.eggSide4.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.eggTop.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.eggTip.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-
-		if (this.eggType == 1 || this.eggType == 2) {
-			if (this.eggType == 2) {
-				this.rod1.yRot = -(this.ticksExisted * 0.125F);
-				this.rod2.yRot = this.ticksExisted * 0.125F;
-				this.rod3.yRot = -(this.ticksExisted * 0.125F);
-				this.rod4.yRot = this.ticksExisted * 0.125F;
-				this.rod1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-				this.rod2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-				this.rod3.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-				this.rod4.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			}
-			this.fire.yRot = -(this.ticksExisted * 0.25F);
-			this.fire.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		}
-		if (this.eggType == 3) {
-			this.fuzz.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		}
-		if (this.eggType == 4) {
-			this.item.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		}
-		if (this.eggType == 5) {
-			this.horn1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.horn2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.horn11.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-			this.horn22.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		}
-	}
 }

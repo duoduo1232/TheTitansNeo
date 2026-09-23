@@ -1,5 +1,6 @@
 package net.byAqua3.thetitansneo.item;
 
+import java.util.function.Consumer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,12 +28,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.Fireball;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -41,15 +41,34 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.EquipmentSlot;
 
-public class ItemOptimaAxe extends SwordItem {
+public class ItemOptimaAxe extends Item {
 
 	public ItemOptimaAxe(Properties properties) {
-		super(TheTitansNeoTiers.ULTIMA, properties.attributes(createAttributes(TheTitansNeoTiers.ULTIMA, 0.0F, Float.MAX_VALUE, 12.0F)));
+		super(axeProperties(properties));
 	}
 
-	public static ItemAttributeModifiers createAttributes(Tier tier, float attackDamage, float attackSpeed, float range) {
-		return ItemAttributeModifiers.builder().add(Attributes.BLOCK_INTERACTION_RANGE, new AttributeModifier(ResourceLocation.withDefaultNamespace("base_block_interaction_range"), range, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND).add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, (double) attackSpeed, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND).add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, (double) ((float) attackDamage + tier.getAttackDamageBonus()), AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND).build();
+	/**
+	 * 26.1.2 适配：{@code ToolMaterial} 是 record（{@code getAttackDamageBonus()} 已不存在），
+	 * 且 {@code Item.Properties.axe(...)} 不再接受自定义 range。
+	 * <p>
+	 * 原 1.21.1 传入的 {@code Float.MAX_VALUE} 攻击速度在 26.1.2 下会让
+	 * {@code ATTACK_SPEED} 属性修饰符溢出 —— 玩家攻速 tick 数会算成 0 或负数，
+	 * 触发除零 / 死循环风险，因此这里收敛到 1024.0F（仍为原版上限的数百倍，
+	 * 视觉上"瞬时挥砍"的观感不变）。
+	 * <p>
+	 * 原 {@code BLOCK_INTERACTION_RANGE = 12} 改用 26.1.2 的 {@code DataComponents.ATTACK_RANGE}，
+	 * 这是该版本里承载"攻击/交互距离"的正规组件。
+	 */
+	private static final float ATTACK_SPEED = 1024.0F;
+	private static final float INTERACTION_RANGE = 12.0F;
+
+	private static Properties axeProperties(Properties properties) {
+		return properties
+				.axe(TheTitansNeoTiers.ULTIMA, 0.0F, ATTACK_SPEED)
+				.component(net.minecraft.core.component.DataComponents.ATTACK_RANGE,
+						new net.minecraft.world.item.component.AttackRange(0.0F, INTERACTION_RANGE, 0.0F, INTERACTION_RANGE, 0.3F, 1.0F));
 	}
 
 	@Override
@@ -63,22 +82,22 @@ public class ItemOptimaAxe extends SwordItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-		super.appendHoverText(stack, context, tooltip, flag);
-		tooltip.add(Component.translatable("item.thetitansneo.optima_axe.info1").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_AQUA));
-		tooltip.add(Component.translatable("item.thetitansneo.optima_axe.info2").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_AQUA));
-		tooltip.add(Component.translatable("item.thetitansneo.optima_axe.info3").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_AQUA));
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flag) {
+		super.appendHoverText(stack, context, display, tooltip, flag);
+		tooltip.accept(Component.translatable("item.thetitansneo.optima_axe.info1").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_AQUA));
+		tooltip.accept(Component.translatable("item.thetitansneo.optima_axe.info2").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_AQUA));
+		tooltip.accept(Component.translatable("item.thetitansneo.optima_axe.info3").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_AQUA));
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot) {
 		if (entity instanceof Player) {
 			Player player = (Player) entity;
 
 			if (!TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.optimaAxeHiddenParticles, false)) {
 				for (int i = 0; i < 3; i++) {
-					level.addParticle(ParticleTypes.PORTAL, player.getX() + (level.random.nextDouble() - 0.5D) * player.getBbWidth(), player.getY() + level.random.nextDouble() * player.getBbHeight(), player.getZ() + (level.random.nextDouble() - 0.5D) * player.getBbWidth(), (level.random.nextDouble() - 0.5D) * 2.0D, 1.0D, (level.random.nextDouble() - 0.5D) * 2.0D);
-					level.addParticle(ParticleTypes.LARGE_SMOKE, player.getX() + (level.random.nextDouble() - 0.5D) * player.getBbWidth(), player.getY() + level.random.nextDouble() * player.getBbHeight(), player.getZ() + (level.random.nextDouble() - 0.5D) * player.getBbWidth(), (level.random.nextDouble() - 0.5D) * 2.0D, 1.0D, (level.random.nextDouble() - 0.5D) * 2.0D);
+					level.addParticle(ParticleTypes.PORTAL, player.getX() + (level.getRandom().nextDouble() - 0.5D) * player.getBbWidth(), player.getY() + level.getRandom().nextDouble() * player.getBbHeight(), player.getZ() + (level.getRandom().nextDouble() - 0.5D) * player.getBbWidth(), (level.getRandom().nextDouble() - 0.5D) * 2.0D, 1.0D, (level.getRandom().nextDouble() - 0.5D) * 2.0D);
+					level.addParticle(ParticleTypes.LARGE_SMOKE, player.getX() + (level.getRandom().nextDouble() - 0.5D) * player.getBbWidth(), player.getY() + level.getRandom().nextDouble() * player.getBbHeight(), player.getZ() + (level.getRandom().nextDouble() - 0.5D) * player.getBbWidth(), (level.getRandom().nextDouble() - 0.5D) * 2.0D, 1.0D, (level.getRandom().nextDouble() - 0.5D) * 2.0D);
 				}
 			}
 
@@ -166,14 +185,14 @@ public class ItemOptimaAxe extends SwordItem {
 						if (entity != null) {
 							DamageSourceTitanAttack damageSource = new DamageSourceTitanAttack(player);
 
-							player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 2.0F, 0.5F + level.random.nextFloat() * 0.25F);
+							player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 2.0F, 0.5F + level.getRandom().nextFloat() * 0.25F);
 							player.playSound(TheTitansNeoSounds.SLASH_FLESH.get(), 10.0F, 1.0F);
 
 							if (entity instanceof EntityTitan) {
 								player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
 
 								EntityTitan titan = (EntityTitan) entity;
-								titan.hurt(damageSource, 2000.0F);
+								titan.hurtServer((ServerLevel) livingEntity.level(), damageSource, 2000.0F);
 							} else if (entity instanceof PrimedTnt) {
 								if (!level.isClientSide()) {
 									level.explode(player, entity.getX(), entity.getY(), entity.getZ(), 4.0F, false, Level.ExplosionInteraction.MOB);
@@ -186,7 +205,7 @@ public class ItemOptimaAxe extends SwordItem {
 								}
 							} else if (entity instanceof LivingEntity) {
 								entity.setRemainingFireTicks(Integer.MAX_VALUE);
-								if (!entity.hurt(damageSource, 20000.0F)) {
+								if (!entity.hurtServer((ServerLevel) level, damageSource, 20000.0F)) {
 									((LivingEntity) entity).setHealth(0.0F);
 								}
 								entity.push(-Math.sin(player.getYRot() * Math.PI / 180.0F) * 6.0D, 6.0D, Math.cos(player.getYRot() * Math.PI / 180.0F) * 6.0D);
@@ -206,22 +225,22 @@ public class ItemOptimaAxe extends SwordItem {
 					if (entity != null) {
 						DamageSourceTitanAttack damageSource = new DamageSourceTitanAttack(player);
 
-						player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 2.0F, 0.5F + level.random.nextFloat() * 0.25F);
+						player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 2.0F, 0.5F + level.getRandom().nextFloat() * 0.25F);
 						player.playSound(TheTitansNeoSounds.SLASH_FLESH.get(), 10.0F, 1.0F);
 
 						if (entity instanceof EntityTitan) {
 							player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
 
 							EntityTitan titan = (EntityTitan) entity;
-							titan.hurt(damageSource, 2000.0F);
+							titan.hurtServer((ServerLevel) level, damageSource, 2000.0F);
 						} else if (entity instanceof LivingEntity) {
 							entity.setRemainingFireTicks(Integer.MAX_VALUE);
-							if (!entity.hurt(damageSource, Float.MAX_VALUE)) {
+							if (!entity.hurtServer((ServerLevel) level, damageSource, Float.MAX_VALUE)) {
 								((LivingEntity) entity).setHealth(0.0F);
 							}
 							entity.push(-Math.sin(player.getYRot() * Math.PI / 180.0F) * 6.0D, 6.0D, Math.cos(player.getYRot() * Math.PI / 180.0F) * 6.0D);
 						} else {
-							entity.hurt(entity.damageSources().playerAttack(player), 20000.0F);
+							entity.hurtServer((ServerLevel) level, entity.damageSources().playerAttack(player), 20000.0F);
 						}
 					}
 				}

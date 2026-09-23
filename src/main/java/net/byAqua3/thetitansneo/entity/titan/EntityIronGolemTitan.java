@@ -25,13 +25,12 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.byAqua3.thetitansneo.util.AnimationUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.SynchedEntityData.Builder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
@@ -41,11 +40,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -56,6 +55,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityIronGolemTitan extends EntityTitan implements IBossBarDisplay {
 
 	private static final EntityDataAccessor<Boolean> PLAYER_CREATED = SynchedEntityData.defineId(EntityIronGolemTitan.class, EntityDataSerializers.BOOLEAN);
@@ -76,8 +76,8 @@ public class EntityIronGolemTitan extends EntityTitan implements IBossBarDisplay
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/iron_golem_titan.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/iron_golem_titan.png");
 	}
 
 	@Override
@@ -162,18 +162,18 @@ public class EntityIronGolemTitan extends EntityTitan implements IBossBarDisplay
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setPlayerCreated(tag.getBoolean("PlayerCreated"));
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setPlayerCreated(input.getBooleanOr("PlayerCreated", false));
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		return groupData;
 	}
@@ -273,17 +273,17 @@ public class EntityIronGolemTitan extends EntityTitan implements IBossBarDisplay
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
+	public boolean doHurtTarget(ServerLevel level, Entity entity) {
 		this.level().broadcastEntityEvent(this, (byte) 4);
-		return super.doHurtTarget(entity);
+		return super.doHurtTarget(level, entity);
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (amount > 1000.0F) {
 			amount = 1000.0F;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
@@ -637,4 +637,5 @@ public class EntityIronGolemTitan extends EntityTitan implements IBossBarDisplay
 		}
 		
 		this.animationTick();
-	}}
+	}
+}

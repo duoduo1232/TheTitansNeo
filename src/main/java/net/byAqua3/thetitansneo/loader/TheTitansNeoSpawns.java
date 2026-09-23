@@ -4,7 +4,7 @@ import net.byAqua3.thetitansneo.entity.titan.EntityCreeperTitan;
 import net.byAqua3.thetitansneo.entity.titan.EntitySkeletonTitan;
 import net.byAqua3.thetitansneo.entity.titan.EntitySpiderTitan;
 import net.byAqua3.thetitansneo.item.ItemTitanSpawnEgg.OnSpawned;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 
 public class TheTitansNeoSpawns {
 
@@ -31,9 +31,10 @@ public class TheTitansNeoSpawns {
 			skeletonTitan.setPos(spiderTitan.getX(), spiderTitan.getY(), spiderTitan.getZ());
 			skeletonTitan.setXRot(spiderTitan.getXRot());
 			skeletonTitan.setYRot(spiderTitan.getYRot());
-			skeletonTitan.finalizeSpawn(level, level.getCurrentDifficultyAt(spiderTitan.blockPosition()), MobSpawnType.SPAWN_EGG, null);
+			skeletonTitan.finalizeSpawn(level, level.getCurrentDifficultyAt(spiderTitan.blockPosition()), EntitySpawnReason.SPAWN_EGG, null);
 			skeletonTitan.setTitanHealth(skeletonTitan.getMaxHealth());
 			level.addFreshEntity(skeletonTitan);
 			skeletonTitan.startRiding(spiderTitan);
 		}
-	};}
+	};
+}

@@ -16,7 +16,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -30,7 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -39,17 +38,18 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Giant;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.item.ItemStack;
 
 public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 
@@ -108,15 +108,15 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setMinionType(tag.getInt("MinionType"));
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setMinionType(input.getIntOr("MinionType", 0));
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("MinionType", this.getMinionTypeInt());
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("MinionType", this.getMinionTypeInt());
 	}
 
 	private LivingEntity doJumpDamage(double x, double y, double z, double distance, double damage, int knockback) {
@@ -126,8 +126,8 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 
 		for (LivingEntity entity : entities) {
 			if (entity != null && entity != this && entity.isAlive() && !(entity instanceof EntityZombieTitan) && !(entity instanceof EntityZombieTitanMinion) && !(entity instanceof EntityZombieTitanGiantMinion)) {
-				entity.hurt(this.damageSources().explosion(null), (float) damage);
-				entity.hurt(this.damageSources().fall(), (float) damage / 4.0F);
+				entity.hurtServer((ServerLevel) doJumpDamage.level(), this.damageSources().explosion(null), (float) damage);
+				entity.hurtServer((ServerLevel) doJumpDamage.level(), this.damageSources().fall(), (float) damage / 4.0F);
 				this.level().playSound(entity, entity.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.MASTER, 0.85F, 1.0F + (this.getRandom().nextFloat() - this.getRandom().nextFloat()) * 0.5F);
 				if (knockback != 0) {
 					double ks = 0.75D + this.getRandom().nextDouble() + this.getRandom().nextDouble();
@@ -150,21 +150,21 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 		int j = this.getRandom().nextInt(13) + this.getRandom().nextInt(1 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.FEATHER, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.FEATHER, 1));
 		}
 		j = this.getRandom().nextInt(13) + this.getRandom().nextInt(2 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.ROTTEN_FLESH, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ROTTEN_FLESH, 1));
 		}
 		if (attackedRecently) {
 			if (this.getRandom().nextInt(5) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-				this.spawnAtLocation(Items.IRON_INGOT, 1);
+				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.IRON_INGOT, 1));
 			}
 			if (this.getRandom().nextInt(5) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-				this.spawnAtLocation(Items.CARROT, 1);
+				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.CARROT, 1));
 			}
 			if (this.getRandom().nextInt(5) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-				this.spawnAtLocation(Items.POTATO, 1);
+				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.POTATO, 1));
 			}
 		}
 	}
@@ -184,13 +184,9 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 		if (this.getMaster() != null) {
 			return this.getMaster().canAttack(target);
 		}
-		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
+		return !target.is(TheTitansNeoEntities.ZOMBIE_TITAN.get()) && !target.is(TheTitansNeoEntities.ZOMBIE_TITAN_MINION.get()) && !target.is(TheTitansNeoEntities.ZOMBIE_TITAN_GIANT_MINION.get()) && target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType != TheTitansNeoEntities.ZOMBIE_TITAN.get() && entityType != TheTitansNeoEntities.ZOMBIE_TITAN_MINION.get() && entityType != TheTitansNeoEntities.ZOMBIE_TITAN_GIANT_MINION.get();
-	}
 
 	@Override
 	public int getArmorValue() {
@@ -267,11 +263,11 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 	}
 
 	@Override
-	public boolean killedEntity(ServerLevel level, LivingEntity entity) {
+	public boolean killedEntity(ServerLevel level, LivingEntity entity, DamageSource source) {
 		if (entity.getMaxHealth() <= 100.0D) {
 			entity.push(0.0D, 15.0D, 0.0D);
 		}
-		this.heal(this.level().isDay() ? (5.0F + this.getRandom().nextFloat() * 15.0F) : (15.0F + this.getRandom().nextFloat() * 30.0F));
+		this.heal((this.level().getOverworldClockTime() % 24000L < 12000L) ? (5.0F + this.getRandom().nextFloat() * 15.0F) : (15.0F + this.getRandom().nextFloat() * 30.0F));
 
 		if (entity instanceof Villager) {
 			Villager villager = (Villager) entity;
@@ -299,7 +295,7 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 				villager.discard();
 			}
 			if (zombieVillager != null) {
-				zombieVillager.finalizeSpawn(level, level.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false, true));
+				zombieVillager.finalizeSpawn(level, level.getCurrentDifficultyAt(zombieVillager.blockPosition()), EntitySpawnReason.CONVERSION, new Zombie.ZombieGroupData(false, true));
 				zombieVillager.setVillager(true);
 				net.neoforged.neoforge.event.EventHooks.onLivingConvert(entity, zombieVillager);
 				if (!this.isSilent()) {
@@ -310,12 +306,12 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 			}
 		}
 
-		return super.killedEntity(level, entity);
+		return super.killedEntity(level, entity, source);
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		boolean flag = super.doHurtTarget(entity);
+	public boolean doHurtTarget(ServerLevel level, Entity entity) {
+		boolean flag = super.doHurtTarget(level, entity);
 		if (flag && entity instanceof LivingEntity) {
 			LivingEntity livingEntity = (LivingEntity) entity;
 
@@ -336,7 +332,7 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (this.isInvulnerable()) {
@@ -365,11 +361,11 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 				}
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		return false;
 	}
 
@@ -407,7 +403,7 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 				}
 			}
 			if (this.tickCount % 20 == 0 && this.distanceToSqr(this.getTarget()) <= ((14.0F + this.getTarget().getBbWidth() / 2.0F) * (14.0F + this.getTarget().getBbWidth() / 2.0F))) {
-				this.doHurtTarget(this.getTarget());
+				this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
 			}
 		}
 		if (this.getMaster() != null) {
@@ -435,9 +431,9 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 	@Override
 	protected void dropAllDeathLoot(ServerLevel level, DamageSource damageSource) {
 		this.captureDrops(new java.util.ArrayList<>());
-		boolean flag = this.lastHurtByPlayerTime > 0;
-		if (this.shouldDropLoot() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.dropFromLootTable(damageSource, flag);
+		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
+		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
 			int i = 0;
@@ -460,13 +456,13 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 			}
 		}
 
-		this.dropEquipment();
+		dropEquipment(level);
 
-		int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.lastHurtByPlayer, this.getExperienceReward(level, damageSource.getEntity()));
+		int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
 		ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
 
 		Collection<ItemEntity> drops = captureDrops(null);
-		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, lastHurtByPlayerTime > 0)) {
+		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, this.getLastHurtByPlayerMemoryTime() > 0)) {
 			for (ItemEntity drop : drops) {
 				this.level().addFreshEntity(drop);
 			}
@@ -476,10 +472,9 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 	@Override
 	public void tick() {
 		super.tick();
-		this.noCulling = true;
 
-		if (this.tickCount % 20 == 0 && (!this.level().isDay() || this.getRandom().nextInt(5) == 0)) {
-			this.heal(this.level().isDay() ? (1.0F + this.getRandom().nextFloat() * 4.0F) : (5.0F + this.getRandom().nextFloat() * 15.0F));
+		if (this.tickCount % 20 == 0 && (!(this.level().getOverworldClockTime() % 24000L < 12000L) || this.getRandom().nextInt(5) == 0)) {
+			this.heal((this.level().getOverworldClockTime() % 24000L < 12000L) ? (1.0F + this.getRandom().nextFloat() * 4.0F) : (5.0F + this.getRandom().nextFloat() * 15.0F));
 		}
 
 		if (this.getDeltaMovement().x != 0.0D && this.getDeltaMovement().z != 0.0D && this.getRandom().nextInt(5) == 0) {
@@ -523,5 +518,14 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 			}
 			return (var3 > var5) ? 1 : ((var3 < var5) ? -1 : 0);
 		}
+	}
+
+	/**
+	 * 26.1.2: Entity.noCulling 字段已删除。原语义是「大体积实体不做视锥剔除，任何距离都渲染」，
+	 * 对应到新版本的正确扩展点是覆写 shouldRenderAtSqrDistance 恒返回 true。
+	 */
+	@Override
+	public boolean shouldRenderAtSqrDistance(double distance) {
+		return true;
 	}
 }

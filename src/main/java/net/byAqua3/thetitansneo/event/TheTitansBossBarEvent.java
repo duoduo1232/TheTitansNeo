@@ -10,10 +10,10 @@ import net.byAqua3.thetitansneo.entity.IEntityAnimatedHealth;
 import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -23,7 +23,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 public class TheTitansBossBarEvent {
 	
-	public void render(GuiGraphics guiGraphics) {
+	public void render(GuiGraphicsExtractor guiGraphics) {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 
@@ -43,7 +43,7 @@ public class TheTitansBossBarEvent {
 					LivingEntity livingEntity = (LivingEntity) entity;
 
 					if (bossBarDisplay.getBossBarTexture() != null) {
-						ResourceLocation bossBar = bossBarDisplay.getBossBarTexture();
+						Identifier bossBar = bossBarDisplay.getBossBarTexture();
 						Component name = livingEntity.hasCustomName() ? livingEntity.getCustomName() : livingEntity.getName();
 						int color = bossBarDisplay.getBossBarNameColor();
 						int healthColor = bossBarDisplay.getBossBarHealthColor();
@@ -72,26 +72,24 @@ public class TheTitansBossBarEvent {
 
 						x = (mc.getWindow().getGuiScaledWidth() / 2) - (width / 2);
 
-						guiGraphics.pose().pushPose();
+						guiGraphics.pose().pushMatrix();
 
-						RenderSystem.enableBlend();
 						
-						guiGraphics.blit(bossBar, x, y, 0, 0, width, height);
+						guiGraphics.blit(bossBar, x, y, x + width, y + height, 0.0F, width/256F, 0.0F, height/256F);
 						if (TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.titanBossBarAnimated, true) && animatedWidth > 0) {
-							guiGraphics.blit(bossBar, x, y, 0, (height + vOffset) * 2, animatedWidth, height + vHeight);
+							guiGraphics.blit(bossBar, x, y, x + animatedWidth, y + height + vHeight, 0.0F, (animatedWidth)/256F, ((height + vOffset) * 2)/256F, ((height + vOffset) * 2 + height + vHeight)/256F);
 						}
 						if (healthWidth > 0) {
-							guiGraphics.blit(bossBar, x, y, 0, height + vOffset, healthWidth, height + vHeight);
+							guiGraphics.blit(bossBar, x, y, x + healthWidth, y + height + vHeight, 0.0F, (healthWidth)/256F, (height + vOffset)/256F, (height + vOffset + height + vHeight)/256F);
 						}
 
 						String healthText = String.valueOf(new DecimalFormat("#").format(health)) + "/" + String.valueOf(new DecimalFormat("#").format(maxHealth));
 
-						guiGraphics.drawString(mc.font, name, x + (width / 2 - mc.font.width(name) / 2) + 1, y + height - textOffset, color);
-						guiGraphics.drawString(mc.font, healthText, x + (width / 2 - mc.font.width(healthText) / 2) + 1, y + height - textOffset + 10, healthColor);
+						guiGraphics.text(mc.font, name, x + (width / 2 - mc.font.width(name) / 2) + 1, y + height - textOffset, color);
+						guiGraphics.text(mc.font, healthText, x + (width / 2 - mc.font.width(healthText) / 2) + 1, y + height - textOffset + 10, healthColor);
 
-						RenderSystem.disableBlend();
 
-						guiGraphics.pose().popPose();
+						guiGraphics.pose().popMatrix();
 
 						y += height + interval + 12;
 						if (y >= guiGraphics.guiHeight() / 3) {
@@ -105,7 +103,7 @@ public class TheTitansBossBarEvent {
 	
 	@SubscribeEvent
 	public void onBossEventProgress(CustomizeGuiOverlayEvent.BossEventProgress event) {
-		GuiGraphics guiGraphics = event.getGuiGraphics();
+		GuiGraphicsExtractor guiGraphics = event.getGuiGraphics();
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 
@@ -142,8 +140,8 @@ public class TheTitansBossBarEvent {
 
 	@SubscribeEvent
 	public void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
-		GuiGraphics guiGraphics = event.getGuiGraphics();
-		ResourceLocation name = event.getName();
+		GuiGraphicsExtractor guiGraphics = event.getGuiGraphics();
+		Identifier name = event.getName();
 		Minecraft mc = Minecraft.getInstance();
 
 		if (name == VanillaGuiLayers.BOSS_OVERLAY) {
@@ -151,7 +149,7 @@ public class TheTitansBossBarEvent {
 			
 			this.render(guiGraphics);
 			
-			guiGraphics.pose().pushPose();
+			guiGraphics.pose().pushMatrix();
 			
 			if (player != null) {
 				int range = TheTitansNeoConfigs.titanBossBarRange.get();
@@ -177,7 +175,7 @@ public class TheTitansBossBarEvent {
 				}
 
 				if (index > 0) {
-					guiGraphics.pose().translate(0.0D, y, 0.0D);
+					guiGraphics.pose().translate(0.0F, (float) y);
 				}
 			}
 		}
@@ -185,10 +183,11 @@ public class TheTitansBossBarEvent {
 
 	@SubscribeEvent
 	public void onRenderGuiLayerPost(RenderGuiLayerEvent.Post event) {
-		GuiGraphics guiGraphics = event.getGuiGraphics();
-		ResourceLocation name = event.getName();
+		GuiGraphicsExtractor guiGraphics = event.getGuiGraphics();
+		Identifier name = event.getName();
 
 		if (name == VanillaGuiLayers.BOSS_OVERLAY) {
-			guiGraphics.pose().popPose();
+			guiGraphics.pose().popMatrix();
 		}
-	}}
+	}
+}

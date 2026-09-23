@@ -6,11 +6,11 @@ import net.byAqua3.thetitansneo.util.ItemUtils;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -25,28 +25,28 @@ public class ItemHarcadiumBow extends BowItem {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		InteractionResultHolder<ItemStack> ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(stack, level, player, hand, true);
+		InteractionResult ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(stack, level, player, hand, true);
 		if (ret != null) {
 			return ret;
 		}
 		boolean flag = (player.isCreative() || EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().holderOrThrow(Enchantments.INFINITY), stack) > 0);
 
-		if (flag || ItemUtils.hasItem(player.getInventory().items, TheTitansNeoItems.HARCADIUM_ARROW.get()) || ItemUtils.hasItem(player.getInventory().offhand, TheTitansNeoItems.HARCADIUM_ARROW.get())) {
+		if (flag || ItemUtils.hasItem(player.getInventory().getNonEquipmentItems(), TheTitansNeoItems.HARCADIUM_ARROW.get()) || ItemUtils.hasItem(java.util.List.of(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.OFFHAND)), TheTitansNeoItems.HARCADIUM_ARROW.get())) {
 			player.startUsingItem(hand);
-			return InteractionResultHolder.consume(stack);
+			return InteractionResult.SUCCESS;
 		}
-		return InteractionResultHolder.pass(stack);
+		return InteractionResult.PASS;
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int time) {
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int time) {
 		Player player = (Player) entity;
 		boolean flag = (player.isCreative() || EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().holderOrThrow(Enchantments.INFINITY), stack) > 0);
 
-		if (flag || ItemUtils.hasItem(player.getInventory().items, TheTitansNeoItems.HARCADIUM_ARROW.get()) || ItemUtils.hasItem(player.getInventory().offhand, TheTitansNeoItems.HARCADIUM_ARROW.get())) {
+		if (flag || ItemUtils.hasItem(player.getInventory().getNonEquipmentItems(), TheTitansNeoItems.HARCADIUM_ARROW.get()) || ItemUtils.hasItem(java.util.List.of(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.OFFHAND)), TheTitansNeoItems.HARCADIUM_ARROW.get())) {
 			int max = this.getUseDuration(stack, entity);
 			int j = max - time;
 
@@ -54,7 +54,7 @@ public class ItemHarcadiumBow extends BowItem {
 			f = (f * f + f * 2.0F) / 3.0F;
 
 			if (f < 0.1) {
-				return;
+				return false;
 			}
 
 			if (f > 1.0) {
@@ -84,19 +84,19 @@ public class ItemHarcadiumBow extends BowItem {
 			if (EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().holderOrThrow(Enchantments.FLAME), stack) > 0) {
 				arrow.igniteForSeconds(500);
 			}
-			stack.hurtAndBreak(this.getDurabilityUse(stack), player, LivingEntity.getSlotForHand(player.getUsedItemHand()));
+			stack.hurtAndBreak(this.getDurabilityUse(stack), player, player.getUsedItemHand());
 			if (flag) {
 				arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 			} else {
-				if (ItemUtils.hasItem(player.getInventory().offhand, TheTitansNeoItems.HARCADIUM_ARROW.get())) {
-					for (ItemStack itemStack : player.getInventory().offhand) {
+				if (ItemUtils.hasItem(java.util.List.of(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.OFFHAND)), TheTitansNeoItems.HARCADIUM_ARROW.get())) {
+					for (ItemStack itemStack : java.util.List.of(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.OFFHAND))) {
 						if (itemStack.is(TheTitansNeoItems.HARCADIUM_ARROW.get())) {
 							itemStack.shrink(1);
 							break;
 						}
 					}
 				} else {
-					for (ItemStack itemStack : player.getInventory().items) {
+					for (ItemStack itemStack : player.getInventory().getNonEquipmentItems()) {
 						if (itemStack.is(TheTitansNeoItems.HARCADIUM_ARROW.get())) {
 							itemStack.shrink(1);
 							break;
@@ -109,13 +109,15 @@ public class ItemHarcadiumBow extends BowItem {
 				level.addFreshEntity(arrow);
 			}
 
-			level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (level.random.nextFloat() * 0.4F + 1.2F) + 0.5F);
+			level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + 0.5F);
 
 			player.awardStat(Stats.ITEM_USED.get(this));
 		}
+		return true;
 	}
 
 	@Override
 	public AbstractArrow customArrow(AbstractArrow arrow, ItemStack projectileStack, ItemStack weaponStack) {
 		return new EntityHarcadiumArrow(arrow.level());
-	}}
+	}
+}

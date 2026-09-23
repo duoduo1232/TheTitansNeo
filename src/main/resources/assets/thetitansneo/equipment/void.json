@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "thetitansneo:absence"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "thetitansneo:absence"
+      }
+    ]
+  }
+}

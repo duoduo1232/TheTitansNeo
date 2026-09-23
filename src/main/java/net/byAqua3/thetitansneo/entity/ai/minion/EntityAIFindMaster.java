@@ -8,7 +8,7 @@ import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.byAqua3.thetitansneo.entity.titan.EntityZombieTitan;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 
 public class EntityAIFindMaster extends Goal {
 
@@ -67,4 +67,5 @@ public class EntityAIFindMaster extends Goal {
 				}
 			}
 		}
-	}}
+	}
+}

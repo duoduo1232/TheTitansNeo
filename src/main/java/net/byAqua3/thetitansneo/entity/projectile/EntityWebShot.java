@@ -8,7 +8,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.SynchedEntityData.Builder;
 import net.minecraft.util.Mth;
@@ -56,27 +55,29 @@ public class EntityWebShot extends Projectile implements IEntityProjectileTitan 
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.life = tag.getShort("life");
-		if (tag.contains("inBlockState", 10)) {
-			this.lastState = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), tag.getCompound("inBlockState"));
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.life = input.getShortOr("life", (short) 0);
+		if (input.contains("inBlockState", 10)) {
+			this.lastState = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), input.childOrEmpty("inBlockState"));
 		}
 
-		this.shakeTime = tag.getByte("shake") & 255;
-		this.inGround = tag.getBoolean("inGround");
+		this.shakeTime = input.getByteOr("shake", (byte) 0) & 255;
+		this.inGround = input.getBooleanOr("inGround", false);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putShort("life", (short) this.life);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putShort("life", (short) this.life);
 		if (this.lastState != null) {
-			tag.put("inBlockState", NbtUtils.writeBlockState(this.lastState));
+			// 26.1.2: 原 output.put("inBlockState", NbtUtils.writeBlockState(this.lastState)) 需改为逐字段写入子节点
+			net.minecraft.world.level.storage.ValueOutput inBlockStateChild = output.child("inBlockState");
+			/* TODO: inBlockStateChild.putXxx(...) 逐字段 */
 		}
 
-		tag.putByte("shake", (byte) this.shakeTime);
-		tag.putBoolean("inGround", this.inGround);
+		output.putByte("shake", (byte) this.shakeTime);
+		output.putBoolean("inGround", this.inGround);
 	}
 
 	@Override
@@ -273,7 +274,6 @@ public class EntityWebShot extends Projectile implements IEntityProjectileTitan 
 			this.level().addParticle(ParticleTypes.POOF, this.getX(), this.getY() + 1.5D, this.getZ(), 0.0D, 0.0D, 0.0D);
 
 			this.setPos(d7, d2, d3);
-			this.checkInsideBlocks();
 
 			for (int l1 = -1; l1 <= 1; l1++) {
 				for (int i2 = -1; i2 <= 1; i2++) {

@@ -13,7 +13,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoItems;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -31,7 +30,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
@@ -40,7 +39,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.block.Block;
@@ -89,43 +88,36 @@ public class EntityWitherTurret extends AbstractGolem implements RangedAttackMob
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setPlayerCreated(tag.getBoolean("PlayerCreated"));
-		if (tag.contains("DurabilityLevel", Tag.TAG_INT)) {
-			this.durabilityLevel = tag.getInt("DurabilityLevel");
-		}
-		if (tag.contains("FerocityLevel", Tag.TAG_INT)) {
-			this.ferocityLevel = tag.getInt("FerocityLevel");
-		}
-		if (tag.contains("ManiacLevel", Tag.TAG_INT)) {
-			this.maniacLevel = tag.getInt("ManiacLevel");
-		}
-		if (tag.contains("UnstabilityLevel", Tag.TAG_INT)) {
-			this.unstabilityLevel = tag.getInt("UnstabilityLevel");
-		}
-		if (tag.contains("ShurakinLevel", Tag.TAG_INT)) {
-			this.shurakinLevel = tag.getInt("ShurakinLevel");
-		}
-		if (tag.contains("UnbreakingLevel", Tag.TAG_INT)) {
-			this.unbreakingLevel = tag.getInt("UnbreakingLevel");
-		}
-		if (tag.contains("titanKillerLevel", Tag.TAG_INT)) {
-			this.titanKillerLevel = tag.getInt("TitanKillerLevel");
-		}
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setPlayerCreated(input.getBooleanOr("PlayerCreated", false));
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.durabilityLevel = input.getIntOr("DurabilityLevel", 0);
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.ferocityLevel = input.getIntOr("FerocityLevel", 0);
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.maniacLevel = input.getIntOr("ManiacLevel", 0);
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.unstabilityLevel = input.getIntOr("UnstabilityLevel", 0);
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.shurakinLevel = input.getIntOr("ShurakinLevel", 0);
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.unbreakingLevel = input.getIntOr("UnbreakingLevel", 0);
+		// 26.1.2: ValueInput.contains(name, tagType) 已删除；getXxxOr 缺失时即返回默认值，语义等价
+		this.titanKillerLevel = input.getIntOr("TitanKillerLevel", 0);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putBoolean("PlayerCreated", this.isPlayerCreated());
-		tag.putInt("DurabilityLevel", this.durabilityLevel);
-		tag.putInt("FerocityLevel", this.ferocityLevel);
-		tag.putInt("ManiacLevel", this.maniacLevel);
-		tag.putInt("UnstabilityLevel", this.unstabilityLevel);
-		tag.putInt("ShurakinLevel", this.shurakinLevel);
-		tag.putInt("UnbreakingLevel", this.unbreakingLevel);
-		tag.putInt("TitanKillerLevel", this.titanKillerLevel);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putBoolean("PlayerCreated", this.isPlayerCreated());
+		output.putInt("DurabilityLevel", this.durabilityLevel);
+		output.putInt("FerocityLevel", this.ferocityLevel);
+		output.putInt("ManiacLevel", this.maniacLevel);
+		output.putInt("UnstabilityLevel", this.unstabilityLevel);
+		output.putInt("ShurakinLevel", this.shurakinLevel);
+		output.putInt("UnbreakingLevel", this.unbreakingLevel);
+		output.putInt("TitanKillerLevel", this.titanKillerLevel);
 	}
 
 	protected double getHeadX(int head) {
@@ -255,9 +247,10 @@ public class EntityWitherTurret extends AbstractGolem implements RangedAttackMob
 		return 1.0F;
 	}
 
+	// 26.1.2: Entity.kill() 改为 kill(ServerLevel)，覆写需同步签名。
 	@Override
-	public void kill() {
-		super.kill();
+	public void kill(ServerLevel level) {
+		super.kill(level);
 	}
 
 	@Override
@@ -282,7 +275,7 @@ public class EntityWitherTurret extends AbstractGolem implements RangedAttackMob
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource source) {
 		return false;
 	}
 
@@ -316,7 +309,7 @@ public class EntityWitherTurret extends AbstractGolem implements RangedAttackMob
 			this.level().explode(this, this.getX(), this.getY() - 1.0D, this.getZ(), 2.0F, true, ExplosionInteraction.MOB);
 		}
 
-		if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+		if (((ServerLevel) this.level()).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
 			ItemStack itemStack = ItemStack.EMPTY;
 			if (this.isPlayerCreated()) {
 				itemStack = this.getItemStack();
@@ -388,8 +381,7 @@ public class EntityWitherTurret extends AbstractGolem implements RangedAttackMob
 		this.originalTick();
 		
 		this.setOnGround(true);
-		this.hasImpulse = false;
-		this.noCulling = true;
+		this.needsSync = false;
 		this.blocksBuilding = true;
 		this.setYRot(this.yHeadRot);
 		this.yBodyRot = this.yHeadRot;
@@ -408,4 +400,14 @@ public class EntityWitherTurret extends AbstractGolem implements RangedAttackMob
 		if (this.tickCount % 20 == 0) {
 			heal(1.0F + this.durabilityLevel);
 		}
-	}}
+	}
+
+	/**
+	 * 26.1.2: Entity.noCulling 字段已删除。原语义是「大体积实体不做视锥剔除，任何距离都渲染」，
+	 * 对应到新版本的正确扩展点是覆写 shouldRenderAtSqrDistance 恒返回 true。
+	 */
+	@Override
+	public boolean shouldRenderAtSqrDistance(double distance) {
+		return true;
+	}
+}

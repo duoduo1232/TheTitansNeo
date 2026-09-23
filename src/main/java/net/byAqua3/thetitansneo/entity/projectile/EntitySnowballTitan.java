@@ -10,7 +10,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntitySnowballTitan extends AbstractHurtingProjectile implements IEntityProjectileTitan, ItemSupplier {
 
 	public EntitySnowballTitan(EntityType<? extends EntitySnowballTitan> entityType, Level level) {
@@ -48,7 +49,7 @@ public class EntitySnowballTitan extends AbstractHurtingProjectile implements IE
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		return false;
 	}
 

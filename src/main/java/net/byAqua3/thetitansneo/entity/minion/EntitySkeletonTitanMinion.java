@@ -22,7 +22,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoMobEffects;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -43,7 +42,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -54,19 +53,19 @@ import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
-import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.Level.ExplosionInteraction;
@@ -170,36 +169,36 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setMinionType(tag.getInt("MinionType"));
-		this.deathTicks = tag.getInt("DeathTicks");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setMinionType(input.getIntOr("MinionType", 0));
+		this.deathTicks = input.getIntOr("DeathTicks", 0);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("MinionType", this.getMinionTypeInt());
-		tag.putInt("DeathTicks", this.deathTicks);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("MinionType", this.getMinionTypeInt());
+		output.putInt("DeathTicks", this.deathTicks);
 	}
 
 	protected void dropRareDrop(int count) {
-		this.spawnAtLocation(Items.SKELETON_SKULL, 1);
+		this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.SKELETON_SKULL, 1));
 	}
 
 	protected void dropFewItems(boolean attackedRecently, int loottingLevel) {
 		int j = this.getRandom().nextInt(3 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.BONE, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.BONE, 1));
 		}
 		j = this.getRandom().nextInt(5 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.BONE_MEAL, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.BONE_MEAL, 1));
 		}
 		j = this.getRandom().nextInt(3 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.ARROW, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ARROW, 1));
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(2);
@@ -207,7 +206,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(Items.EXPERIENCE_BOTTLE, 1);
+				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -215,7 +214,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 					j += this.getRandom().nextInt(loottingLevel + 1);
 				}
 				for (k = 0; k < j; k++) {
-					this.spawnAtLocation(Items.GOLDEN_APPLE, 1);
+					this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
 				}
 				if (this.getMinionTypeInt() >= 3) {
 					j = this.getRandom().nextInt(2);
@@ -225,28 +224,28 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(Items.EMERALD, 1);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
 							break;
 						case 1:
-							this.spawnAtLocation(Items.DIAMOND, 1);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
 							break;
 						case 2:
-							this.spawnAtLocation(Items.GOLD_INGOT, 1);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 3:
-							this.spawnAtLocation(Items.GOLD_INGOT, 1);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 4:
-							this.spawnAtLocation(Items.GOLD_INGOT, 1);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -255,13 +254,13 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(Items.EMERALD, 1);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
 								break;
 							case 1:
-								this.spawnAtLocation(Items.DIAMOND, 1);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
 								break;
 							case 2:
-								this.spawnAtLocation(Items.GOLD_INGOT, 1);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
 								break;
 							}
 						}
@@ -272,7 +271,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).addOrReplacePermanentModifier(new AttributeModifier(RANDOM_SPAWN_BONUS_ID, this.getRandom().nextGaussian() * 0.1D, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 		this.getAttribute(Attributes.FOLLOW_RANGE).addOrReplacePermanentModifier(new AttributeModifier(RANDOM_SPAWN_BONUS_ID, this.getRandom().nextGaussian() * 0.05D, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
@@ -344,13 +343,9 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 		if (this.getMaster() != null) {
 			return this.getMaster().canAttack(target);
 		}
-		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
+		return !target.is(TheTitansNeoEntities.SKELETON_TITAN.get()) && !target.is(TheTitansNeoEntities.SKELETON_TITAN_MINION.get()) && target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType != TheTitansNeoEntities.SKELETON_TITAN.get() && entityType != TheTitansNeoEntities.SKELETON_TITAN_MINION.get();
-	}
 
 	@Override
 	public int getArmorValue() {
@@ -469,8 +464,8 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		if (super.doHurtTarget(entity)) {
+	public boolean doHurtTarget(ServerLevel level, Entity entity) {
+		if (super.doHurtTarget(level, entity)) {
 			if (entity instanceof LivingEntity && this.getMinionTypeInt() >= 3) {
 				LivingEntity livingEntity = (LivingEntity) entity;
 
@@ -490,7 +485,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (this.isInvulnerable() || (this.getMinionType() == EnumMinionType.TEMPLAR && damageSource.is(TheTitansNeoDamageTypes.RADIATION))) {
@@ -535,11 +530,11 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 				}
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		if (this.getMinionType() == EnumMinionType.TEMPLAR) {
 			this.xxa = 0.0F;
 			this.zza = 0.0F;
@@ -552,7 +547,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 	public void performRangedAttack(LivingEntity target, float velocity) {
 		if (this.getMinionType() == EnumMinionType.TEMPLAR) {
 			if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 36.0D) {
-				this.doHurtTarget(target);
+				this.doHurtTarget((ServerLevel) this.level(), target);
 			} else {
 				int randomInt = this.getRandom().nextInt(5);
 
@@ -578,10 +573,10 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 						this.level().addFreshEntity(abstractArrow);
 					}
 				} else if (randomInt == 1) {
-					ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
+					ThrownSplashPotion thrownPotion = new ThrownSplashPotion(this.level(), this, this.getMainHandItem());
 					ItemStack itemStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HARMING);
 					thrownPotion.setItem(itemStack);
-					if (target.getType().is(EntityTypeTags.UNDEAD)) {
+					if (target.is(EntityTypeTags.UNDEAD)) {
 						itemStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HEALING);
 						thrownPotion.setItem(itemStack);
 					}
@@ -625,7 +620,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 					if (!this.level().isClientSide()) {
 						target.addEffect(new MobEffectInstance(MobEffects.WITHER, 100, 2));
 					}
-					target.hurt(this.damageSources().wither(), 5.0F);
+					target.hurtServer((ServerLevel) this.level(), this.damageSources().wither(), 5.0F);
 					target.invulnerableTime = 1;
 				} else if (randomInt == 4) {
 					this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
@@ -665,9 +660,9 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 			return;
 		}
 		this.captureDrops(new java.util.ArrayList<>());
-		boolean flag = this.lastHurtByPlayerTime > 0;
-		if (this.shouldDropLoot() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.dropFromLootTable(damageSource, flag);
+		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
+		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
 			int i = 0;
@@ -690,15 +685,15 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 			}
 		}
 
-		this.dropEquipment();
+		dropEquipment(level);
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
-			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.lastHurtByPlayer, this.getExperienceReward(level, damageSource.getEntity()));
+			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
 			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
-		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, lastHurtByPlayerTime > 0)) {
+		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, this.getLastHurtByPlayerMemoryTime() > 0)) {
 			for (ItemEntity drop : drops) {
 				this.level().addFreshEntity(drop);
 			}
@@ -792,11 +787,11 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 			if (this.getTarget() != null) {
 				double d0 = this.distanceToSqr(this.getTarget());
 				if (d0 < 4.0D) {
-					this.doHurtTarget(this.getTarget());
+					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
 				}
 				if (this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.lookAt(this.getTarget(), 180.0F, 180.0F);
-					this.addEffect(new MobEffectInstance(MobEffects.JUMP, 60, 7));
+					this.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, 7));
 					double d01 = this.getTarget().getX() - this.getX();
 					double d1 = this.getTarget().getZ() - this.getZ();
 					float f2 = (float) Math.sqrt(d01 * d01 + d1 * d1);
@@ -813,7 +808,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 						EntitySkeletonTitanMinion skeletonTitanMinion = new EntitySkeletonTitanMinion(this.level());
 						skeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						skeletonTitanMinion.setYRot(this.getYRot());
-						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						skeletonTitanMinion.setMinionType(0);
 						skeletonTitanMinion.setHealth(skeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(skeletonTitanMinion);
@@ -824,7 +819,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 						EntitySkeletonTitanMinion skeletonTitanMinion = new EntitySkeletonTitanMinion(this.level());
 						skeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						skeletonTitanMinion.setYRot(this.getYRot());
-						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						skeletonTitanMinion.setMinionType(1);
 						skeletonTitanMinion.setHealth(skeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(skeletonTitanMinion);
@@ -861,7 +856,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 						EntitySkeletonTitanMinion skeletonTitanMinion = new EntitySkeletonTitanMinion(this.level());
 						skeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						skeletonTitanMinion.setYRot(this.getYRot());
-						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						skeletonTitanMinion.setMinionType(0);
 						skeletonTitanMinion.setHealth(skeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(skeletonTitanMinion);
@@ -872,7 +867,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 						EntitySkeletonTitanMinion skeletonTitanMinion = new EntitySkeletonTitanMinion(this.level());
 						skeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						skeletonTitanMinion.setYRot(this.getYRot());
-						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						skeletonTitanMinion.setMinionType(1);
 						skeletonTitanMinion.setHealth(skeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(skeletonTitanMinion);
@@ -883,7 +878,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 						EntitySkeletonTitanMinion skeletonTitanMinion = new EntitySkeletonTitanMinion(this.level());
 						skeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						skeletonTitanMinion.setYRot(this.getYRot());
-						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						skeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(skeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						skeletonTitanMinion.setMinionType(2);
 						skeletonTitanMinion.setHealth(skeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(skeletonTitanMinion);
@@ -895,7 +890,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 					this.level().addParticle(ParticleTypes.POOF, this.getX() + (this.getRandom().nextDouble() - 0.5D) * this.getBbWidth(), this.getY(), this.getZ() + (this.getRandom().nextDouble() - 0.5D) * this.getBbWidth(), 0.0D, 0.0D, 0.0D);
 				}
 			} else {
-				this.hasImpulse = false;
+				this.needsSync = false;
 			}
 			if (this.getTarget() != null && this.getRandom().nextInt(60) == 0) {
 				if (!this.onGround()) {
@@ -914,7 +909,7 @@ public class EntitySkeletonTitanMinion extends Skeleton implements RangedAttackM
 			if (this.attackPattern == 0 && this.getTarget() != null) {
 				if (this.getTarget().getY() + this.getTarget().getEyeHeight() > this.getY() + this.getEyeHeight() + this.heightOffset) {
 					this.push(0.0D, 0.4D - this.getDeltaMovement().y, 0.0D);
-					this.hasImpulse = true;
+					this.needsSync = true;
 				}
 				this.getLookControl().setLookAt(this.getTarget(), 180.0F, 40.0F);
 				double d0 = this.getTarget().getX() - this.getX();

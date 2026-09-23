@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.byAqua3.thetitansneo.entity.EntityWitherTurret;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -14,15 +15,15 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelWitherTurret extends EntityModel<EntityWitherTurret> {
+public class ModelWitherTurret extends EntityModel<TitanRenderState> {
 
 	public ModelPart head;
 	public ModelPart pole1;
 	public ModelPart pole2;
 
 	public ModelWitherTurret() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.head = root.getChild("head");
 		this.pole1 = root.getChild("pole1");
 		this.pole2 = root.getChild("pole2");
@@ -39,14 +40,10 @@ public class ModelWitherTurret extends EntityModel<EntityWitherTurret> {
 	}
 
 	@Override
-	public void setupAnim(EntityWitherTurret entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.head.yRot = headYaw * Mth.PI / 180.0F;
-		this.head.xRot = headPitch * Mth.PI / 180.0F;
+	public void setupAnim(TitanRenderState state) {
+		this.head.yRot = state.yRot * Mth.PI / 180.0F;
+		this.head.xRot = state.xRot * Mth.PI / 180.0F;
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.pole1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.pole2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}}
+}

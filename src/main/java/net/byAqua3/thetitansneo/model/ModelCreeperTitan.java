@@ -7,6 +7,7 @@ import net.byAqua3.thetitansneo.animation.Animator;
 import net.byAqua3.thetitansneo.entity.titan.EntityCreeperTitan;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -16,7 +17,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelCreeperTitan extends EntityModel<EntityCreeperTitan> {
+public class ModelCreeperTitan extends EntityModel<TitanRenderState> {
 
 	private Animator animator;
 
@@ -38,8 +39,8 @@ public class ModelCreeperTitan extends EntityModel<EntityCreeperTitan> {
 	public ModelPart rightbackfoot;
 
 	public ModelCreeperTitan(float grow) {
-		super();
-		ModelPart root = createBodyLayer(grow).bakeRoot();
+		super(createBodyLayer(grow).bakeRoot());
+		ModelPart root = this.root;
 		this.bottomBody = root.getChild("bottomBody");
 		this.leftfrontupperleg = root.getChild("leftfrontupperleg");
 		this.leftbackupperleg = root.getChild("leftbackupperleg");
@@ -83,18 +84,11 @@ public class ModelCreeperTitan extends EntityModel<EntityCreeperTitan> {
 	}
 
 	@Override
-	public void setupAnim(EntityCreeperTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.animate(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch);
+	public void setupAnim(TitanRenderState state) {
+		this.animate((EntityCreeperTitan) state.titan, state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.leftfrontupperleg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.rightbackupperleg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.bottomBody.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.leftbackupperleg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.rightfrontupperleg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 
 	public void setAngles() {
 		float f = 16.1F;
@@ -122,7 +116,7 @@ public class ModelCreeperTitan extends EntityModel<EntityCreeperTitan> {
 	}
 
 	public void animate(EntityCreeperTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		this.animator.update(entity);
 		this.setAngles();
 		float f6 = Mth.cos(ageInTicks * 0.1F);
@@ -146,7 +140,7 @@ public class ModelCreeperTitan extends EntityModel<EntityCreeperTitan> {
 				this.bottomTop.xRot = (0.005F + 0.005F * Mth.cos(ageInTicks * 0.1F - 1.0F)) * Mth.PI;
 				this.head.xRot = (0.005F + 0.005F * f6) * Mth.PI;
 			}
-			if (this.riding) {
+			if (entity.isPassenger()) {
 				this.rightbackupperleg.setPos(-3.0F, 21.0F, 1.0F);
 				this.leftfrontupperleg.setPos(3.0F, 21.0F, -1.0F);
 				this.bottomBody.setPos(0.0F, 21.0F, 0.0F);
@@ -217,7 +211,7 @@ public class ModelCreeperTitan extends EntityModel<EntityCreeperTitan> {
 			this.bottomTop.yRot += faceYaw * 0.3F;
 			this.bottomMiddle.xRot += facePitch * 0.3F;
 			this.bottomMiddle.yRot += faceYaw * 0.3F;
-			if (!entity.onGround() && !this.riding) {
+			if (!entity.onGround() && !entity.isPassenger()) {
 				this.bottomBody.zRot = 0.0F;
 				this.bottomMiddle.zRot = 0.0F;
 				this.bottomTop.zRot = 0.0F;
@@ -1279,4 +1273,5 @@ public class ModelCreeperTitan extends EntityModel<EntityCreeperTitan> {
 		this.animator.rotate(this.rightbackfoot, 0.0F, 0.0F, 0.0F);
 		this.animator.endPhase();
 		this.animator.resetPhase(40);
-	}}
+	}
+}

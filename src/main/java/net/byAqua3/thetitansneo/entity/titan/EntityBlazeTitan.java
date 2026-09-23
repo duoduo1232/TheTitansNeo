@@ -20,11 +20,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -34,7 +33,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -45,6 +44,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(EntityBlazeTitan.class, EntityDataSerializers.BYTE);
@@ -83,8 +83,8 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/blaze_titan.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/blaze_titan.png");
 	}
 
 	@Override
@@ -160,17 +160,17 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		return groupData;
 	}
@@ -325,12 +325,12 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 
 	@Override
 	public boolean attackEntityFromPart(EntityTitanPart entityTitanPart, DamageSource damageSource, float amount) {
-		this.hurt(damageSource, amount);
+		this.hurtServer((ServerLevel) this.level(), damageSource, amount);
 		return true;
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (this.isArmored()) {
 			amount /= 2.0F;
 		}
@@ -338,11 +338,11 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 			this.heal(amount);
 			return false;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		return false;
 	}
 
@@ -360,7 +360,7 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 			LivingEntity entity = this.getTarget();
 			if (entity != null && entity.getY() + entity.getEyeHeight() > this.getY() + this.getEyeHeight() + this.heightOffset) {
 				this.setTitanDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y + (0.9D - this.getDeltaMovement().y) * 0.9D, this.getDeltaMovement().z);
-				this.hasImpulse = true;
+				this.needsSync = true;
 			}
 		}
 	}
@@ -438,7 +438,7 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 	public void tick() {
 		super.tick();
 
-		this.hasImpulse = true;
+		this.needsSync = true;
 		this.setOnGround(false);
 
 		if (this.tickCount > 5) {
@@ -446,20 +446,20 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 			float f1 = this.tickCount * Mth.PI * 0.008F + 0.15F;
 
 			for (int i = 0; i < 4; i++) {
-				this.rods[i].moveTo(this.getX() - (Mth.cos(f1 + f) * 10.0F), this.getY() - (4.0F + Mth.cos((i * 2 + this.tickCount) * 0.03F)), this.getZ() - (Mth.sin(f1 + f) * 10.0F));
+				this.rods[i].setPos(this.getX() - (Mth.cos(f1 + f) * 10.0F), this.getY() - (4.0F + Mth.cos((i * 2 + this.tickCount) * 0.03F)), this.getZ() - (Mth.sin(f1 + f) * 10.0F));
 				f1++;
 			}
 			f1 = 0.7853982F + this.tickCount * Mth.PI * -0.005F - 1.4F;
 			for (int i = 4; i < 8; i++) {
-				this.rods[i].moveTo(this.getX() - (Mth.cos(f1 + f) * 7.0F), this.getY() - (10.0F + Mth.cos((i * 3 + this.tickCount) * 0.05F)), this.getZ() - (Mth.sin(f1 + f) * 7.0F));
+				this.rods[i].setPos(this.getX() - (Mth.cos(f1 + f) * 7.0F), this.getY() - (10.0F + Mth.cos((i * 3 + this.tickCount) * 0.05F)), this.getZ() - (Mth.sin(f1 + f) * 7.0F));
 				f1++;
 			}
 			f1 = 0.47123894F + this.tickCount * Mth.PI * 0.003F - 0.8F;
 			for (int i = 8; i < 12; i++) {
-				this.rods[i].moveTo(this.getX() - (Mth.cos(f1 + f) * 4.0F), this.getY() - (17.0F + Mth.cos((i * 1.5F + this.tickCount) * 0.02F)), this.getZ() - (Mth.sin(f1 + f) * 4.0F));
+				this.rods[i].setPos(this.getX() - (Mth.cos(f1 + f) * 4.0F), this.getY() - (17.0F + Mth.cos((i * 1.5F + this.tickCount) * 0.02F)), this.getZ() - (Mth.sin(f1 + f) * 4.0F));
 				f1++;
 			}
-			this.head.moveTo(this.getX(), this.getY(), this.getZ());
+			this.head.setPos(this.getX(), this.getY(), this.getZ());
 
 			for (int u = 0; u < this.getParticleCount(); u++) {
 				for (int w = 0; w < this.rods.length; w++) {
@@ -487,4 +487,5 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 		} else if (!this.onGround() && this.getDeltaMovement().y < 0.0D) {
 			this.setTitanDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y * 0.25D, this.getDeltaMovement().z);
 		}
-	}}
+	}
+}

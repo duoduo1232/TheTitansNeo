@@ -5,10 +5,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.level.ServerLevel;
 
 public class EntityBlazeTitanMinionSmallFireball extends SmallFireball {
 
@@ -42,11 +43,12 @@ public class EntityBlazeTitanMinionSmallFireball extends SmallFireball {
 
 			livingEntity.invulnerableTime = 0;
 			livingEntity.setRemainingFireTicks((int) amount);
-			owner.doHurtTarget(livingEntity);
+			owner.doHurtTarget((ServerLevel) this.level(), livingEntity);
 
 			if (!this.level().isClientSide()) {
 				this.discard();
 			}
 		}
 		super.onHitEntity(result);
-	}}
+	}
+}

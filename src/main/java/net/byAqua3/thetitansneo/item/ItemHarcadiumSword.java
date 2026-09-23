@@ -7,22 +7,23 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoTiers;
 import net.byAqua3.thetitansneo.util.EntityUtils;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class ItemHarcadiumSword extends SwordItem {
+import net.minecraft.server.level.ServerLevel;
+public class ItemHarcadiumSword extends Item {
 
 	public ItemHarcadiumSword(Properties properties) {
-		super(TheTitansNeoTiers.HARCADIUM, properties.attributes(SwordItem.createAttributes(TheTitansNeoTiers.HARCADIUM, 50, -2.4F)));
+		super(properties.sword(TheTitansNeoTiers.HARCADIUM, 50, -2.4F));
 	}
 	
 	@Override
@@ -31,34 +32,34 @@ public class ItemHarcadiumSword extends SwordItem {
     }
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack pStack) {
-		return UseAnim.BOW;
+	public ItemUseAnimation getUseAnimation(ItemStack pStack) {
+		return ItemUseAnimation.BOW;
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
+	public void hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
 		if (entity != null) {
 			if (entity.getBbHeight() >= 6.0F || entity instanceof EntityTitan || !entity.onGround()) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				entity.hurt(entity.damageSources().mobAttack(attacker), 500.0F);
+				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), 500.0F);
 			}
 		}
-		return super.hurtEnemy(stack, entity, attacker);
+		super.hurtEnemy(stack, entity, attacker);
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		InteractionResultHolder<ItemStack> ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(stack, level, player, hand, true);
+		InteractionResult ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(stack, level, player, hand, true);
 		if (ret != null) {
 			return ret;
 		}
 		player.startUsingItem(hand);
-		return InteractionResultHolder.consume(stack);
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int time) {
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int time) {
 		Player player = (Player) livingEntity;
 		Tool tool = stack.get(DataComponents.TOOL);
 
@@ -69,14 +70,14 @@ public class ItemHarcadiumSword extends SwordItem {
 		f = (f * f + f * 2.0F) / 3.0F;
 
 		if (f < 0.1) {
-			return;
+			return false;
 		}
 
 		if (f > 1.0) {
 			f = 1.0F;
 		}
 		player.playSound(TheTitansNeoSounds.TITAN_SWING.get(), 1.0F, 2.0F);
-		stack.hurtAndBreak(tool.damagePerBlock(), player, LivingEntity.getSlotForHand(player.getUsedItemHand()));
+		stack.hurtAndBreak(tool.damagePerBlock(), player, player.getUsedItemHand());
 		player.swing(player.getUsedItemHand());
 		
 		double d8 = 4.0D;
@@ -94,7 +95,9 @@ public class ItemHarcadiumSword extends SwordItem {
 			if (entity != null && entity instanceof LivingEntity) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
 				entity.playSound(TheTitansNeoSounds.SLASH_FLESH.get(), 2.0F, 1.25F);
-				entity.hurt(entity.damageSources().mobAttack(player), 1000.0F * (f + 1.0F));
+				entity.hurtServer((ServerLevel) livingEntity.level(), entity.damageSources().mobAttack(player), 1000.0F * (f + 1.0F));
 			}
 		}
-	}}
+		return true;
+	}
+}

@@ -1,31 +1,45 @@
 package net.byAqua3.thetitansneo.render.item;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
+import java.util.function.Consumer;
+
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.mojang.serialization.MapCodec;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.byAqua3.thetitansneo.model.ModelUltimaBlade;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.resources.model.sprite.SpriteGetter;
+import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Vector3fc;
 
+/**
+ * 26.1.2: migrated from the deleted NeoForge {@code IItemRenderer} hook to
+ * {@link net.minecraft.client.renderer.special.SpecialModelRenderer}. All per-context transforms are unchanged;
+ * the model is submitted through the deferred node collector instead of drawing into a {@code MultiBufferSource}
+ * directly, and the texture is resolved through the atlas {@link SpriteGetter}.
+ */
 public class RenderUltimaBlade implements IItemRenderer {
 
 	public ModelUltimaBlade model = new ModelUltimaBlade();
 
+	private final SpriteGetter sprites;
+
+	public RenderUltimaBlade(SpriteGetter sprites) {
+		this.sprites = sprites;
+	}
+
 	@Override
-	public void render(ItemStack stack, ItemDisplayContext context, boolean leftHand, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, int packedOverlay, BakedModel bakedModel) {
-		ResourceLocation texture = ResourceLocation.tryBuild(TheTitansNeo.MODID, "entity/items/ultima_blade");
-		Material material = new Material(InventoryMenu.BLOCK_ATLAS, texture);
-		VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entityTranslucentCull);
+	public void submit(ItemStack stack, ItemDisplayContext context, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
+		Identifier texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/ultima_blade");
+		// 26.1.2: Material.buffer(MultiBufferSource, ...) is gone; this is replaced by a submitted model.
+		final SpriteId spriteId = new SpriteId(InventoryMenu.BLOCK_ATLAS, texture);
+		final ModelUltimaBlade bladeModel = this.model;
 
 		switch (context) {
 		case FIRST_PERSON_LEFT_HAND:
@@ -39,7 +53,7 @@ public class RenderUltimaBlade implements IItemRenderer {
 			poseStack.mulPose(Axis.YP.rotationDegrees(18.0F));
 			poseStack.translate(0.0F, -1.3F, -1.2F);
 			poseStack.mulPose(Axis.YP.rotationDegrees(-107.2F));
-			this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+			submitNodeCollector.submitModel(bladeModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 			poseStack.popPose();
 			break;
 		case THIRD_PERSON_LEFT_HAND:
@@ -49,7 +63,7 @@ public class RenderUltimaBlade implements IItemRenderer {
 			poseStack.mulPose(Axis.YP.rotationDegrees(-10.0F));
 			poseStack.mulPose(Axis.ZP.rotationDegrees(-180.0F));
 			poseStack.translate(-0.3F, -1.68F, 0.0F);
-			this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+			submitNodeCollector.submitModel(bladeModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 			poseStack.popPose();
 			break;
 		case THIRD_PERSON_RIGHT_HAND:
@@ -59,7 +73,7 @@ public class RenderUltimaBlade implements IItemRenderer {
 			poseStack.mulPose(Axis.YP.rotationDegrees(-10.0F));
 			poseStack.mulPose(Axis.ZP.rotationDegrees(-180.0F));
 			poseStack.translate(-0.3F, -1.68F, 0.0F);
-			this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+			submitNodeCollector.submitModel(bladeModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 			poseStack.popPose();
 			break;
 		case GROUND:
@@ -68,7 +82,7 @@ public class RenderUltimaBlade implements IItemRenderer {
 			poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 			poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 			poseStack.translate(0.0F, -1.5F, 0.0F);
-			this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+			submitNodeCollector.submitModel(bladeModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 			poseStack.popPose();
 			break;
 		case GUI:
@@ -77,16 +91,8 @@ public class RenderUltimaBlade implements IItemRenderer {
 			poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 			poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 			poseStack.mulPose(Axis.XP.rotationDegrees(-30.0F));
-			poseStack.translate(2.0F, -2.2F, 0.3F);
-			Lighting.setupForFlatItems();
-			this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
-			RenderSystem.disableDepthTest();
-			if (multiBufferSource instanceof MultiBufferSource.BufferSource) {
-				MultiBufferSource.BufferSource bufferSource = (MultiBufferSource.BufferSource) multiBufferSource;
-				bufferSource.endBatch();
-			}
-			RenderSystem.enableDepthTest();
-			Lighting.setupFor3DItems();
+			poseStack.translate(0.0F, -2.2F, 0.3F);
+			submitNodeCollector.submitModel(bladeModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 			poseStack.popPose();
 			break;
 		case FIXED:
@@ -95,10 +101,33 @@ public class RenderUltimaBlade implements IItemRenderer {
 			poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 			poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 			poseStack.translate(0.0F, 0.0F, 0.25F);
-			this.model.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay);
+			submitNodeCollector.submitModel(bladeModel, null, poseStack, packedLight, packedOverlay, -1, spriteId, this.sprites, outlineColor, null);
 			poseStack.popPose();
 			break;
 		default:
 			break;
 		}
-	}}
+	}
+
+	@Override
+	public void getExtents(Consumer<Vector3fc> output) {
+		PoseStack poseStack = new PoseStack();
+		this.model.root().getExtentsForGui(poseStack, output);
+	}
+
+	/** 26.1.2: replaces the deleted per-item renderer map with the data-driven special model route. */
+	public static final class Unbaked implements SpecialModelUnbaked {
+
+		public static final MapCodec<RenderUltimaBlade.Unbaked> MAP_CODEC = MapCodec.unit(new RenderUltimaBlade.Unbaked());
+
+		@Override
+		public MapCodec<RenderUltimaBlade.Unbaked> type() {
+			return MAP_CODEC;
+		}
+
+		@Override
+		public RenderUltimaBlade bake(SpecialModelRenderer.BakingContext context) {
+			return new RenderUltimaBlade(context.sprites());
+		}
+	}
+}

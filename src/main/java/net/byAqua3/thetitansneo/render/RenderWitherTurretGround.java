@@ -3,38 +3,47 @@ package net.byAqua3.thetitansneo.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.byAqua3.thetitansneo.entity.EntityWitherTurretGround;
 import net.byAqua3.thetitansneo.model.ModelWitherTurretGround;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
+
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderWitherTurretGround extends LivingEntityRenderer<EntityWitherTurretGround, ModelWitherTurretGround> {
+public class RenderWitherTurretGround extends LivingEntityRenderer<EntityWitherTurretGround, TitanRenderState, ModelWitherTurretGround> {
 
-	public static final ResourceLocation WITHER = ResourceLocation.withDefaultNamespace("textures/entity/wither/wither.png");
+	public static final Identifier WITHER = Identifier.withDefaultNamespace("textures/entity/wither/wither.png");
 
 	public RenderWitherTurretGround(Context context) {
 		super(context, new ModelWitherTurretGround(), 1.0F);
 	}
 
 	@Override
-	public void render(EntityWitherTurretGround entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
-		super.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+	public TitanRenderState createRenderState() {
+		return new TitanRenderState();
 	}
 
 	@Override
-	protected void scale(EntityWitherTurretGround entity, PoseStack poseStack, float partialTick) {
+	public void extractRenderState(EntityWitherTurretGround entity, TitanRenderState state, float partialTicks) {
+		super.extractRenderState(entity, state, partialTicks);
+		state.titan = entity;
+		state.invulTime = entity.getInvulTime();
+	}
+
+	@Override
+	protected void scale(TitanRenderState state, PoseStack poseStack) {
 		poseStack.scale(2.0F, 2.0F, 2.0F);
 	}
 
 	@Override
-	protected boolean shouldShowName(EntityWitherTurretGround entity) {
+	protected boolean shouldShowName(EntityWitherTurretGround entity, double distanceToCameraSq) {
 		return false;
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EntityWitherTurretGround entity) {
+	protected Identifier getTextureLocation(TitanRenderState state) {
 		return WITHER;
-	}}
+	}
+}

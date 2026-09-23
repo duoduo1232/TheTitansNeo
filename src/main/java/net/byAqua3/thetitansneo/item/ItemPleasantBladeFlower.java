@@ -16,8 +16,9 @@ public class ItemPleasantBladeFlower extends Item {
 	@Override
 	public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
 		entity.removeEffect(MobEffects.BLINDNESS);
-		entity.removeEffect(MobEffects.CONFUSION);
-		entity.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+		entity.removeEffect(MobEffects.NAUSEA);
+		entity.removeEffect(MobEffects.SLOWNESS);
 		entity.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 1000, 1));
 		return super.finishUsingItem(stack, level, entity);
-	}}
+	}
+}

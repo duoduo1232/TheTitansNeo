@@ -8,11 +8,11 @@ import net.byAqua3.thetitansneo.block.BlockPleasantBladeCrop;
 import net.byAqua3.thetitansneo.block.BlockVoidBlock;
 import net.byAqua3.thetitansneo.block.BlockVoidOre;
 import net.byAqua3.thetitansneo.item.ItemMalgrumSeeds;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemNameBlockItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -25,12 +25,12 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class TheTitansNeoBlocks {
 
-	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, TheTitansNeo.MODID);
+	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, TheTitansNeo.MODID);
 	
-    public static final DeferredHolder<Block, Block> MALGRUM_CROP_BLOCK = BLOCKS.register("malgrum", () -> new BlockMalgrumCrop(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.DESTROY)));
+    public static final DeferredHolder<Block, Block> MALGRUM_CROP_BLOCK = BLOCKS.register("malgrum", () -> new BlockMalgrumCrop(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollision().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.DESTROY)));
 	public static final DeferredHolder<Item, Item> MALGRUM_SEEDS = TheTitansNeoItems.ITEMS.register("malgrum_seeds", () -> new ItemMalgrumSeeds(MALGRUM_CROP_BLOCK.get(), new Item.Properties()));
-	public static final DeferredHolder<Block, Block> PLEASANT_BLADE_BLOCK = BLOCKS.register("pleasant_blade", () -> new BlockPleasantBladeCrop(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.DESTROY)));
-	public static final DeferredHolder<Item, Item> PLEASANT_BLADE_SEED = TheTitansNeoItems.ITEMS.register("pleasant_blade_seed", () -> new ItemNameBlockItem(PLEASANT_BLADE_BLOCK.get(), new Item.Properties()));
+	public static final DeferredHolder<Block, Block> PLEASANT_BLADE_BLOCK = BLOCKS.register("pleasant_blade", () -> new BlockPleasantBladeCrop(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollision().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.DESTROY)));
+	public static final DeferredHolder<Item, Item> PLEASANT_BLADE_SEED = TheTitansNeoItems.ITEMS.register("pleasant_blade_seed", () -> new BlockItem(PLEASANT_BLADE_BLOCK.get(), new Item.Properties().useItemDescriptionPrefix()));
 
 	public static final DeferredHolder<Block, Block> COPPER_ORE_BLOCK = BLOCKS.register("copper_ore", () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 5.0F).sound(SoundType.STONE)));
 	public static final DeferredHolder<Block, Block> TIN_ORE_BLOCK = BLOCKS.register("tin_ore", () -> new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 5.0F).sound(SoundType.STONE)));
@@ -78,4 +78,5 @@ public class TheTitansNeoBlocks {
 
 	public static void registerBlocks(IEventBus modEventBus) {
 		BLOCKS.register(modEventBus);
-	}}
+	}
+}

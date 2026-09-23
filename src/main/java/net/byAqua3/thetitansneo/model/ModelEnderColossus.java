@@ -7,6 +7,7 @@ import net.byAqua3.thetitansneo.animation.Animator;
 import net.byAqua3.thetitansneo.entity.titan.EntityEnderColossus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -16,7 +17,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelEnderColossus extends EntityModel<EntityEnderColossus> {
+public class ModelEnderColossus extends EntityModel<TitanRenderState> {
 
 	private Animator animator;
 
@@ -41,8 +42,8 @@ public class ModelEnderColossus extends EntityModel<EntityEnderColossus> {
 	public boolean isAttacking;
 
 	public ModelEnderColossus() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.bodyBottom = root.getChild("bodyBottom");
 		this.bodyMiddle = root.getChild("bodyBottom").getChild("bodyMiddle");
 		this.bodyTop = root.getChild("bodyBottom").getChild("bodyMiddle").getChild("bodyTop");
@@ -88,16 +89,11 @@ public class ModelEnderColossus extends EntityModel<EntityEnderColossus> {
 	}
 
 	@Override
-	public void setupAnim(EntityEnderColossus entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.animate(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch);
+	public void setupAnim(TitanRenderState state) {
+		this.animate((EntityEnderColossus) state.titan, state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.bodyBottom.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.leftThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.rightThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 
 	public void setAngles() {
 		this.bodyBottom.setPos(0.0F, -4.0F, 0.0F);
@@ -111,7 +107,7 @@ public class ModelEnderColossus extends EntityModel<EntityEnderColossus> {
 	}
 
 	public void animate(EntityEnderColossus entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		this.animator.update(entity);
 		this.setAngles();
 		if (this.isAttacking) {
@@ -125,7 +121,7 @@ public class ModelEnderColossus extends EntityModel<EntityEnderColossus> {
 		this.leftFemur.xRot = 0.18F;
 		this.rightFemur.xRot = 0.18F;
 		if (entity.deathTicks <= 0) {
-			if (!this.riding) {
+			if (!entity.isPassenger()) {
 				this.leftThigh.xRot = -0.09F + Mth.cos(limbSwing * 0.33F + 2.6415927F) * 0.75F * limbSwingAmount;
 				this.rightThigh.xRot = -0.09F + Mth.cos(limbSwing * 0.33F - 0.5F) * 0.75F * limbSwingAmount;
 				this.leftFemur.xRot = 0.18F + Mth.cos(limbSwing * 0.33F) * 0.75F * limbSwingAmount;
@@ -176,7 +172,7 @@ public class ModelEnderColossus extends EntityModel<EntityEnderColossus> {
 			if (this.rightForeArm.xRot > -0.3F) {
 				this.rightForeArm.xRot = -0.3F;
 			}
-			if (!entity.onGround() && !this.riding) {
+			if (!entity.onGround() && !entity.isPassenger()) {
 				this.bodyTop.zRot = 0.0F;
 				this.bodyMiddle.zRot = 0.0F;
 				this.bodyBottom.zRot = 0.0F;

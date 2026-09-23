@@ -3,7 +3,6 @@ package net.byAqua3.thetitansneo.entity.projectile;
 import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -14,12 +13,13 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityMortarWitherSkull extends WitherSkull {
 
 	private static final EntityDataAccessor<Boolean> BULLET = SynchedEntityData.defineId(EntityMortarWitherSkull.class, EntityDataSerializers.BOOLEAN);
@@ -36,7 +36,7 @@ public class EntityMortarWitherSkull extends WitherSkull {
 
 	public EntityMortarWitherSkull(Level level, double x, double y, double z, Vec3 movement) {
 		this(TheTitansNeoEntities.MORTAR_WITHER_SKULL.get(), level);
-		this.moveTo(x, y, z, this.getYRot(), this.getXRot());
+		this.snapTo(x, y, z, this.getYRot(), this.getXRot());
 		this.reapplyPosition();
 		this.assignDirectionalMovement(movement, this.accelerationPower + this.speedFactor);
 	}
@@ -62,28 +62,28 @@ public class EntityMortarWitherSkull extends WitherSkull {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setBullet(tag.getBoolean("Bullet"));
-		this.lifeTime = tag.getInt("LifeTime");
-		this.explosivePower = tag.getInt("ExplosivePower");
-		this.extraDamage = tag.getInt("ExtraDamage");
-		this.speedFactor = tag.getFloat("SpeedFactor");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setBullet(input.getBooleanOr("Bullet", false));
+		this.lifeTime = input.getIntOr("LifeTime", 0);
+		this.explosivePower = input.getIntOr("ExplosivePower", 0);
+		this.extraDamage = input.getIntOr("ExtraDamage", 0);
+		this.speedFactor = input.getFloatOr("SpeedFactor", 0.0F);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putBoolean("Bullet", this.isBullet());
-		tag.putInt("LifeTime", this.lifeTime);
-		tag.putInt("ExplosivePower", this.explosivePower);
-		tag.putInt("ExtraDamage", this.extraDamage);
-		tag.putFloat("SpeedFactor", this.speedFactor);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putBoolean("Bullet", this.isBullet());
+		output.putInt("LifeTime", this.lifeTime);
+		output.putInt("ExplosivePower", this.explosivePower);
+		output.putInt("ExtraDamage", this.extraDamage);
+		output.putFloat("SpeedFactor", this.speedFactor);
 	}
 
 	private void assignDirectionalMovement(Vec3 movement, double accelerationPower) {
 		this.setDeltaMovement(movement.normalize().scale(accelerationPower));
-		this.hasImpulse = true;
+		this.needsSync = true;
 	}
 
 	@Override
@@ -103,20 +103,20 @@ public class EntityMortarWitherSkull extends WitherSkull {
 					EntityTitan titan = (EntityTitan) entity;
 					titan.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 0.9F);
 					
-					titan.hurt(this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
+					titan.hurtServer((ServerLevel) this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
 					if (titanDamage > 0) {
 						titan.setTitanHealth(Math.max(titan.getHealth() - titanDamage, 0.0F));
 					}
 				} else {
 					if (entity.getBbHeight() >= 6.0F) {
 						entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 0.9F);
-						entity.hurt(this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 5000.0F + (this.extraDamage * 1000.0F));
+						entity.hurtServer((ServerLevel) this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 5000.0F + (this.extraDamage * 1000.0F));
 					} else {
-						entity.hurt(this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 10.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
+						entity.hurtServer((ServerLevel) this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 10.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
 					}
 				}
 			} else {
-				entity.hurt(this.damageSources().magic(), this.isBullet() ? 5.0F : 500.0F);
+				entity.hurtServer((ServerLevel) this.level(), this.damageSources().magic(), this.isBullet() ? 5.0F : 500.0F);
 			}
 			if (entity instanceof LivingEntity) {
 				LivingEntity livingEntity = (LivingEntity) entity;
@@ -131,12 +131,12 @@ public class EntityMortarWitherSkull extends WitherSkull {
 					if (!this.level().isClientSide()) {
 						if (!this.isBullet()) {
 							livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 40 * i, 3), this.getEffectSource());
-							livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120, 3), this.getEffectSource());
+							livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 120, 3), this.getEffectSource());
 							livingEntity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 120, 1), this.getEffectSource());
-							livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 120, 1), this.getEffectSource());
+							livingEntity.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, 1), this.getEffectSource());
 						} else {
 							livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * i, 1), this.getEffectSource());
-							livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 3), this.getEffectSource());
+							livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3), this.getEffectSource());
 							if (livingEntity.getEyeY() - 0.2D < this.getY()) {
 								livingEntity.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0), this.getEffectSource());
 							}
@@ -170,4 +170,5 @@ public class EntityMortarWitherSkull extends WitherSkull {
 				this.discard();
 			}
 		}
-	}}
+	}
+}

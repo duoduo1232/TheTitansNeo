@@ -17,21 +17,22 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
+import net.minecraft.server.level.ServerLevel;
 public class ItemVoidHoe extends HoeItem {
 
 	public ItemVoidHoe(Properties properties) {
-		super(TheTitansNeoTiers.VOID, properties.attributes(HoeItem.createAttributes(TheTitansNeoTiers.VOID, 1500, 0.0F)));
+		super(TheTitansNeoTiers.VOID, 1500, 0.0F, properties.hoe(TheTitansNeoTiers.VOID, 1500, 0.0F));
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
+	public void hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
 		if (entity != null) {
 			if (entity.getBbHeight() >= 6.0F || entity instanceof EntityTitan || !entity.onGround()) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				entity.hurt(entity.damageSources().mobAttack(attacker), 5000.0F);
+				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), 5000.0F);
 			}
 		}
-		return super.hurtEnemy(stack, entity, attacker);
+		super.hurtEnemy(stack, entity, attacker);
 	}
 
 	@Override
@@ -46,10 +47,11 @@ public class ItemVoidHoe extends HoeItem {
 			level.setBlockAndUpdate(blockPos, Blocks.FARMLAND.defaultBlockState());
 			if (!level.isClientSide()) {
 				if (player != null) {
-					context.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
+					context.getItemInHand().hurtAndBreak(1, player, context.getHand());
 				}
 			}
-			return InteractionResult.sidedSuccess(level.isClientSide());
+			return (level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER);
 		}
 		return super.useOn(context);
-	}}
+	}
+}

@@ -18,11 +18,11 @@ public class BlockHarcadiumBlock extends Block {
 	
 	private static void spawnParticles(Level level, BlockPos pos) {
 		double d0 = 0.5625D;
-		RandomSource randomSource = level.random;
+		RandomSource randomSource = level.getRandom();
 
 		for (Direction direction : Direction.values()) {
 			BlockPos blockPos = pos.relative(direction);
-			if (!level.getBlockState(blockPos).isSolidRender(level, blockPos)) {
+			if (!level.getBlockState(blockPos).isSolidRender()) {
 				Direction.Axis direction$axis = direction.getAxis();
 				double d1 = direction$axis == Direction.Axis.X ? 0.5D + d0 * (double) direction.getStepX() : (double) randomSource.nextFloat();
 				double d2 = direction$axis == Direction.Axis.Y ? 0.5D + d0 * (double) direction.getStepY() : (double) randomSource.nextFloat();
@@ -41,4 +41,5 @@ public class BlockHarcadiumBlock extends Block {
 			level.playLocalSound((pos.getX() + 0.5F), (pos.getY() + 0.5F), (pos.getZ() + 0.5F), TheTitansNeoSounds.HARCACADIUM_BLOCK_HUM.get(), SoundSource.BLOCKS, 2.0F, 1.0F, false);
 		}
 		spawnParticles(level, pos);
-	}}
+	}
+}

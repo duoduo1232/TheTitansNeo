@@ -1,38 +1,36 @@
 package net.byAqua3.thetitansneo.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.byAqua3.thetitansneo.loader.TheTitansNeoItems;
 import net.byAqua3.thetitansneo.render.item.IItemRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.world.item.ItemStack;
 
-@Mixin({ ItemRenderer.class })
+/**
+ * 26.1.2: this class used to {@code @Inject} at HEAD of
+ * {@code net.minecraft.client.renderer.entity.ItemRenderer#render(ItemStack, ItemDisplayContext, boolean,
+ * PoseStack, MultiBufferSource, int, int, BakedModel)}, cancel it, and dispatch to the mod's {@code IItemRenderer}
+ * map after applying NeoForge's {@code ClientHooks.handleCameraTransforms}.
+ * <p>
+ * That whole route is gone: {@code net.minecraft.client.renderer.entity.ItemRenderer} no longer exists as a
+ * class (only {@code ItemEntityRenderer}, {@code ThrownItemRenderer} and the GUI's
+ * {@code OversizedItemRenderer} remain), {@code BakedModel} left the item path, and items are no longer drawn
+ * imperatively. An item is described as an {@link ItemStackRenderState} and its layers are submitted as deferred
+ * nodes, so there is no imperative method left to intercept and no camera-transform hook to apply —
+ * {@code ItemStackRenderState.LayerRenderState.applyTransform} now performs the display transform itself.
+ * <p>
+ * The extension point moved to NeoForge's
+ * {@link net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent}, fired from
+ * {@code SpecialModelRenderers.bootstrap()} on the mod event bus. The mod's renderers are registered there; see
+ * the note written alongside this port for the client setup method and the resource files that select them.
+ * <p>
+ * The mixin body is intentionally empty: it still applies cleanly against {@code ItemStackRenderState} (which is
+ * on the live item path) so the mixin config entry stays valid, while implementing the mod's rendering through
+ * {@link IItemRenderer} / {@code SpecialModelRenderer} instead of by patching vanilla.
+ */
+@Mixin({ ItemStackRenderState.class })
 public class MixinItemRenderer {
 
-	@Inject(method = { "render" }, at = { @At("HEAD") }, cancellable = true)
-	public void render(ItemStack stack, ItemDisplayContext context, boolean leftHand, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, int packedOverlay, BakedModel model, CallbackInfo callbackInfo) {
-		Item item = stack.getItem();
-
-		if (TheTitansNeoItems.ITEMRENDERERS.containsKey(item)) {
-			callbackInfo.cancel();
-
-			poseStack.pushPose();
-			model = net.neoforged.neoforge.client.ClientHooks.handleCameraTransforms(poseStack, model, context, leftHand);
-			poseStack.translate(-0.5F, -0.5F, -0.5F);
-
-			IItemRenderer itemRenderer = TheTitansNeoItems.ITEMRENDERERS.get(item);
-			itemRenderer.render(stack, context, leftHand, poseStack, multiBufferSource, packedLight, packedOverlay, model);
-
-			poseStack.popPose();
-		}
-	}}
+	// 26.1.2: no injection points remain. The legacy hijack is replaced by the special model renderer
+	// registration event; see the class javadoc above.
+}

@@ -14,10 +14,9 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -29,7 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.animal.golem.SnowGolem;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -37,6 +36,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntitySnowGolemTitan extends EntityTitan implements RangedAttackMob, IBossBarDisplay {
 
 	public EntitySnowGolemTitan(EntityType<? extends EntityTitan> entityType, Level level) {
@@ -52,8 +52,8 @@ public class EntitySnowGolemTitan extends EntityTitan implements RangedAttackMob
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/snow_golem_titan.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/snow_golem_titan.png");
 	}
 
 	@Override
@@ -104,13 +104,13 @@ public class EntitySnowGolemTitan extends EntityTitan implements RangedAttackMob
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 	}
 
 	@Override
@@ -149,9 +149,10 @@ public class EntitySnowGolemTitan extends EntityTitan implements RangedAttackMob
 		return SoundEvents.SNOW_GOLEM_DEATH;
 	}
 
+	// 26.1.2: Entity.kill() 改为 kill(ServerLevel)，覆写需同步签名。
 	@Override
-	public void kill() {
-		super.kill();
+	public void kill(ServerLevel level) {
+		super.kill(level);
 		this.setTitanHealth(0.0F);
 	}
 
@@ -287,4 +288,5 @@ public class EntitySnowGolemTitan extends EntityTitan implements RangedAttackMob
 				this.level().addFreshEntity(snowGolem);
 			}
 		}
-	}}
+	}
+}

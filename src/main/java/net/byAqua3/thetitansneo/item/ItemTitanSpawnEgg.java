@@ -6,12 +6,13 @@ import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -21,18 +22,18 @@ import net.minecraft.world.level.gameevent.GameEvent;
 
 public class ItemTitanSpawnEgg extends Item {
 
-	private ResourceLocation entityId;
+	private Identifier entityId;
 	private int specialId;
 	private OnSpawned onSpawned;
 
-	public ItemTitanSpawnEgg(Properties properties, ResourceLocation entityId, int specialId, OnSpawned onSpawned) {
+	public ItemTitanSpawnEgg(Properties properties, Identifier entityId, int specialId, OnSpawned onSpawned) {
 		super(properties);
 		this.entityId = entityId;
 		this.specialId = specialId;
 		this.onSpawned = onSpawned;
 	}
 
-	public ItemTitanSpawnEgg(Properties properties, ResourceLocation entityId) {
+	public ItemTitanSpawnEgg(Properties properties, Identifier entityId) {
 		this(properties, entityId, 0, (level, entity) -> {
 		});
 	}
@@ -61,7 +62,7 @@ public class ItemTitanSpawnEgg extends Item {
 				pos = blockPos.relative(direction);
 			}
 
-			Entity entity = entityType.spawn((ServerLevel) level, itemStack, context.getPlayer(), pos, MobSpawnType.SPAWN_EGG, true, !Objects.equals(blockPos, pos) && direction == Direction.UP);
+			Entity entity = entityType.spawn((ServerLevel) level, itemStack, context.getPlayer(), pos, EntitySpawnReason.SPAWN_EGG, true, !Objects.equals(blockPos, pos) && direction == Direction.UP);
 
 			if (entity != null) {
 				if (entity instanceof EntityTitan) {
@@ -80,4 +81,5 @@ public class ItemTitanSpawnEgg extends Item {
 
 	public interface OnSpawned {
 		void onSpawned(ServerLevel level, Entity entity);
-	}}
+	}
+}

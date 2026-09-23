@@ -6,12 +6,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
@@ -26,7 +26,7 @@ public class PlayerHealthBarEvent {
 	private long lastHealthTime;
 	private long healthBlinkTime;
 
-	public void render(GuiGraphics guiGraphics) {
+	public void render(GuiGraphicsExtractor guiGraphics) {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
 
@@ -41,7 +41,7 @@ public class PlayerHealthBarEvent {
 			int x = guiGraphics.guiWidth() / 2 - 91;
 			int y = guiGraphics.guiHeight() - this.healthBarY - 1;
 
-			ResourceLocation healthBar = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/healthbar/health_bar.png");
+			Identifier healthBar = Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/healthbar/health_bar.png");
 			int color = 16777215;
 			float health = player.getHealth();
 			float maxHealth = player.getMaxHealth() + player.getAbsorptionAmount();
@@ -65,7 +65,7 @@ public class PlayerHealthBarEvent {
 			this.lastHealth = i;
 
 			if (flag) {
-				healthBar = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/healthbar/health_bar_highlight.png");
+				healthBar = Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/healthbar/health_bar_highlight.png");
 			}
 
 			int width = 82;
@@ -75,16 +75,15 @@ public class PlayerHealthBarEvent {
 			int absorptionHealthWidth = (int) Math.min(((this.lastHealth + player.getAbsorptionAmount()) / maxHealth * width), width);
 			String healthText = String.valueOf(new DecimalFormat("#").format((health + player.getAbsorptionAmount()))) + "/" + String.valueOf(new DecimalFormat("#").format(maxHealth));
 
-			guiGraphics.pose().pushPose();
+			guiGraphics.pose().pushMatrix();
 
-			RenderSystem.enableBlend();
 
-			guiGraphics.blit(healthBar, x, y, 0, 0, width, height);
+			guiGraphics.blit(healthBar, x, y, x + width, y + height, 0.0F, width/256F, 0.0F, height/256F);
 			if (absorptionHealthWidth > 0) {
-				guiGraphics.blit(healthBar, x, y, 0, height * 3, absorptionHealthWidth, height);
+				guiGraphics.blit(healthBar, x, y, x + absorptionHealthWidth, y + height, 0.0F, (absorptionHealthWidth)/256F, height * 3/256F, (height * 3 + height)/256F);
 			}
 			if (displayHealthWidth > 0) {
-				guiGraphics.blit(healthBar, x, y, 0, height, displayHealthWidth, height);
+				guiGraphics.blit(healthBar, x, y, x + displayHealthWidth, y + height, 0.0F, (displayHealthWidth)/256F, height/256F, (height + height)/256F);
 			}
 			if (healthWidth > 0) {
 				int offset = height * 2;
@@ -97,21 +96,20 @@ public class PlayerHealthBarEvent {
 				} else if (isHardcore) {
 					offset = height * 3;
 				}
-				guiGraphics.blit(healthBar, x, y, 0, offset, healthWidth, height);
+				guiGraphics.blit(healthBar, x, y, x + healthWidth, y + height, 0.0F, (healthWidth)/256F, offset/256F, (offset + height)/256F);
 			}
 
-			guiGraphics.drawString(mc.font, healthText, x + (width / 2 - mc.font.width(healthText) / 2) + 1, y + (height / 2 - mc.font.lineHeight / 2), color);
+			guiGraphics.text(mc.font, healthText, x + (width / 2 - mc.font.width(healthText) / 2) + 1, y + (height / 2 - mc.font.lineHeight / 2), color);
 
-			RenderSystem.disableBlend();
 
-			guiGraphics.pose().popPose();
+			guiGraphics.pose().popMatrix();
 		}
 	}
 
 	@SubscribeEvent
 	public void onRenderGuiLayer(RenderGuiLayerEvent.Pre event) {
-		GuiGraphics guiGraphics = event.getGuiGraphics();
-		ResourceLocation name = event.getName();
+		GuiGraphicsExtractor guiGraphics = event.getGuiGraphics();
+		Identifier name = event.getName();
 		Minecraft mc = Minecraft.getInstance();
 
 		if (!TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.playerHealthBar, true)) {

@@ -27,7 +27,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -39,12 +39,12 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
 
 public class FeatureTitanSpawn extends Feature<NoneFeatureConfiguration> {
 
-	public static final SavedData.Factory<SavedDataSpawnedPos> FACTORY = new SavedData.Factory<>(SavedDataSpawnedPos::new, SavedDataSpawnedPos::load, null);
+	// 26.1.2: SavedData.Factory 已删除，注册信息由 SavedDataSpawnedPos.TYPE 自带（含数据名）。
+	public static final net.minecraft.world.level.saveddata.SavedDataType<SavedDataSpawnedPos> FACTORY = SavedDataSpawnedPos.TYPE;
 
 	public FeatureTitanSpawn(Codec<NoneFeatureConfiguration> codec) {
 		super(codec);
@@ -58,7 +58,7 @@ public class FeatureTitanSpawn extends Feature<NoneFeatureConfiguration> {
 	}
 
 	public boolean isTitanSpawned(WorldGenLevel level, Entity entity, double range) {
-		SavedDataSpawnedPos savedData = level.getLevel().getDataStorage().computeIfAbsent(FACTORY, "titan_spawned_pos");
+		SavedDataSpawnedPos savedData = level.getLevel().getDataStorage().computeIfAbsent(FACTORY);
 
 		for (BlockPos blockPos : savedData.getSpawnedPos()) {
 			if (this.distanceToPos(blockPos, entity.blockPosition()) < range) {
@@ -69,7 +69,7 @@ public class FeatureTitanSpawn extends Feature<NoneFeatureConfiguration> {
 	}
 
 	public void setTitanSpawned(WorldGenLevel level, Entity entity) {
-		SavedDataSpawnedPos savedData = level.getLevel().getDataStorage().computeIfAbsent(FACTORY, "titan_spawned_pos");
+		SavedDataSpawnedPos savedData = level.getLevel().getDataStorage().computeIfAbsent(FACTORY);
 
 		savedData.getSpawnedPos().add(entity.blockPosition().immutable());
 		if (savedData.getSpawnedPos().size() >= 100) {
@@ -90,7 +90,7 @@ public class FeatureTitanSpawn extends Feature<NoneFeatureConfiguration> {
 
 	public int getSurface(WorldGenLevel level, int x, int z) {
 		int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-		for (int i = level.getMinBuildHeight(); i < y - 1; i++) {
+		for (int i = level.getMinY(); i < y - 1; i++) {
 			BlockPos blockPos = new BlockPos(x, i, z);
 			if (level.isEmptyBlock(blockPos) && !level.isEmptyBlock(blockPos.below())) {
 				return i;
@@ -143,7 +143,7 @@ public class FeatureTitanSpawn extends Feature<NoneFeatureConfiguration> {
 		BlockState belowState = level.getBlockState(belowPos);
 		Block belowBlock = belowState.getBlock();
 
-		if (spawnPosProtect && TheTitansNeoConfigs.playerSpawnPosProtect.get() && this.distanceToPos(blockPos, level.getLevel().getSharedSpawnPos()) <= TheTitansNeoConfigs.playerSpawnPosDistance.get()) {
+		if (spawnPosProtect && TheTitansNeoConfigs.playerSpawnPosProtect.get() && this.distanceToPos(blockPos, level.getLevel().getRespawnData().pos()) <= TheTitansNeoConfigs.playerSpawnPosDistance.get()) {
 			return null;
 		}
 
@@ -155,7 +155,7 @@ public class FeatureTitanSpawn extends Feature<NoneFeatureConfiguration> {
 			titan.setPos(x + 0.5D, y, z + 0.5D);
 			titan.setYRot(random.nextFloat() * 360.0F);
 			if (!this.isTitanSpawned(level.getLevel(), titan, TheTitansNeoConfigs.titanSpawnIntervalDistance.get())) {
-				titan.finalizeSpawn(level.getLevel(), level.getCurrentDifficultyAt(titan.blockPosition()), MobSpawnType.STRUCTURE, null);
+				titan.finalizeSpawn(level.getLevel(), level.getCurrentDifficultyAt(titan.blockPosition()), EntitySpawnReason.STRUCTURE, null);
 				titan.setTitanHealth(titan.getMaxHealth());
 				this.destroyBlocksInAABB(level, titan.getBoundingBox());
 				level.addFreshEntity(titan);
@@ -187,7 +187,7 @@ public class FeatureTitanSpawn extends Feature<NoneFeatureConfiguration> {
 			for (int i2 = z - diaz; i2 <= z + diaz; i2++) {
 				BlockPos blockPos = new BlockPos(l1, y, i2);
 				BlockState blockState = level.getBlockState(blockPos);
-				if (!blockState.isSolidRender(level, blockPos)) {
+				if (!blockState.isSolidRender()) {
 					level.setBlock(blockPos, Blocks.GOLD_BLOCK.defaultBlockState(), 0, 1);
 				}
 			}

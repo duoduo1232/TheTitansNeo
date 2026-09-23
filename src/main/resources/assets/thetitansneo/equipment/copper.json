@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "thetitansneo:copper"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "thetitansneo:copper"
+      }
+    ]
+  }
+}

@@ -7,6 +7,7 @@ import net.byAqua3.thetitansneo.animation.Animator;
 import net.byAqua3.thetitansneo.entity.titan.EntityOmegafish;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -16,7 +17,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelOmegafish extends EntityModel<EntityOmegafish> {
+public class ModelOmegafish extends EntityModel<TitanRenderState> {
 
 	private Animator animator;
 
@@ -32,8 +33,8 @@ public class ModelOmegafish extends EntityModel<EntityOmegafish> {
 	public ModelPart fuzz3;
 
 	public ModelOmegafish(float grow) {
-		super();
-		ModelPart root = createBodyLayer(grow).bakeRoot();
+		super(createBodyLayer(grow).bakeRoot());
+		ModelPart root = this.root;
 		this.bodyCenter = root.getChild("bodyCenter");
 		this.tail1 = root.getChild("bodyCenter").getChild("tail1");
 		this.tail2 = root.getChild("bodyCenter").getChild("tail1").getChild("tail2");
@@ -68,14 +69,11 @@ public class ModelOmegafish extends EntityModel<EntityOmegafish> {
 	}
 
 	@Override
-	public void setupAnim(EntityOmegafish entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.animate(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch);
+	public void setupAnim(TitanRenderState state) {
+		this.animate((EntityOmegafish) state.titan, state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.bodyCenter.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 
 	public void setAngles() {
 		this.bodyCenter.y = 22.0F;
@@ -87,7 +85,7 @@ public class ModelOmegafish extends EntityModel<EntityOmegafish> {
 	}
 
 	public void animate(EntityOmegafish entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		this.animator.update(entity);
 		this.setAngles();
 		if (entity.deathTicks <= 0) {
@@ -102,7 +100,7 @@ public class ModelOmegafish extends EntityModel<EntityOmegafish> {
 				this.tail3.yRot = -(headYaw * Mth.PI / 180.0F / 4.0F) + 0.01F * Mth.cos(ageInTicks * 0.1F - 2.0F) * Mth.PI + Mth.cos(limbSwing * 0.5F - 2.5F) * 0.25F * limbSwingAmount;
 				this.tailTip.yRot = -(headYaw * Mth.PI / 180.0F / 4.0F) + 0.01F * Mth.cos(ageInTicks * 0.1F - 2.5F) * Mth.PI + Mth.cos(limbSwing * 0.5F - 3.0F) * 0.25F * limbSwingAmount;
 			}
-			if (!entity.onGround() && !this.riding && entity.getAnimationID() != 2) {
+			if (!entity.onGround() && !entity.isPassenger() && entity.getAnimationID() != 2) {
 				this.head.yRot = -(Mth.cos(limbSwing * 0.35F) * 0.5F * limbSwingAmount);
 				this.frontBody.yRot = Mth.cos(limbSwing * 0.35F - 0.5F) * 0.25F * limbSwingAmount;
 				this.bodyCenter.yRot = Mth.cos(limbSwing * 0.35F - 1.0F) * 0.25F * limbSwingAmount;

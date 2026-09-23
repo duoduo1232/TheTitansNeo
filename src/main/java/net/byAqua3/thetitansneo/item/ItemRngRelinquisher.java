@@ -7,14 +7,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
 public class ItemRngRelinquisher extends Item {
@@ -24,7 +24,7 @@ public class ItemRngRelinquisher extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 		if (!player.level().isClientSide()) {
 			if (player.level().dimension() == Level.END) {
@@ -37,9 +37,9 @@ public class ItemRngRelinquisher extends Item {
 					ServerLevel serverLevel = (ServerLevel) player.level();
 					MinecraftServer server = serverLevel.getServer();
 					ServerLevel voidLevel = server.getLevel(TheTitansNeoDimensions.THE_NOWHERE);
-					BlockPos spawnPos = voidLevel.getSharedSpawnPos();
-					player.changeDimension(new DimensionTransition(voidLevel, new Vec3(spawnPos.getX(), 128.0D, spawnPos.getZ()), Vec3.ZERO, 0.0F, 0.0F, false, DimensionTransition.DO_NOTHING));
-					return InteractionResultHolder.success(stack);
+					BlockPos spawnPos = voidLevel.getRespawnData().pos();
+					player.teleport(new TeleportTransition(voidLevel, new Vec3(spawnPos.getX(), 128.0D, spawnPos.getZ()), Vec3.ZERO, 0.0F, 0.0F, false, TeleportTransition.DO_NOTHING));
+					return InteractionResult.SUCCESS;
 				} else {
 					player.sendSystemMessage(Component.translatable("item.thetitansneo.rng_relinquisher.end.pos"));
 				}
@@ -49,5 +49,6 @@ public class ItemRngRelinquisher extends Item {
 				player.sendSystemMessage(Component.translatable("item.thetitansneo.rng_relinquisher.other"));
 			}
 		}
-		return InteractionResultHolder.consume(stack);
-	}}
+		return InteractionResult.SUCCESS;
+	}
+}

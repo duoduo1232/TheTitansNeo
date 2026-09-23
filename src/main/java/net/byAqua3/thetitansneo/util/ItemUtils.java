@@ -25,7 +25,7 @@ public class ItemUtils {
 	}
 
 	public static boolean hasItem(Inventory inventory, Item item) {
-		if (hasItem(inventory.items, item) || hasItem(inventory.offhand, item)) {
+		if (hasItem(inventory.getNonEquipmentItems(), item) || hasItem(java.util.List.of(inventory.player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.OFFHAND)), item)) {
 			return true;
 		}
 		return false;

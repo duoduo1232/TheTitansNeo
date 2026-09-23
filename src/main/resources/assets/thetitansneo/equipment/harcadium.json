@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "thetitansneo:harcadium"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "thetitansneo:harcadium"
+      }
+    ]
+  }
+}

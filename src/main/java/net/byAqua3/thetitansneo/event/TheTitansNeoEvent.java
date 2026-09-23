@@ -40,7 +40,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerHeartTypeEvent;
+// 26.1.2: PlayerHeartTypeEvent 已从 event.entity.player 移到 client.event（该事件仅客户端触发）。
+import net.neoforged.neoforge.client.event.PlayerHeartTypeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.ExplosionKnockbackEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -88,10 +89,10 @@ public class TheTitansNeoEvent {
 					}
 
 					if (flag) {
-						serverLevel.setWeatherParameters(0, ServerLevel.THUNDER_DURATION.sample(serverLevel.getRandom()), true, true);
+						serverLevel.getServer().setWeatherParameters(0, ServerLevel.THUNDER_DURATION.sample(serverLevel.getRandom()), true, true);
 					}
 
-					if (level.random.nextInt(60) == 0) {
+					if (level.getRandom().nextInt(60) == 0) {
 						for (Entity entity : entities) {
 							if (entity != null && entity != player && entity.isAlive() && entity instanceof LivingEntity) {
 								EntityColorLightningBolt colorLightningBolt = new EntityColorLightningBolt(level, level.getRandom().nextFloat(), level.getRandom().nextFloat(), level.getRandom().nextFloat());
@@ -125,7 +126,7 @@ public class TheTitansNeoEvent {
 				if (b > 0 && !(damageSource instanceof DamageSourceTitanAttack)) {
 					if (event.getEntity() instanceof EntityTitan) {
 						EntityTitan titan = (EntityTitan) event.getEntity();
-						titan.hurt(new DamageSourceTitanAttack(player), b * 100.0F);
+						titan.hurtServer((ServerLevel) level, new DamageSourceTitanAttack(player), b * 100.0F);
 					}
 				}
 			}
@@ -162,7 +163,7 @@ public class TheTitansNeoEvent {
 						level.addFreshEntity(itemEntity);
 					}
 				}
-				itemStack.hurtAndBreak(tool.damagePerBlock(), player, LivingEntity.getSlotForHand(hand));
+				itemStack.hurtAndBreak(tool.damagePerBlock(), player, hand);
 			}
 		} else if (ItemUtils.isUltimateTool(item)) {
 			itemStack.mineBlock(level, blockState, blockPos, player);

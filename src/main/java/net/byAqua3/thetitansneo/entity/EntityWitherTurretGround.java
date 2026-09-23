@@ -10,7 +10,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoItems;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData.Builder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -23,7 +22,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.block.Block;
@@ -53,13 +52,13 @@ public class EntityWitherTurretGround extends EntityWitherTurret {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 	}
 
 	@Override
@@ -145,7 +144,7 @@ public class EntityWitherTurretGround extends EntityWitherTurret {
 			this.level().explode(this, this.getX(), this.getY() - 1.0D, this.getZ(), 2.0F, true, ExplosionInteraction.MOB);
 		}
 
-		if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+		if (((ServerLevel) this.level()).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
 			ItemStack itemStack = ItemStack.EMPTY;
 			if (this.isPlayerCreated()) {
 				itemStack = this.getItemStack();
@@ -215,7 +214,7 @@ public class EntityWitherTurretGround extends EntityWitherTurret {
 		this.originalTick();
 		
 		this.setOnGround(true);
-		this.hasImpulse = false;
+		this.needsSync = false;
 		this.setYRot(this.yHeadRot);
 		this.yBodyRot = this.yHeadRot;
 
@@ -236,4 +235,5 @@ public class EntityWitherTurretGround extends EntityWitherTurret {
 		if (this.tickCount % 20 == 0) {
 			heal(1.0F + this.durabilityLevel);
 		}
-	}}
+	}
+}

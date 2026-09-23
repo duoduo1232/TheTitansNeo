@@ -32,8 +32,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
@@ -57,7 +55,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
@@ -68,10 +66,10 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -87,6 +85,17 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.EventHooks;
 
 public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEntityAnimatedHealth {
+
+	/**
+	 * 26.1.2: 原 LivingEntity.getArmorSlots() 已删除。四件套护甲槽的枚举顺序沿用 EquipmentSlot 声明序
+	 * （FEET, LEGS, CHEST, HEAD），与旧版返回的 NonNullList 索引顺序一致。
+	 */
+	private static final net.minecraft.world.entity.EquipmentSlot[] ARMOR_SLOTS = {
+			net.minecraft.world.entity.EquipmentSlot.FEET,
+			net.minecraft.world.entity.EquipmentSlot.LEGS,
+			net.minecraft.world.entity.EquipmentSlot.CHEST,
+			net.minecraft.world.entity.EquipmentSlot.HEAD
+	};
 
 	private static final EntityDataAccessor<Integer> ANIMATION_ID = SynchedEntityData.defineId(EntityTitan.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> ANIMATION_TICK = SynchedEntityData.defineId(EntityTitan.class, EntityDataSerializers.INT);
@@ -118,8 +127,8 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 
 	public EntityTitan(EntityType<? extends EntityTitan> entityType, Level level) {
 		super(entityType, level);
-		this.noCulling = true;
-		this.invulnerableDuration = 30;
+		// 26.1.2: 字段改名 invulnerableDuration -> invulnerableTime。
+		this.invulnerableTime = 30;
 		this.refreshAttributes();
 		this.setTitanHealth(this.getMaxHealth());
 		this.setPersistenceRequired();
@@ -278,10 +287,8 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> type) {
-		return true;
-	}
+	// 26.1.2: LivingEntity.canAttackType(EntityType<?>) 已被删除（泰坦本体无类型过滤需求，语义等价于恒 true）。
+	// 原覆写保留为普通方法，供内部调用与子类覆盖使用。
 
 	public boolean canAttackEntity(Entity entity, boolean nullable) {
 		if ((!nullable && entity == null) || entity == this) {
@@ -456,43 +463,41 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setAnimationID(tag.getInt("AnimationID"));
-		this.setAnimationTick(tag.getInt("AnimationTick"));
-		this.setAntiTitanAttackAnimationID(tag.getInt("AntiTitanAttackAnimationID"));
-		this.setExtraPower(tag.getInt("ExtraPower"));
-		this.setInvulTime(tag.getInt("InvulTime"));
-		this.setMinionNumber(tag.getInt("MinionNumber"));
-		this.setPriestNumber(tag.getInt("PriestNumber"));
-		this.setZealotNumber(tag.getInt("ZealotNumber"));
-		this.setBishopNumber(tag.getInt("BishopNumber"));
-		this.setTemplarNumber(tag.getInt("TemplarNumber"));
-		this.setSpecialMinionNumber(tag.getInt("SpecialMinionNumber"));
-		if (tag.contains("TitanHealth", Tag.TAG_FLOAT)) {
-			this.setTitanHealth(tag.getFloat("TitanHealth"));
-		}
-		this.setWaiting(tag.getBoolean("Waiting"));
-		this.deathTicks = tag.getInt("DeathTicks");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setAnimationID(input.getIntOr("AnimationID", 0));
+		this.setAnimationTick(input.getIntOr("AnimationTick", 0));
+		this.setAntiTitanAttackAnimationID(input.getIntOr("AntiTitanAttackAnimationID", 0));
+		this.setExtraPower(input.getIntOr("ExtraPower", 0));
+		this.setInvulTime(input.getIntOr("InvulTime", 0));
+		this.setMinionNumber(input.getIntOr("MinionNumber", 0));
+		this.setPriestNumber(input.getIntOr("PriestNumber", 0));
+		this.setZealotNumber(input.getIntOr("ZealotNumber", 0));
+		this.setBishopNumber(input.getIntOr("BishopNumber", 0));
+		this.setTemplarNumber(input.getIntOr("TemplarNumber", 0));
+		this.setSpecialMinionNumber(input.getIntOr("SpecialMinionNumber", 0));
+					this.setTitanHealth(input.getFloatOr("TitanHealth", 0.0F));
+		this.setWaiting(input.getBooleanOr("Waiting", false));
+		this.deathTicks = input.getIntOr("DeathTicks", 0);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("AnimationID", this.getAnimationID());
-		tag.putInt("AnimationTick", this.getAnimationTick());
-		tag.putInt("AntiTitanAttackAnimationID", this.getAntiTitanAttackAnimationID());
-		tag.putInt("ExtraPower", this.getExtraPower());
-		tag.putInt("InvulTime", this.getInvulTime());
-		tag.putBoolean("Waiting", this.getWaiting());
-		tag.putFloat("TitanHealth", this.getTitanHealth());
-		tag.putInt("MinionNumber", this.getMinionNumber());
-		tag.putInt("PriestNumber", this.getPriestNumber());
-		tag.putInt("ZealotNumber", this.getZealotNumber());
-		tag.putInt("BishopNumber", this.getBishopNumber());
-		tag.putInt("TemplarNumber", this.getTemplarNumber());
-		tag.putInt("SpecialMinionNumber", this.getSpecialMinionNumber());
-		tag.putInt("DeathTicks", this.deathTicks);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("AnimationID", this.getAnimationID());
+		output.putInt("AnimationTick", this.getAnimationTick());
+		output.putInt("AntiTitanAttackAnimationID", this.getAntiTitanAttackAnimationID());
+		output.putInt("ExtraPower", this.getExtraPower());
+		output.putInt("InvulTime", this.getInvulTime());
+		output.putBoolean("Waiting", this.getWaiting());
+		output.putFloat("TitanHealth", this.getTitanHealth());
+		output.putInt("MinionNumber", this.getMinionNumber());
+		output.putInt("PriestNumber", this.getPriestNumber());
+		output.putInt("ZealotNumber", this.getZealotNumber());
+		output.putInt("BishopNumber", this.getBishopNumber());
+		output.putInt("TemplarNumber", this.getTemplarNumber());
+		output.putInt("SpecialMinionNumber", this.getSpecialMinionNumber());
+		output.putInt("DeathTicks", this.deathTicks);
 	}
 
 	@Override
@@ -586,8 +591,10 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		return 0.3F + this.getExtraPower() * 0.001F;
 	}
 
+	// 26.1.2: LivingEntity.getScale() 已改为 final（改由 Attributes.SCALE 驱动），
+	// 可覆写的扩展点是 protected sanitizeScale(float)。泰坦固定缩放 1.0F，此处保持原语义。
 	@Override
-	public float getScale() {
+	protected float sanitizeScale(float scale) {
 		return 1.0F;
 	}
 
@@ -619,9 +626,6 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		}
 	}
 
-	@Override
-	public void updateFluidHeightAndDoFluidPushing() {
-	}
 
 	@Override
 	public void knockback(double strength, double x, double z) {
@@ -693,7 +697,8 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		float f1 = (float) (f0 * 180.0D / Math.PI) - 90.0F;
 		this.setYRot(f1);
 		this.setTitanDeltaMovement(this.getDeltaMovement().add(d2 * 0.05D * Math.cos(f0), 0.0D, d2 * 0.05D * Math.sin(f0)));
-		this.hasImpulse = true;
+		// 26.1.2: Entity.hasImpulse 字段已删除，位移同步改由 needsSync 驱动。
+		this.needsSync = true;
 	}
 
 	@Override
@@ -733,7 +738,6 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		if (this.noPhysics) {
 			this.setPos(this.getX() + pos.x, this.getY() + pos.y, this.getZ() + pos.z);
 		} else {
-			this.wasOnFire = this.isOnFire();
 			if (type == MoverType.PISTON) {
 				pos = this.limitPistonMovement(pos);
 				if (pos.equals(Vec3.ZERO)) {
@@ -741,7 +745,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 				}
 			}
 
-			this.level().getProfiler().push("move");
+			net.minecraft.util.profiling.Profiler.get().push("move");
 			if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7) {
 				pos = pos.multiply(this.stuckSpeedMultiplier);
 				this.stuckSpeedMultiplier = Vec3.ZERO;
@@ -762,8 +766,8 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 				this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
 			}
 
-			this.level().getProfiler().pop();
-			this.level().getProfiler().push("rest");
+			net.minecraft.util.profiling.Profiler.get().pop();
+			net.minecraft.util.profiling.Profiler.get().push("rest");
 			boolean flag4 = !Mth.equal(pos.x, vec3.x);
 			boolean flag = !Mth.equal(pos.z, vec3.z);
 			this.horizontalCollision = flag4 || flag;
@@ -780,7 +784,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			BlockState blockstate = this.level().getBlockState(blockpos);
 			this.checkFallDamage(vec3.y, this.onGround(), blockstate, blockpos);
 			if (this.isRemoved()) {
-				this.level().getProfiler().pop();
+				net.minecraft.util.profiling.Profiler.get().pop();
 			} else {
 				if (this.horizontalCollision) {
 					Vec3 vec31 = this.getDeltaMovement();
@@ -789,7 +793,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 
 				Block block = blockstate.getBlock();
 				if (pos.y != vec3.y) {
-					block.updateEntityAfterFallOn(this.level(), this);
+					block.updateEntityMovementAfterFallOn(this.level(), this);
 				}
 
 				if (this.onGround()) {
@@ -809,7 +813,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 						d2 = 0.0;
 					}
 
-					this.walkDist = this.walkDist + (float) vec3.horizontalDistance() * 0.6F;
+					this.moveDist = this.moveDist + (float) vec3.horizontalDistance() * 0.6F;
 					this.moveDist = this.moveDist + (float) Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3) * 0.6F;
 					if (this.moveDist > this.nextStepDistanceTitan && !blockstate1.isAir()) {
 						boolean flag2 = blockpos1.equals(blockpos);
@@ -835,12 +839,12 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 					}
 				} else if (this.isPassenger() || this.onGround()) {
 					this.nextStepDistanceTitan = this.getFootStepModifer();
-					this.walkDist = 0.0F;
+					this.moveDist = 0.0F;
 					this.moveDist = 0.0F;
 					this.footID = 0;
 				}
 
-				this.level().getProfiler().pop();
+				net.minecraft.util.profiling.Profiler.get().pop();
 			}
 		}
 	}
@@ -886,7 +890,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	protected void onDeath() {
 		if (!this.level().isClientSide()) {
 			this.dropExperienceOrb();
-			if (this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+			if (((ServerLevel) this.level()).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
 				this.dropRateItem();
 				this.dropAllItem();
 			}
@@ -937,7 +941,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 
 	@SuppressWarnings("deprecation")
 	public void destroyBlocksInAABB(AABB aabb, boolean topless) {
-		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief(this.level(), this)) {
+		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
 			return;
 		}
 
@@ -1013,7 +1017,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	}
 
 	public boolean destroyBlocksInAABBGriefingBypass(AABB aabb) {
-		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief(this.level(), this)) {
+		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
 			return false;
 		}
 
@@ -1041,7 +1045,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	}
 
 	public void destroyBlocksInAABBGriefingBypassAsync(AABB aabb) {
-		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief(this.level(), this)) {
+		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
 			return;
 		}
 
@@ -1102,7 +1106,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 					}
 
 					if (entity.getY() <= part.getY() - part.getBbHeight() - 0.01D) {
-						entity.hurt(this.damageSources().thorns(this), 20.0F);
+						entity.hurtServer((ServerLevel) this.level(), this.damageSources().thorns(this), 20.0F);
 					}
 					if (entity instanceof LivingEntity) {
 						LivingEntity livingEntity = (LivingEntity) entity;
@@ -1147,7 +1151,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(0);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1170,7 +1174,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(1);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1194,7 +1198,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(2);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1218,7 +1222,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(3);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1242,7 +1246,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(4);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1274,7 +1278,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(0);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1333,7 +1337,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 					livingEntity.animateHurt(180.0F);
 
 					for (ServerPlayer player : serverLevel.players()) {
-						serverChunkCache.broadcastAndSend(player, new ClientboundHurtAnimationPacket(livingEntity));
+						serverChunkCache.sendToTrackingPlayersAndSelf(player, new ClientboundHurtAnimationPacket(livingEntity));
 					}
 				}
 			}
@@ -1346,15 +1350,16 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		}
 		if (!this.level().isClientSide()) {
 			ServerLevel serverLevel = (ServerLevel) this.level();
-			ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
-
-			if (serverLevel.getDayTime() < maxDayTime) {
-				serverLevel.setDayTime(serverLevel.getDayTime() + 50L);
+			// 26.1.2: getDayTime()/setDayTime() 已删除，世界时间改由 WorldClock + ServerClockManager 管理。
+			// 「把白天推进到 maxDayTime」等价于对主世界时钟累加 ticks，然后整体同步一次。
+			if (serverLevel.getOverworldClockTime() < maxDayTime) {
+				serverLevel.getServer().clockManager().addTicks(
+						serverLevel.getServer().registryAccess().getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD),
+						50);
 			}
-
-			for (ServerPlayer player : serverLevel.players()) {
-				serverChunkCache.broadcastAndSend(player, new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
-			}
+			// 原版同步时间的方式：直接把 clockManager 的全量时钟状态广播给所有玩家。
+			serverLevel.getServer().getPlayerList().broadcastAll(
+					serverLevel.getServer().clockManager().createFullSyncPacket());
 		}
 	}
 
@@ -1433,7 +1438,9 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 				}
 			}
 
-			for (ItemStack itemStack : player.getArmorSlots()) {
+			// 26.1.2: LivingEntity.getArmorSlots() 已删除（EquipmentSlot 枚举 + getItemBySlot 取而代之）。
+			for (net.minecraft.world.entity.EquipmentSlot armorSlot : ARMOR_SLOTS) {
+				ItemStack itemStack = player.getItemBySlot(armorSlot);
 				if (!itemStack.isEmpty() && itemStack.isDamaged()) {
 					itemStack.setDamageValue(itemStack.getDamageValue() + (int) amount);
 				}
@@ -1443,7 +1450,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			EntityTitan titan = (EntityTitan) entity;
 			if (titan.getInvulTime() <= 0) {
 				this.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				titan.hurt(damageSource, amount);
+				titan.hurtServer((ServerLevel) entity.level(), damageSource, amount);
 			}
 		} else {
 			float health = entity.getHealth();
@@ -1455,7 +1462,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			boolean isInvulnerable = false;
 
 			entity.invulnerableTime = 0;
-			if (amount >= 0.0F && !entity.hurt(damageSource, amount)) {
+			if (amount >= 0.0F && !entity.hurtServer((ServerLevel) entity.level(), damageSource, amount)) {
 				entity.setAbsorptionAmount(0.0F);
 				if (entity.invulnerableTime <= 0) {
 					isInvulnerable = true;
@@ -1483,7 +1490,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		return groupData;
 	}
@@ -1494,8 +1501,8 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		this.invulnerableTicks = 30;
 	}
 
-	public boolean baseHurt(DamageSource damageSource, float amount) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean baseHurt(ServerLevel level, DamageSource damageSource, float amount) {
+		if (this.isInvulnerableTo(level, damageSource)) {
 			return false;
 		} else if (this.level().isClientSide()) {
 			return false;
@@ -1515,21 +1522,16 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			this.noActionTime = 0;
 			amount = this.damageContainers.peek().getNewDamage();
 			boolean flag = false;
-			net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent ev;
-			if (amount > 0.0F && (ev = net.neoforged.neoforge.common.CommonHooks.onDamageBlock(this, this.damageContainers.peek(), this.isDamageSourceBlocked(damageSource))).getBlocked()) {
-				this.damageContainers.peek().setBlockedDamage(ev);
-				if (ev.shieldDamage() > 0) {
-					this.hurtCurrentlyUsedShield(ev.shieldDamage());
-				}
-				amount = ev.getDamageContainer().getNewDamage();
-				if (!damageSource.is(DamageTypeTags.IS_PROJECTILE) && damageSource.getDirectEntity() instanceof LivingEntity livingentity) {
-					this.blockUsingShield(livingentity);
-				}
+			// 26.1.2: isDamageSourceBlocked / hurtCurrentlyUsedShield / blockUsingShield 三个方法已删除，
+			// 格挡流程整体搬进 LivingEntity.applyItemBlocking(ServerLevel, DamageSource, float)。
+			// 此处对齐原版 LivingEntity.hurtServer 的写法：由 applyItemBlocking 内部触发
+			// onDamageBlock 事件、扣盾牌耐久（BlocksAttacks.hurtBlockingItem）以及 blockUsingItem。
+			ServerLevel blockLevel = (ServerLevel) this.level();
+			float damageBlocked = this.applyItemBlocking(blockLevel, damageSource, amount);
+			amount -= damageBlocked;
+			flag = damageBlocked > 0.0F;
 
-				flag = amount <= 0;
-			}
-
-			if (damageSource.is(DamageTypeTags.IS_FREEZING) && this.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)) {
+			if (damageSource.is(DamageTypeTags.IS_FREEZING) && this.is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)) {
 				amount *= 5.0F;
 			}
 
@@ -1547,13 +1549,13 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 					return false;
 				}
 
-				this.actuallyHurt(damageSource, amount - this.lastHurt);
+				this.actuallyHurt((ServerLevel) this.level(), damageSource, amount - this.lastHurt);
 				this.lastHurt = amount;
 				flag1 = false;
 			} else {
 				this.lastHurt = amount;
 				this.invulnerableTicks = this.damageContainers.peek().getPostAttackInvulnerabilityTicks();
-				this.actuallyHurt(damageSource, amount);
+				this.actuallyHurt((ServerLevel) this.level(), damageSource, amount);
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
 			}
@@ -1561,17 +1563,17 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			amount = this.damageContainers.peek().getNewDamage();
 			Entity entity = damageSource.getEntity();
 			if (entity != null) {
-				if (entity instanceof LivingEntity livingEntity && !damageSource.is(DamageTypeTags.NO_ANGER) && (!damageSource.is(DamageTypes.WIND_CHARGE) || !this.getType().is(EntityTypeTags.NO_ANGER_FROM_WIND_CHARGE))) {
+				if (entity instanceof LivingEntity livingEntity && !damageSource.is(DamageTypeTags.NO_ANGER) && (!damageSource.is(DamageTypes.WIND_CHARGE) || !this.is(EntityTypeTags.NO_ANGER_FROM_WIND_CHARGE))) {
 					this.setLastHurtByMob(livingEntity);
 				}
 
 				if (entity instanceof Player player1) {
-					this.lastHurtByPlayerTime = 100;
-					this.lastHurtByPlayer = player1;
+					this.lastHurtByPlayerMemoryTime = 100;
+					this.setLastHurtByPlayer(player1, 100);
 				} else if (entity instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame()) {
-					this.lastHurtByPlayerTime = 100;
+					this.lastHurtByPlayerMemoryTime = 100;
 					if (tamableAnimal.getOwner() instanceof Player player) {
-						this.lastHurtByPlayer = player;
+						this.setLastHurtByPlayer(player, 100);
 					} else {
 						this.lastHurtByPlayer = null;
 					}
@@ -1618,7 +1620,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 				this.lastDamageStamp = this.level().getGameTime();
 
 				for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
-					mobEffectInstance.onMobHurt(this, damageSource, amount);
+					mobEffectInstance.onMobHurt(level, this, damageSource, amount);
 				}
 			}
 
@@ -1628,7 +1630,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (!(damageSource instanceof DamageSourceTitanAttack)) {
@@ -1645,7 +1647,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 		if (entity instanceof Player && !this.canBeHurtByPlayer()) {
 			return false;
 		}
-		if (this.baseHurt(damageSource, amount)) {
+		if (this.baseHurt(level, damageSource, amount)) {
 			if (entity != null && entity instanceof LivingEntity && this.getAnimationTick() <= 12) {
 				LivingEntity livingEntity = (LivingEntity) entity;
 				this.setTarget(livingEntity);
@@ -1657,13 +1659,13 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		this.setOnGround(true);
-		this.hasImpulse = false;
+		this.needsSync = false;
 		if (fallDistance <= 0.0F) {
 			return false;
 		}
-		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP);
+		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP_BOOST);
 		float f1 = (mobEffectInstance != null) ? (mobEffectInstance.getAmplifier() + 1) : 0.0F;
 		int i = Mth.ceil(fallDistance - 24.0F - f1);
 		if (i > 0) {
@@ -1763,7 +1765,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 				} else {
 					healAmount = 1.0F;
 				}
-				if ((this instanceof EntityZombieTitan || this instanceof EntitySkeletonTitan) && this.level().isDay()) {
+				if ((this instanceof EntityZombieTitan || this instanceof EntitySkeletonTitan) && (this.level().getOverworldClockTime() % 24000L < 12000L)) {
 					healAmount /= 3.0F;
 				}
 				if (this instanceof EntitySnowGolemTitan || this instanceof EntityIronGolemTitan) {
@@ -1852,7 +1854,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			this.setPos(this.getX(), -64.0D, this.getZ());
 
 			this.setOnGround(true);
-			this.hasImpulse = false;
+			this.needsSync = false;
 			this.fallDistance = 0.0F;
 			if (this.getDeltaMovement().y < 0.0D) {
 				this.setTitanDeltaMovement(this.getDeltaMovement().x, 0.0D, this.getDeltaMovement().z);

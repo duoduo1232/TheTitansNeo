@@ -7,31 +7,42 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoTiers;
 import net.byAqua3.thetitansneo.util.EntityUtils;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class ItemAdminiumSword extends SwordItem {
+import net.minecraft.server.level.ServerLevel;
+public class ItemAdminiumSword extends Item {
 
 	public ItemAdminiumSword(Properties properties) {
-		super(TheTitansNeoTiers.ADMINIUM, properties.attributes(ItemAdminiumSword.createAttributes(1000000000.0F, Float.MAX_VALUE)));
+		super(adminiumProperties(properties));
 	}
 
-	public static ItemAttributeModifiers createAttributes(float attackDamage, float attackSpeed) {
-		return ItemAttributeModifiers.builder().add(Attributes.ATTACK_SPEED, new AttributeModifier(ResourceLocation.withDefaultNamespace("attack_speed"), attackSpeed, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND).add(Attributes.ATTACK_DAMAGE, new AttributeModifier(ResourceLocation.withDefaultNamespace("attack_damage"), attackDamage, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND).build();
+	/**
+	 * 26.1.2 适配：{@code ToolMaterial} 是 record，{@code getAttackDamageBonus()} 已不存在，
+	 * 原 {@code createAttributes(1000000000.0F, Float.MAX_VALUE)} 的两个入参
+	 * 直接对应 {@code Properties.sword(material, attackDamageBaseline, attackSpeedBaseline)}。
+	 * <p>
+	 * {@code Float.MAX_VALUE} 攻速收敛到 1024.0F，避免攻速修饰符溢出导致攻击冷却归零。
+	 */
+	private static final float ATTACK_DAMAGE = 1000000000.0F;
+	private static final float ATTACK_SPEED = 1024.0F;
+
+	private static Properties adminiumProperties(Properties properties) {
+		return properties.sword(TheTitansNeoTiers.ADMINIUM, ATTACK_DAMAGE, ATTACK_SPEED);
 	}
 
 	@Override
@@ -45,12 +56,12 @@ public class ItemAdminiumSword extends SwordItem {
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack stack) {
-		return UseAnim.BOW;
+	public ItemUseAnimation getUseAnimation(ItemStack stack) {
+		return ItemUseAnimation.BOW;
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
+	public void hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
 		if (entity != null) {
 			entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
 			if (entity instanceof EntityTitan) {
@@ -60,27 +71,27 @@ public class ItemAdminiumSword extends SwordItem {
 				}
 			} else {
 				entity.invulnerableTime = 0;
-				entity.hurt(entity.damageSources().mobAttack(attacker), Float.MAX_VALUE);
+				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), Float.MAX_VALUE);
 				entity.setHealth(0.0F);
 				entity.push(0.0D, 1.0D, 0.0D);
 			}
 		}
-		return super.hurtEnemy(stack, entity, attacker);
+		super.hurtEnemy(stack, entity, attacker);
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		InteractionResultHolder<ItemStack> ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(stack, level, player, hand, true);
+		InteractionResult ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(stack, level, player, hand, true);
 		if (ret != null) {
 			return ret;
 		}
 		player.startUsingItem(hand);
-		return InteractionResultHolder.consume(stack);
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public void releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int time) {
+	public boolean releaseUsing(ItemStack stack, Level level, LivingEntity livingEntity, int time) {
 		Player player = (Player) livingEntity;
 		Tool tool = stack.get(DataComponents.TOOL);
 
@@ -91,14 +102,14 @@ public class ItemAdminiumSword extends SwordItem {
 		f = (f * f + f * 2.0F) / 3.0F;
 
 		if (f < 0.1) {
-			return;
+			return false;
 		}
 
 		if (f > 1.0) {
 			f = 1.0F;
 		}
 		player.playSound(TheTitansNeoSounds.TITAN_SWING.get(), 1.0F, 2.0F);
-		stack.hurtAndBreak(tool.damagePerBlock(), player, LivingEntity.getSlotForHand(player.getUsedItemHand()));
+		stack.hurtAndBreak(tool.damagePerBlock(), player, player.getUsedItemHand());
 		player.swing(player.getUsedItemHand());
 
 		double d8 = 4.0D;
@@ -136,4 +147,6 @@ public class ItemAdminiumSword extends SwordItem {
 				}
 			}
 		}
-	}}
+		return true;
+	}
+}

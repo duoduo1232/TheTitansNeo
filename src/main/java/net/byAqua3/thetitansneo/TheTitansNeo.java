@@ -73,7 +73,6 @@ public class TheTitansNeo {
 
 	private void clientSetup(final FMLClientSetupEvent event) {
 		event.enqueueWork(() -> {
-			TheTitansNeoItems.initItemProperties();
 			TheTitansNeoItems.registerItemRenderers();
 			TheTitansNeoConfigs.registerConfigScreen();
 		});

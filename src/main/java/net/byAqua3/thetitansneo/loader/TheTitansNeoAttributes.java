@@ -2,7 +2,7 @@ package net.byAqua3.thetitansneo.loader;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -14,7 +14,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class TheTitansNeoAttributes {
 
-	public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(BuiltInRegistries.ATTRIBUTE, TheTitansNeo.MODID);
+	public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(Registries.ATTRIBUTE, TheTitansNeo.MODID);
 
 	public static final Holder<Attribute> TITAN_RESISTANCE = ATTRIBUTES.register("generic.titan_resistance", () -> new RangedAttribute("attribute.name.generic.titan_resistance", 0.0D, 0.0D, 100.0D).setSyncable(true));
 	public static final Holder<Attribute> TITAN_KNOCKBACK_RESISTANCE = ATTRIBUTES.register("generic.titan_knockback_resistance", () -> new RangedAttribute("attribute.name.generic.titan_knockback_resistance", 0.0D, 0.0D, 100.0D).setSyncable(true));

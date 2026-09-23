@@ -5,21 +5,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.byAqua3.thetitansneo.entity.titan.EntityEnderColossus;
 import net.byAqua3.thetitansneo.model.ModelEnderColossus;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderEnderColossus extends LivingEntityRenderer<EntityEnderColossus, ModelEnderColossus> {
+public class RenderEnderColossus extends LivingEntityRenderer<EntityEnderColossus, TitanRenderState, ModelEnderColossus> {
 
-	public static final ResourceLocation ENDER_COLOSSUS = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus.png");
-	public static final ResourceLocation ENDER_COLOSSUS_DEAD = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_dead.png");
-	public static final ResourceLocation ENDER_COLOSSUS_EYES = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_eyes.png");
-	public static final ResourceLocation ENDER_COLOSSUS_EYES_DEAD = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_eyes_dead.png");
-	public static final ResourceLocation ENDER_COLOSSUS_EYES_BEAM = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_beam.png");
+	public static final Identifier ENDER_COLOSSUS = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus.png");
+	public static final Identifier ENDER_COLOSSUS_DEAD = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_dead.png");
+	public static final Identifier ENDER_COLOSSUS_EYES = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_eyes.png");
+	public static final Identifier ENDER_COLOSSUS_EYES_DEAD = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_eyes_dead.png");
+	public static final Identifier ENDER_COLOSSUS_EYES_BEAM = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/ender_colossus_beam.png");
 
 	public RenderEnderColossus(Context context) {
 		super(context, new ModelEnderColossus(), 0.5F);
@@ -28,41 +28,65 @@ public class RenderEnderColossus extends LivingEntityRenderer<EntityEnderColossu
 	}
 
 	@Override
-	public void render(EntityEnderColossus entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
-		this.model.isAttacking = entity.isScreaming();
-		super.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+	public TitanRenderState createRenderState() {
+		return new TitanRenderState();
 	}
 
 	@Override
-	protected void scale(EntityEnderColossus entity, PoseStack poseStack, float partialTick) {
+	public void extractRenderState(EntityEnderColossus entity, TitanRenderState state, float partialTicks) {
+		super.extractRenderState(entity, state, partialTicks);
+		state.titan = entity;
+		state.invulTime = entity.getInvulTime();
+		state.extraPower = entity.getExtraPower();
+		state.animationID = entity.getAnimationID();
+		state.deathTicks = entity.deathTicks;
+		state.isStunned = entity.isStunned;
+		state.isScreaming = entity.isScreaming();
+		state.eyeLaserTime = entity.getEyeLaserTime();
+		// 26.1.2: 眼睛光柱需要世界时间与实体插值位置/朝向，这里一并捕获。
+		state.worldTicks = (int) entity.level().getOverworldClockTime();
+		state.entityX = entity.getX();
+		state.entityY = entity.getY();
+		state.entityZ = entity.getZ();
+		state.prevEntityX = entity.xOld;
+		state.prevEntityY = entity.yOld;
+		state.prevEntityZ = entity.zOld;
+		state.lookVector = entity.getViewVector(1.0F);
+		state.isAlive = entity.isAlive();
+	}
+
+	@Override
+	protected boolean shouldRenderLayers(TitanRenderState state) {
+		this.getModel().isAttacking = state.isScreaming;
+		return true;
+	}
+
+	@Override
+	protected void scale(TitanRenderState state, PoseStack poseStack) {
 		float f1 = 24.0F;
-		int i = entity.getInvulTime();
+		int i = state.invulTime;
 		if (i > 0) {
-			f1 -= (i - partialTick) / 440.0F * 7.75F;
+			f1 -= (i - state.partialTick) / 440.0F * 7.75F;
 		}
-		int i2 = entity.getExtraPower();
+		int i2 = state.extraPower;
 		if (i2 > 0) {
 			f1 += i2 * 0.5F;
 		}
 		poseStack.scale(f1, f1, f1);
 		poseStack.translate(0.0F, 0.015F, 0.0F);
-		if (entity.isPassenger()) {
+		if (state.isPassenger) {
 			poseStack.translate(0.0F, 0.1F, 0.0F);
 			poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
 		}
 	}
-	
-	@Override
-	protected float getShadowRadius(EntityEnderColossus entity) {
-		return this.shadowRadius * entity.getBbWidth();
-    }
 
 	@Override
-	protected boolean shouldShowName(EntityEnderColossus entity) {
+	protected boolean shouldShowName(EntityEnderColossus entity, double distanceToCameraSq) {
 		return false;
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EntityEnderColossus entity) {
-		return (entity.getAnimationID() == 10 && entity.deathTicks > 200) ? ENDER_COLOSSUS_DEAD : ENDER_COLOSSUS;
-	}}
+	protected Identifier getTextureLocation(TitanRenderState state) {
+		return (state.animationID == 10 && state.deathTicks > 200) ? ENDER_COLOSSUS_DEAD : ENDER_COLOSSUS;
+	}
+}

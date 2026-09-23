@@ -3,7 +3,7 @@ package net.byAqua3.thetitansneo.entity.ai.minion.silverfish;
 import net.byAqua3.thetitansneo.entity.minion.EntityOmegafishMinion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.Level.ExplosionInteraction;
@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.InfestedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityAIOmegafishMinionWakeUpFriends extends Goal {
 	
 	private EntityOmegafishMinion entity;
@@ -47,7 +48,7 @@ public class EntityAIOmegafishMinionWakeUpFriends extends Goal {
 							EntityOmegafishMinion omegafishMinion = new EntityOmegafishMinion(this.entity.level());
 							omegafishMinion.setPos(i + i1 + 0.5D, j + l, k + j1 + 0.5D);
 							if (!this.entity.level().isClientSide()) {
-								omegafishMinion.finalizeSpawn((ServerLevelAccessor) this.entity.level(), this.entity.level().getCurrentDifficultyAt(omegafishMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+								omegafishMinion.finalizeSpawn((ServerLevelAccessor) this.entity.level(), this.entity.level().getCurrentDifficultyAt(omegafishMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 								this.entity.level().addFreshEntity(omegafishMinion);
 							}
 							this.entity.level().explode(omegafishMinion, omegafishMinion.getX(), omegafishMinion.getY(), omegafishMinion.getZ(), 2.0F, false, ExplosionInteraction.MOB);
@@ -60,4 +61,5 @@ public class EntityAIOmegafishMinionWakeUpFriends extends Goal {
 					}
 				}
 			}
-	 }}
+	 }
+}

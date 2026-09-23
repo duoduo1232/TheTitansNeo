@@ -1,7 +1,6 @@
 package net.byAqua3.thetitansneo.entity;
 
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -59,17 +58,17 @@ public class EntityColorLightningBolt extends LightningBolt {
     }
     
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
-    	this.setRed(tag.getFloat("red"));
-    	this.setGreen(tag.getFloat("green"));
-    	this.setBlue(tag.getFloat("blue"));
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+    	this.setRed(input.getFloatOr("red", 0.0F));
+    	this.setGreen(input.getFloatOr("green", 0.0F));
+    	this.setBlue(input.getFloatOr("blue", 0.0F));
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
-    	tag.putFloat("red", this.getRed());
-    	tag.putFloat("green", this.getGreen());
-    	tag.putFloat("blue", this.getBlue());
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+    	output.putFloat("red", this.getRed());
+    	output.putFloat("green", this.getGreen());
+    	output.putFloat("blue", this.getBlue());
     }
     
     @Override

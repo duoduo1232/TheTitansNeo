@@ -12,10 +12,9 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.byAqua3.thetitansneo.util.AnimationUtils;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
@@ -61,11 +60,11 @@ public class EntityCaveSpiderTitan extends EntitySpiderTitan {
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
+	public Identifier getBossBarTexture() {
 		if (this.isInvisible()) {
 			return null;
 		}
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/cave_spider_titan.png");
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/cave_spider_titan.png");
 	}
 
 	@Override
@@ -136,22 +135,22 @@ public class EntityCaveSpiderTitan extends EntitySpiderTitan {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		if (tag.hasUUID("Owner")) {
-			this.ownerUUID = tag.getUUID("Owner");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		if (input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+			this.ownerUUID = input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 			this.cachedOwner = null;
 		}
-		this.isSubdued = tag.getBoolean("IsSubdued");
+		this.isSubdued = input.getBooleanOr("IsSubdued", false);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 		if (this.ownerUUID != null) {
-			tag.putUUID("Owner", this.ownerUUID);
+			output.store("Owner", net.minecraft.core.UUIDUtil.CODEC, this.ownerUUID);
 		}
-		tag.putBoolean("IsSubdued", this.isSubdued);
+		output.putBoolean("IsSubdued", this.isSubdued);
 	}
 
 	@Override
@@ -313,7 +312,7 @@ public class EntityCaveSpiderTitan extends EntitySpiderTitan {
 		if (minionType != EnumMinionType.SPECIAL) {
 			if (entity instanceof EntityCaveSpiderTitanMinion) {
 				EntityCaveSpiderTitanMinion caveSpiderTitanMinion = (EntityCaveSpiderTitanMinion) entity;
-				caveSpiderTitanMinion.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, 4, true, false));
+				caveSpiderTitanMinion.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, true, false));
 			}
 		}
 	}
@@ -338,7 +337,7 @@ public class EntityCaveSpiderTitan extends EntitySpiderTitan {
 		if (this.onGround() && player.getXRot() < -80.0F) {
 			this.jumpFromGround();
 		}
-		if (!this.isControlledByLocalInstance()) {
+		if (!this.isLocalInstanceAuthoritative()) {
 			this.calculateEntityAnimation(false);
 		}
 	}
@@ -351,4 +350,5 @@ public class EntityCaveSpiderTitan extends EntitySpiderTitan {
 			Player player = (Player) this.getFirstPassenger();
 			this.updateRiddenMovement(player, new Vec3(this.xxa, this.yya, this.zza));
 		}
-	}}
+	}
+}

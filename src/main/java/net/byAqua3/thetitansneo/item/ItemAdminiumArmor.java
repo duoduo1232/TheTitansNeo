@@ -16,7 +16,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
@@ -24,20 +23,16 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -46,37 +41,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
-public class ItemAdminiumArmor extends ArmorItem {
+import net.minecraft.server.level.ServerLevel;
+public class ItemAdminiumArmor extends Item {
 
-	public ItemAdminiumArmor(Holder<ArmorMaterial> material, Type type, Properties properties) {
-		super(material, type, properties.attributes(createAttributes(type)));
+	public ItemAdminiumArmor(Properties properties) {
+		// 26.1.2：装备信息（耐久/属性/EQUIPPABLE/修复材料）已由
+		// TheTitansNeoItems 侧调用 Properties.humanoidArmor(...) 打包。
+		super(properties);
 	}
 
-	public static ItemAttributeModifiers createAttributes(Type type) {
-		ItemAttributeModifiers.Builder itemAttributeModifiers$builder = ItemAttributeModifiers.builder();
-		if (type == Type.HELMET) {
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 14.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_KNOCKBACK_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 15.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.MAX_HEALTH, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 1250.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.ARMOR, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 100000.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-		} else if (type == Type.CHESTPLATE) {
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 26.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_KNOCKBACK_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 40.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.MAX_HEALTH, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 2000.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.ARMOR, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 100000.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-		} else if (type == Type.LEGGINGS) {
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 20.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_KNOCKBACK_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 30.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.MAX_HEALTH, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 1750.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.ARMOR, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 100000.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-		} else if (type == Type.BOOTS) {
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 10.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(TheTitansNeoAttributes.TITAN_KNOCKBACK_RESISTANCE, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 15.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.MAX_HEALTH, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 1000.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-			itemAttributeModifiers$builder.add(Attributes.ARMOR, new AttributeModifier(ResourceLocation.withDefaultNamespace("armor." + type.getName()), 100000.0D, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.bySlot(type.getSlot()));
-		}
-		return itemAttributeModifiers$builder.build();
-	}
 
 	@Override
 	public boolean isFoil(ItemStack stack) {
@@ -85,38 +58,38 @@ public class ItemAdminiumArmor extends ArmorItem {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-		super.inventoryTick(stack, level, entity, slotId, isSelected);
+	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot) {
+		super.inventoryTick(stack, level, entity, slot);
 
 		if (entity instanceof Player) {
 			Player player = (Player) entity;
 
 			stack.setDamageValue(stack.getDamageValue() - 10);
 
-			if (this.getEquipmentSlot() == EquipmentSlot.HEAD && slotId == 39) {
+			if (stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE).slot() == EquipmentSlot.HEAD && slot == EquipmentSlot.HEAD) {
 				player.playSound(TheTitansNeoSounds.HARCACADIUM_HUM.get(), 5.0F, 0.5F);
 				player.removeEffect(MobEffects.BLINDNESS);
 				player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 300, 0));
 				player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, 0));
-			} else if (this.getEquipmentSlot() == EquipmentSlot.CHEST && slotId == 38) {
+			} else if (stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE).slot() == EquipmentSlot.CHEST && slot == EquipmentSlot.CHEST) {
 				player.playSound(TheTitansNeoSounds.HARCACADIUM_HUM.get(), 5.0F, 0.5F);
 				player.removeEffect(MobEffects.WEAKNESS);
-				player.removeEffect(MobEffects.DIG_SLOWDOWN);
-				player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 300, 99));
-				player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 300, 3));
-				player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 300, 999));
+				player.removeEffect(MobEffects.MINING_FATIGUE);
+				player.addEffect(new MobEffectInstance(MobEffects.HASTE, 300, 99));
+				player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 300, 3));
+				player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 300, 999));
 				player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 300, 0));
-			} else if (this.getEquipmentSlot() == EquipmentSlot.LEGS && slotId == 37) {
+			} else if (stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE).slot() == EquipmentSlot.LEGS && slot == EquipmentSlot.LEGS) {
 				player.playSound(TheTitansNeoSounds.HARCACADIUM_HUM.get(), 5.0F, 0.0F);
 				player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 300, 199));
-				player.removeEffect(MobEffects.CONFUSION);
+				player.removeEffect(MobEffects.NAUSEA);
 				player.removeEffect(MobEffects.HUNGER);
 				player.removeEffect(MobEffects.POISON);
-			} else if (this.getEquipmentSlot() == EquipmentSlot.FEET && slotId == 36) {
+			} else if (stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE).slot() == EquipmentSlot.FEET && slot == EquipmentSlot.FEET) {
 				player.playSound(TheTitansNeoSounds.HARCACADIUM_HUM.get(), 5.0F, 0.5F);
-				player.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
-				player.addEffect(new MobEffectInstance(MobEffects.JUMP, 300, 19));
-				player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 300, 39));
+				player.removeEffect(MobEffects.SLOWNESS);
+				player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 300, 19));
+				player.addEffect(new MobEffectInstance(MobEffects.SPEED, 300, 39));
 				player.stuckSpeedMultiplier = Vec3.ZERO;
 			}
 			if (player.getItemBySlot(EquipmentSlot.HEAD).getItem() == TheTitansNeoItems.ADMINIUM_HELMET.get() && player.getItemBySlot(EquipmentSlot.CHEST).getItem() == TheTitansNeoItems.ADMINIUM_CHESTPLATE.get() && player.getItemBySlot(EquipmentSlot.LEGS).getItem() == TheTitansNeoItems.ADMINIUM_LEGGINGS.get() && player.getItemBySlot(EquipmentSlot.FEET).getItem() == TheTitansNeoItems.ADMINIUM_BOOTS.get()) {
@@ -126,7 +99,7 @@ public class ItemAdminiumArmor extends ArmorItem {
 				}
 				player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 300, 399));
 				player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 300, 199));
-				player.invulnerableDuration = 40;
+				player.invulnerableTime = 40;
 				player.extinguishFire();
 				player.fallDistance = 0;
 				player.heal((player.getHealth() < player.getMaxHealth() / 4.0F) ? 50.0F : 10.0F);
@@ -139,7 +112,7 @@ public class ItemAdminiumArmor extends ArmorItem {
 					player.setDeltaMovement(player.getDeltaMovement().x, 0.0F, player.getDeltaMovement().z);
 				}
 				if (player.getHealth() < player.getMaxHealth()) {
-					player.addEffect(new MobEffectInstance(MobEffects.HEAL, 300, 2));
+					player.addEffect(new MobEffectInstance(MobEffects.INSTANT_HEALTH, 300, 2));
 				}
 				if (!level.isClientSide()) {
 					if (TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.adminiumArmorRadiation, true)) {
@@ -150,8 +123,8 @@ public class ItemAdminiumArmor extends ArmorItem {
 								if (TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.adminiumArmorRadiationPlayer, true) && livingEntity instanceof Player) {
 									continue;
 								}
-								Holder<DamageType> damageType = entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(TheTitansNeoDamageTypes.RADIATION);
-								livingEntity.hurt(new DamageSource(damageType), 10.0F);
+								Holder<DamageType> damageType = entity.level().registryAccess().holderOrThrow(TheTitansNeoDamageTypes.RADIATION);
+								livingEntity.hurtServer(level, new DamageSource(damageType), 10.0F);
 								livingEntity.invulnerableTime = 0;
 								livingEntity.addEffect(new MobEffectInstance(TheTitansNeoMobEffects.RADIATION, 5000, 1));
 							}
@@ -163,7 +136,7 @@ public class ItemAdminiumArmor extends ArmorItem {
 						BlockState blockState = level.getBlockState(blockPos);
 						// Block block = blockState.getBlock();
 						if (!player.onGround() && blockState.isSolid()) {
-							if (player.getBoundingBox() != null && level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+							if (player.getBoundingBox() != null && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
 								int minX = Mth.floor(player.getBoundingBox().minX - 3.0D);
 								int minY = Mth.floor(player.getBoundingBox().minY - 1.0D);
 								int minZ = Mth.floor(player.getBoundingBox().minZ - 3.0D);
@@ -227,7 +200,7 @@ public class ItemAdminiumArmor extends ArmorItem {
 							for (Entity hurtEntity : entities) {
 								if (hurtEntity != null && hurtEntity instanceof LivingEntity && !(hurtEntity instanceof EntityTitan) && !(hurtEntity instanceof AbstractGolem) && !(hurtEntity instanceof OwnableEntity) && !(hurtEntity instanceof Villager)) {
 									LivingEntity livingEntity = (LivingEntity) hurtEntity;
-									livingEntity.hurt(livingEntity.damageSources().explosion(livingEntity, player), 300.0F);
+									livingEntity.hurtServer(level, livingEntity.damageSources().explosion(livingEntity, player), 300.0F);
 									livingEntity.push(0.0D, 1.0D, 0.0D);
 								}
 							}
@@ -255,7 +228,7 @@ public class ItemAdminiumArmor extends ArmorItem {
 				}
 				player.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0D);
 			} else {
-				player.invulnerableDuration = 20;
+				player.invulnerableTime = 20;
 				player.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.0D);
 			}
 		}

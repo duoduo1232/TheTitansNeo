@@ -37,12 +37,11 @@ import net.byAqua3.thetitansneo.util.AnimationUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -58,7 +57,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -110,11 +109,11 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
+	public Identifier getBossBarTexture() {
 		if (this.getCharged()) {
-			return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/charged_creeper_titan.png");
+			return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/charged_creeper_titan.png");
 		}
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/creeper_titan.png");
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/creeper_titan.png");
 	}
 
 	@Override
@@ -210,23 +209,23 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setCreeperState(tag.getInt("CreeperState"));
-		this.setCharged(tag.getBoolean("IsCharged"));
-		this.damageToLegs = tag.getInt("DamageToLegs");
-		this.isStunned = tag.getBoolean("IsStunned");
-		this.fuseTime = tag.getInt("FuseTime");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setCreeperState(input.getIntOr("CreeperState", 0));
+		this.setCharged(input.getBooleanOr("IsCharged", false));
+		this.damageToLegs = input.getIntOr("DamageToLegs", 0);
+		this.isStunned = input.getBooleanOr("IsStunned", false);
+		this.fuseTime = input.getIntOr("FuseTime", 0);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("CreeperState", this.getCreeperState());
-		tag.putBoolean("IsCharged", this.getCharged());
-		tag.putInt("DamageToLegs", this.damageToLegs);
-		tag.putBoolean("IsStunned", this.isStunned);
-		tag.putInt("FuseTime", this.fuseTime);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("CreeperState", this.getCreeperState());
+		output.putBoolean("IsCharged", this.getCharged());
+		output.putInt("DamageToLegs", this.damageToLegs);
+		output.putBoolean("IsStunned", this.isStunned);
+		output.putInt("FuseTime", this.fuseTime);
 	}
 
 	public void doLightningAttackToEntity(LivingEntity entity) {
@@ -243,7 +242,7 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 			int knockbackAmount = this.getKnockbackAmount();
 
 			if (entity != this) {
-				entity.hurt(this.damageSources().lightningBolt(), 50.0F);
+				entity.hurtServer((ServerLevel) entity.level(), this.damageSources().lightningBolt(), 50.0F);
 				this.attackEntity(entity, amount);
 				this.knockbackEntity(entity, knockbackAmount);
 			}
@@ -265,7 +264,7 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 			int knockbackAmount = this.getKnockbackAmount();
 
 			if (entity != this) {
-				entity.hurt(this.damageSources().lightningBolt(), 50.0F);
+				entity.hurtServer((ServerLevel) entity.level(), this.damageSources().lightningBolt(), 50.0F);
 				this.attackEntity(entity, amount);
 				this.knockbackEntity(entity, knockbackAmount);
 			}
@@ -325,7 +324,7 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.setWaiting(true);
 		return groupData;
@@ -516,10 +515,10 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 			this.heal(amount);
 			return false;
 		}
-		if (this.hurt(damageSource, amount)) {
+		if (this.hurtServer((ServerLevel) this.level(), damageSource, amount)) {
 			if (damageSource.getEntity() != null && damageSource.getEntity() instanceof Player && this.damageToLegs < 8 && !this.isStunned && (entityTitanPart == this.leg1 || entityTitanPart == this.leg2 || entityTitanPart == this.leg3 || entityTitanPart == this.leg4)) {
 				this.damageToLegs++;
-				this.hurt(damageSource, 100.0F);
+				this.hurtServer((ServerLevel) this.level(), damageSource, 100.0F);
 				this.setTarget((LivingEntity) damageSource.getEntity());
 				if (this.damageToLegs >= 8) {
 					this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());
@@ -532,13 +531,13 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		this.setOnGround(true);
-		this.hasImpulse = false;
+		this.needsSync = false;
 		if (fallDistance <= 0.0F) {
 			return false;
 		}
-		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP);
+		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP_BOOST);
 		float f1 = (mobEffectInstance != null) ? (mobEffectInstance.getAmplifier() + 1) : 0.0F;
 		int i = Mth.ceil(fallDistance - 24.0F - f1);
 		if (i > 0) {
@@ -667,7 +666,7 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 		if (minionType != EnumMinionType.SPECIAL) {
 			if (entity instanceof EntityCreeperTitanMinion) {
 				EntityCreeperTitanMinion creeperTitanMinion = (EntityCreeperTitanMinion) entity;
-				creeperTitanMinion.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, 4, true, false));
+				creeperTitanMinion.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, true, false));
 
 				if (this.getCharged()) {
 					LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
@@ -974,7 +973,7 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 				}
 
 				if (flag) {
-					serverLevel.setWeatherParameters(0, ServerLevel.THUNDER_DURATION.sample(serverLevel.getRandom()), true, true);
+					serverLevel.getServer().setWeatherParameters(0, ServerLevel.THUNDER_DURATION.sample(serverLevel.getRandom()), true, true);
 				}
 			}
 
@@ -1030,12 +1029,12 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 			float f1 = Mth.sin(f);
 			float f2 = Mth.cos(f);
 			float offset = ((this.getAnimationID() == 3 && this.getAnimationTick() > 30 && this.getAnimationTick() < 70) || (this.getAnimationID() == 7 && this.getAnimationTick() > 30 && this.getAnimationTick() < 130)) ? 6.0F : 0.0F;
-			this.head.moveTo(this.getX(), this.getY() + ((this.getAnimationID() == 8) ? 12.0D : 18.0D), this.getZ());
-			this.body.moveTo(this.getX(), this.getY() + ((this.getAnimationID() == 8) ? 0.0D : 6.0D), this.getZ());
-			this.leg1.moveTo(this.getX() - (f1 * 5.5F) + (f2 * 5.5F), this.getY() + offset, this.getZ() + (f2 * 5.5F) + (f1 * 5.5F));
-			this.leg2.moveTo(this.getX() - (f1 * 5.5F) - (f2 * 5.5F), this.getY() + offset, this.getZ() + (f2 * 5.5F) - (f1 * 5.5F));
-			this.leg3.moveTo(this.getX() + (f1 * 5.5F) + (f2 * 5.5F), this.getY(), this.getZ() - (f2 * 5.5F) + (f1 * 5.5F));
-			this.leg4.moveTo(this.getX() + (f1 * 5.5F) - (f2 * 5.5F), this.getY(), this.getZ() - (f2 * 5.5F) - (f1 * 5.5F));
+			this.head.setPos(this.getX(), this.getY() + ((this.getAnimationID() == 8) ? 12.0D : 18.0D), this.getZ());
+			this.body.setPos(this.getX(), this.getY() + ((this.getAnimationID() == 8) ? 0.0D : 6.0D), this.getZ());
+			this.leg1.setPos(this.getX() - (f1 * 5.5F) + (f2 * 5.5F), this.getY() + offset, this.getZ() + (f2 * 5.5F) + (f1 * 5.5F));
+			this.leg2.setPos(this.getX() - (f1 * 5.5F) - (f2 * 5.5F), this.getY() + offset, this.getZ() + (f2 * 5.5F) - (f1 * 5.5F));
+			this.leg3.setPos(this.getX() + (f1 * 5.5F) + (f2 * 5.5F), this.getY(), this.getZ() - (f2 * 5.5F) + (f1 * 5.5F));
+			this.leg4.setPos(this.getX() + (f1 * 5.5F) - (f2 * 5.5F), this.getY(), this.getZ() - (f2 * 5.5F) - (f1 * 5.5F));
 
 			for (EntityTitanPart part : this.parts) {
 				if (this.isAlive() && !this.isStunned) {

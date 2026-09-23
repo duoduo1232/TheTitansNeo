@@ -1,37 +1,35 @@
 package net.byAqua3.thetitansneo.render.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.byAqua3.thetitansneo.entity.titan.EntityEnderColossus;
 import net.byAqua3.thetitansneo.model.ModelEnderColossus;
 import net.byAqua3.thetitansneo.render.RenderEnderColossus;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class LayerEnderColossusEyes extends RenderLayer<EntityEnderColossus, ModelEnderColossus> {
+public class LayerEnderColossusEyes extends RenderLayer<TitanRenderState, ModelEnderColossus> {
 
-	public LayerEnderColossusEyes(RenderLayerParent<EntityEnderColossus, ModelEnderColossus> renderer) {
+	public LayerEnderColossusEyes(RenderLayerParent<TitanRenderState, ModelEnderColossus> renderer) {
 		super(renderer);
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, EntityEnderColossus entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float headYaw, float headPitch) {
-		ResourceLocation eyesTextures = RenderEnderColossus.ENDER_COLOSSUS_EYES;
-		if (entity.getAnimationID() == 10 && entity.deathTicks > 160) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, TitanRenderState state, float yRot, float xRot) {
+		Identifier eyesTextures;
+		if (state.animationID == 10 && state.deathTicks > 160) {
 			eyesTextures = RenderEnderColossus.ENDER_COLOSSUS_EYES_DEAD;
 		} else {
-			eyesTextures = (entity.getEyeLaserTime() >= 0) ? RenderEnderColossus.ENDER_COLOSSUS_EYES_DEAD : RenderEnderColossus.ENDER_COLOSSUS_EYES;
+			eyesTextures = (state.eyeLaserTime >= 0) ? RenderEnderColossus.ENDER_COLOSSUS_EYES_DEAD : RenderEnderColossus.ENDER_COLOSSUS_EYES;
 		}
 
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.eyes(eyesTextures));
-		this.getParentModel().renderToBuffer(poseStack, vertexConsumer, 15728640, OverlayTexture.NO_OVERLAY);
+		submitNodeCollector.submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(eyesTextures), 15728640, OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor, null);
 	}
 }

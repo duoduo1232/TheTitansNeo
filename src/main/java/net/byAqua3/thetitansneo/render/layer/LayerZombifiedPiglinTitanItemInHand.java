@@ -1,49 +1,38 @@
 package net.byAqua3.thetitansneo.render.layer;
 
-import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
-import net.byAqua3.thetitansneo.entity.titan.EntityZombifiedPiglinTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
 import net.byAqua3.thetitansneo.model.ModelZombifiedPiglinTitan;
-import net.byAqua3.thetitansneo.util.RenderUtils;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
+import net.byAqua3.thetitansneo.util.RenderWeapon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class LayerZombifiedPiglinTitanItemInHand extends RenderLayer<EntityZombifiedPiglinTitan, ModelZombifiedPiglinTitan> {
+public class LayerZombifiedPiglinTitanItemInHand extends RenderLayer<TitanRenderState, ModelZombifiedPiglinTitan> {
 
-	public LayerZombifiedPiglinTitanItemInHand(RenderLayerParent<EntityZombifiedPiglinTitan, ModelZombifiedPiglinTitan> renderer) {
+	public LayerZombifiedPiglinTitanItemInHand(RenderLayerParent<TitanRenderState, ModelZombifiedPiglinTitan> renderer) {
 		super(renderer);
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, EntityZombifiedPiglinTitan entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, TitanRenderState state, float yRot, float xRot) {
 		if (TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.titanWeaponOldModel, false)) {
 			if (!this.getParentModel().heldItem.visible) {
 				this.getParentModel().heldItem.visible = true;
 			}
 			return;
 		}
-
-		Minecraft mc = Minecraft.getInstance();
-		TextureAtlas textureAtlas = mc.getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(Sheets.translucentItemSheet());
 
 		this.getParentModel().heldItem.visible = false;
 		poseStack.pushPose();
@@ -69,16 +58,10 @@ public class LayerZombifiedPiglinTitanItemInHand extends RenderLayer<EntityZombi
 		poseStack.translate(0.0F, 0.25F, 0.03125F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
 		poseStack.mulPose(Axis.ZP.rotationDegrees(55.0F));
+		Identifier texture = Identifier.tryBuild(TheTitansNeo.MODID, "item/gold_sword_256");
+		// 26.1.2: 旧的 BakedQuad 烘焙 API 已移除，直接按 sprite UV 提交平面 quad。
+		RenderWeapon.submitItemSprite(texture, poseStack, submitNodeCollector, lightCoords);
 
-		TextureAtlasSprite textureAtlasSprite = textureAtlas.getSprite(ResourceLocation.tryBuild(TheTitansNeo.MODID, "item/gold_sword_256"));
-		List<BakedQuad> quads = RenderUtils.bakeItem(textureAtlasSprite);
-
-		PoseStack.Pose poseStack$pose = poseStack.last();
-		
-		for (BakedQuad quad : quads) {
-			vertexConsumer.putBulkData(poseStack$pose, quad, 1.0F, 1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY, true);
-		}
-		
 		poseStack.popPose();
 
 		poseStack.popPose();

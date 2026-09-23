@@ -19,11 +19,11 @@ public class BlockHarcadiumOre extends DropExperienceBlock {
 
 	private static void spawnParticles(Level level, BlockPos pos) {
 		double d0 = 0.5625D;
-		RandomSource randomSource = level.random;
+		RandomSource randomSource = level.getRandom();
 
 		for (Direction direction : Direction.values()) {
 			BlockPos blockPos = pos.relative(direction);
-			if (!level.getBlockState(blockPos).isSolidRender(level, blockPos)) {
+			if (!level.getBlockState(blockPos).isSolidRender()) {
 				Direction.Axis direction$axis = direction.getAxis();
 				double d1 = direction$axis == Direction.Axis.X ? 0.5D + d0 * (double) direction.getStepX() : (double) randomSource.nextFloat();
 				double d2 = direction$axis == Direction.Axis.Y ? 0.5D + d0 * (double) direction.getStepY() : (double) randomSource.nextFloat();

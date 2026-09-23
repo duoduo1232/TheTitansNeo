@@ -15,12 +15,12 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.Block;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoItems;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoBlocks;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
@@ -45,7 +46,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoDimensions;
 import net.minecraft.util.Mth;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.byAqua3.thetitansneo.damage.DamageSourceTitanAttack;
@@ -60,7 +60,7 @@ import net.byAqua3.thetitansneo.item.ItemUltimaBlade;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoEntities;
@@ -112,8 +112,8 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/witherzilla.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/witherzilla.png");
 	}
 
 	@Override
@@ -181,13 +181,13 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 	}
 
 	public boolean isInOmegaForm() {
@@ -318,7 +318,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 					this.attackEntity(livingEntity, 20.0F);
 					if (livingEntity.getBbHeight() >= 6.0F || livingEntity.isInvulnerable()) {
 						livingEntity.setHealth(0.0F);
-						livingEntity.hurt(this.damageSources().fellOutOfWorld(), Float.MAX_VALUE);
+						livingEntity.hurtServer((ServerLevel) entity.level(), this.damageSources().fellOutOfWorld(), Float.MAX_VALUE);
 						livingEntity.die(this.damageSources().fellOutOfWorld());
 						livingEntity.discard();
 					}
@@ -330,7 +330,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 					}
 				} else {
 					DamageSourceTitanAttack damageSource = new DamageSourceTitanAttack(this);
-					entity.hurt(damageSource, 20.0F);
+					entity.hurtServer((ServerLevel) entity.level(), damageSource, 20.0F);
 					entity.discard();
 				}
 				entity.push(0.0D, 0.5D, 0.0D);
@@ -345,7 +345,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		return groupData;
 	}
@@ -457,7 +457,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (amount >= 100000.0F) {
 			amount = 100000.0F;
 		}
@@ -465,11 +465,11 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 			this.blockBreakCounter = 1;
 		}
 		this.tickCount++;
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerLevel level) {
 		if (!this.level().players().isEmpty()) {
 			for (Player player : this.level().players()) {
 				player.sendSystemMessage(Component.translatable("entity.thetitansneo.witherzilla.killattempt"));
@@ -693,9 +693,9 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 				serverLevel.getChunkSource().addRegionTicket(TicketType.FORCED, chunkPos, 0, chunkPos);
 
 				if (this.getTarget() != null && this.getTarget() instanceof EntityEnderColossus) {
-					serverLevel.setWeatherParameters(0, 0, false, false);
+					serverLevel.getServer().setWeatherParameters(0, 0, false, false);
 				} else {
-					serverLevel.setWeatherParameters(0, 1000000, true, true);
+					serverLevel.getServer().setWeatherParameters(0, 1000000, true, true);
 				}
 
 				ImmutableList<Entity> entities = ImmutableList.copyOf(serverLevel.getAllEntities());

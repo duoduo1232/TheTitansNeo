@@ -18,10 +18,6 @@ public abstract class EntityFlying extends LivingEntity {
 		super(entityType, level);
 	}
 	
-	@Override
-	public Iterable<ItemStack> getArmorSlots() {
-		return NonNullList.withSize(4, ItemStack.EMPTY);
-	}
 
 	@Override
 	public ItemStack getItemBySlot(EquipmentSlot slot) {
@@ -48,7 +44,7 @@ public abstract class EntityFlying extends LivingEntity {
 
 	@Override
 	public void travel(Vec3 travelVector) {
-		if (this.isControlledByLocalInstance()) {
+		if (this.isLocalInstanceAuthoritative()) {
 			if (this.isInWater()) {
 				this.moveRelative(0.02F, travelVector);
 				this.move(MoverType.SELF, this.getDeltaMovement());

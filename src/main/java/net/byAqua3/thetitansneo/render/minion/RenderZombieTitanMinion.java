@@ -1,54 +1,72 @@
 package net.byAqua3.thetitansneo.render.minion;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.byAqua3.thetitansneo.TheTitansNeo;
+import net.byAqua3.thetitansneo.entity.minion.IMinion;
 import net.byAqua3.thetitansneo.entity.minion.EntityZombieTitanMinion;
-import net.minecraft.client.model.ZombieModel;
+import net.byAqua3.thetitansneo.render.state.MinionZombieRenderState;
+import net.minecraft.client.model.monster.zombie.ZombieModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
+import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderZombieTitanMinion extends AbstractZombieRenderer<EntityZombieTitanMinion, ZombieModel<EntityZombieTitanMinion>> {
+public class RenderZombieTitanMinion extends AbstractZombieRenderer<EntityZombieTitanMinion, MinionZombieRenderState, ZombieModel<MinionZombieRenderState>> {
 
-	public static final ResourceLocation ZOMBIE = ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
-	public static final ResourceLocation ZOMBIE_PRIEST = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_priest.png");
-	public static final ResourceLocation ZOMBIE_ZEALOT = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_zealot.png");
-	public static final ResourceLocation ZOMBIE_BISHOP = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_bishop.png");
-	public static final ResourceLocation ZOMBIE_TEMPLAR = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_templar.png");
+	public static final Identifier ZOMBIE = Identifier.withDefaultNamespace("textures/entity/zombie/zombie.png");
+	public static final Identifier ZOMBIE_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_priest.png");
+	public static final Identifier ZOMBIE_ZEALOT = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_zealot.png");
+	public static final Identifier ZOMBIE_BISHOP = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_bishop.png");
+	public static final Identifier ZOMBIE_TEMPLAR = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_templar.png");
 
-	private RenderZombieVillagerTitanMinion villagerRenderer;
+	private final RenderZombieVillagerTitanMinion villagerRenderer;
 
 	public RenderZombieTitanMinion(EntityRendererProvider.Context context) {
-		this(context, ModelLayers.ZOMBIE, ModelLayers.ZOMBIE_INNER_ARMOR, ModelLayers.ZOMBIE_OUTER_ARMOR);
+		this(context, ModelLayers.ZOMBIE, ModelLayers.ZOMBIE_BABY, ModelLayers.ZOMBIE_ARMOR, ModelLayers.ZOMBIE_BABY_ARMOR);
 	}
 
-	public RenderZombieTitanMinion(EntityRendererProvider.Context context, ModelLayerLocation zombieLayer, ModelLayerLocation innerArmor, ModelLayerLocation outerArmor) {
-		super(context, new ZombieModel<>(context.bakeLayer(zombieLayer)), new ZombieModel<>(context.bakeLayer(innerArmor)), new ZombieModel<>(context.bakeLayer(outerArmor)));
+	public RenderZombieTitanMinion(
+		EntityRendererProvider.Context context,
+		ModelLayerLocation zombieLayer,
+		ModelLayerLocation babyZombieLayer,
+		ArmorModelSet<ModelLayerLocation> armorSet,
+		ArmorModelSet<ModelLayerLocation> babyArmorSet
+	) {
+		super(
+			context,
+			new ZombieModel<MinionZombieRenderState>(context.bakeLayer(zombieLayer)),
+			new ZombieModel<MinionZombieRenderState>(context.bakeLayer(babyZombieLayer)),
+			ArmorModelSet.bake(armorSet, context.getModelSet(), ZombieModel::new),
+			ArmorModelSet.bake(babyArmorSet, context.getModelSet(), ZombieModel::new)
+		);
 		this.villagerRenderer = new RenderZombieVillagerTitanMinion(context);
 	}
 
 	@Override
-	public void render(EntityZombieTitanMinion entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
+	public MinionZombieRenderState createRenderState() {
+		return new MinionZombieRenderState();
+	}
+
+	// 26.1.2: 原实现按实体是否为村民在 render 里切换另一套渲染器；
+	// 新架构下渲染器不再持有实体，改为在 extract 阶段选好对应的纹理。
+	@Override
+	public void extractRenderState(EntityZombieTitanMinion entity, MinionZombieRenderState state, float partialTicks) {
+		super.extractRenderState(entity, state, partialTicks);
 		if (entity.isVillager()) {
-			this.villagerRenderer.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+			state.texture = RenderZombieVillagerTitanMinion.villagerTexture(entity);
 		} else {
-			super.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+			state.texture = getMinionTexture(entity);
 		}
 	}
 
-	@Override
-	public ResourceLocation getTextureLocation(EntityZombieTitanMinion entity) {
-		if (entity.isVillager()) {
-			return this.villagerRenderer.getTextureLocation(entity);
-		} else {
-			switch (entity.getMinionType()) {
+	private static Identifier getMinionTexture(EntityZombieTitanMinion entity) {
+		if (entity instanceof IMinion) {
+			IMinion minion = (IMinion) entity;
+			switch (minion.getMinionType()) {
 			case PRIEST:
 				return ZOMBIE_PRIEST;
 			case ZEALOT:
@@ -61,13 +79,16 @@ public class RenderZombieTitanMinion extends AbstractZombieRenderer<EntityZombie
 				return ZOMBIE;
 			}
 		}
+		return ZOMBIE;
 	}
 
 	@Override
-	protected boolean isShaking(EntityZombieTitanMinion entity) {
-		if (entity.isVillager()) {
-			return this.villagerRenderer.isShaking(entity);
-		}
-		return super.isShaking(entity) || entity.isUnderWaterConverting();
+	public Identifier getTextureLocation(MinionZombieRenderState state) {
+		return state.texture != null ? state.texture : ZOMBIE;
+	}
+
+	@Override
+	protected boolean isShaking(MinionZombieRenderState state) {
+		return super.isShaking(state) || state.isConverting;
 	}
 }

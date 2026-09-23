@@ -15,7 +15,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
@@ -73,16 +73,16 @@ public class ChunkGeneratorNowhere extends NoiseBasedChunkGenerator implements I
 	public void createStructures(RegistryAccess registryAccess, ChunkGeneratorStructureState structureState, StructureManager structureManager, ChunkAccess chunk, StructureTemplateManager structureTemplateManager) {
 		super.createStructures(registryAccess, structureState, structureManager, chunk, structureTemplateManager);
 		
-		Registry<StructureSet> registry = registryAccess.registryOrThrow(Registries.STRUCTURE_SET);
+		Registry<StructureSet> registry = registryAccess.lookupOrThrow(Registries.STRUCTURE_SET);
 		List<Holder<StructureSet>> structureSets = new ArrayList<>();
 		//structureSets.addAll(structureState.possibleStructureSets);
 
 		for (Entry<ResourceKey<StructureSet>, StructureSet> entry : registry.entrySet()) {
 			ResourceKey<StructureSet> resourceKey = entry.getKey();
 			StructureSet structureSet = entry.getValue();
-			ResourceLocation resourceLocation = resourceKey.location();
+			Identifier resourceLocation = resourceKey.location();
 
-			if (!resourceLocation.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE) && !resourceLocation.getNamespace().equals(TheTitansNeo.MODID)) {
+			if (!resourceLocation.getNamespace().equals(Identifier.DEFAULT_NAMESPACE) && !resourceLocation.getNamespace().equals(TheTitansNeo.MODID)) {
 				structureSets.add(registry.wrapAsHolder(structureSet));
 			}
 		}

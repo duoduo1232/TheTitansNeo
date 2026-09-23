@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityEnderColossusCrystal extends EntityFlying {
 
 	public int courseChangeCooldown;
@@ -33,7 +34,7 @@ public class EntityEnderColossusCrystal extends EntityFlying {
 	public EntityEnderColossusCrystal(EntityType<? extends EntityFlying> entityType, Level level) {
 		super(entityType, level);
 		this.innerRotation = this.getRandom().nextInt(100000);
-		this.hasImpulse = true;
+		this.needsSync = true;
 		this.setOnGround(false);
 	}
 
@@ -102,7 +103,7 @@ public class EntityEnderColossusCrystal extends EntityFlying {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (this.isInvulnerable()) {
 			return false;
 		}
@@ -113,7 +114,7 @@ public class EntityEnderColossusCrystal extends EntityFlying {
 			this.setOnGround(true);
 			return true;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
@@ -124,7 +125,7 @@ public class EntityEnderColossusCrystal extends EntityFlying {
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerLevel level) {
 	}
 
 	@Override
@@ -198,7 +199,6 @@ public class EntityEnderColossusCrystal extends EntityFlying {
 	@Override
 	public void tick() {
 		super.tick();
-		this.noCulling = true;
 		this.innerRotation++;
 
 		if (this.isOnFire()) {

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.byAqua3.thetitansneo.entity.EntityWitherTurretMortar;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -14,7 +15,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelWitherTurretMortar extends EntityModel<EntityWitherTurretMortar> {
+public class ModelWitherTurretMortar extends EntityModel<TitanRenderState> {
 
 	public ModelPart head;
 	public ModelPart leftFrontTripodLeg;
@@ -25,8 +26,8 @@ public class ModelWitherTurretMortar extends EntityModel<EntityWitherTurretMorta
 	public ModelPart handle;
 
 	public ModelWitherTurretMortar() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.head = root.getChild("head");
 		this.leftFrontTripodLeg = root.getChild("leftFrontTripodLeg");
 		this.rightFrontTripodLeg = root.getChild("rightFrontTripodLeg");
@@ -51,18 +52,10 @@ public class ModelWitherTurretMortar extends EntityModel<EntityWitherTurretMorta
 	}
 
 	@Override
-	public void setupAnim(EntityWitherTurretMortar entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.head.yRot = headYaw * Mth.PI / 180.0F;
-		this.head.xRot = headPitch * Mth.PI / 180.0F;
+	public void setupAnim(TitanRenderState state) {
+		this.head.yRot = state.yRot * Mth.PI / 180.0F;
+		this.head.xRot = state.xRot * Mth.PI / 180.0F;
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.leftFrontTripodLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.rightFrontTripodLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.backTripodLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.backTripodLegTip.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.support.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.handle.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}}
+}

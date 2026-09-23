@@ -21,7 +21,6 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoMobEffects;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -43,7 +42,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -52,20 +51,20 @@ import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -158,17 +157,17 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setMinionType(tag.getInt("MinionType"));
-		this.deathTicks = tag.getInt("DeathTicks");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setMinionType(input.getIntOr("MinionType", 0));
+		this.deathTicks = input.getIntOr("DeathTicks", 0);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("MinionType", this.getMinionTypeInt());
-		tag.putInt("DeathTicks", this.deathTicks);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("MinionType", this.getMinionTypeInt());
+		output.putInt("DeathTicks", this.deathTicks);
 	}
 
 	protected void dropRareDrop(int count) {
@@ -178,17 +177,17 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 		int j = this.getRandom().nextInt(2 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.ENDER_EYE, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ENDER_EYE, 1));
 		}
 		j = this.getRandom().nextInt(3 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(Items.COAL, 1);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.COAL, 1));
 		}
 		if (this.getRandom().nextInt(5) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-			this.spawnAtLocation(new ItemStack(Blocks.END_STONE), 0.0F);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.END_STONE), 0.0F);
 		}
 		if (this.getRandom().nextInt(20) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-			this.spawnAtLocation(new ItemStack(Blocks.OBSIDIAN), 0.0F);
+			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.OBSIDIAN), 0.0F);
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(4);
@@ -196,7 +195,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(Items.EXPERIENCE_BOTTLE, 1);
+				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -205,9 +204,9 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 				}
 				for (k = 0; k < j; k++) {
 					if (this.getRandom().nextInt(10) == 0) {
-						this.spawnAtLocation(Items.ENCHANTED_GOLDEN_APPLE, 1);
+						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ENCHANTED_GOLDEN_APPLE, 1));
 					} else {
-						this.spawnAtLocation(Items.GOLDEN_APPLE, 1);
+						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
 					}
 				}
 				if (this.getMinionTypeInt() >= 3) {
@@ -218,28 +217,28 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
 							break;
 						case 1:
-							this.spawnAtLocation(new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
 							break;
 						case 2:
-							this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						case 3:
-							this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						case 4:
-							this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -248,17 +247,17 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
 								break;
 							case 1:
-								this.spawnAtLocation(new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
 								break;
 							case 2:
-								this.spawnAtLocation(new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 								break;
 							}
 						}
-						this.spawnAtLocation(new ItemStack(Blocks.OBSIDIAN), 0.0F);
+						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.OBSIDIAN), 0.0F);
 					}
 				}
 			}
@@ -267,7 +266,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.setRandomMinionType();
 		this.setHealth(this.getMaxHealth());
@@ -340,13 +339,9 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 		if (this.getMaster() != null) {
 			return this.getMaster().canAttack(target);
 		}
-		return target.canBeSeenByAnyone() && this.canAttackEntity(target);
+		return !target.is(TheTitansNeoEntities.ENDER_COLOSSUS.get()) && !target.is(TheTitansNeoEntities.ENDER_COLOSSUS_MINION.get()) && !target.is(TheTitansNeoEntities.DRAGON_MINION.get()) && target.canBeSeenByAnyone() && this.canAttackEntity(target);
 	}
 
-	@Override
-	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType != TheTitansNeoEntities.ENDER_COLOSSUS.get() && entityType != TheTitansNeoEntities.ENDER_COLOSSUS_MINION.get() && entityType != TheTitansNeoEntities.DRAGON_MINION.get();
-	}
 
 	@Override
 	public int getArmorValue() {
@@ -446,8 +441,8 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		if (super.doHurtTarget(entity)) {
+	public boolean doHurtTarget(ServerLevel level, Entity entity) {
+		if (super.doHurtTarget(level, entity)) {
 			if (entity instanceof Mob || entity instanceof AbstractGolem || entity instanceof Player) {
 				this.teleport();
 			}
@@ -470,7 +465,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		Entity entity = damageSource.getEntity();
 
 		if (this.isInvulnerable() || (this.getMinionTypeInt() >= 4 && damageSource.is(TheTitansNeoDamageTypes.RADIATION))) {
@@ -522,11 +517,11 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 				}
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		if (this.getMinionType() == EnumMinionType.TEMPLAR) {
 			this.xxa = 0.0F;
 			this.zza = 0.0F;
@@ -539,7 +534,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 	public void performRangedAttack(LivingEntity target, float velocity) {
 		this.swing(InteractionHand.MAIN_HAND);
 		if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 45.0D) {
-			this.doHurtTarget(target);
+			this.doHurtTarget((ServerLevel) this.level(), target);
 		} else {
 			int randomInt = this.getRandom().nextInt(5);
 
@@ -564,10 +559,10 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 				}
 			} else if (randomInt == 1) {
 				for (int i = 0; i < 100; i++) {
-					ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
+					ThrownSplashPotion thrownPotion = new ThrownSplashPotion(this.level(), this, this.getMainHandItem());
 					ItemStack itemStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HARMING);
 					thrownPotion.setItem(itemStack);
-					if (target.getType().is(EntityTypeTags.UNDEAD)) {
+					if (target.is(EntityTypeTags.UNDEAD)) {
 						itemStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.HEALING);
 						thrownPotion.setItem(itemStack);
 					}
@@ -601,7 +596,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 				if (!this.level().isClientSide()) {
 					this.level().explode(this, target.getX(), target.getY(), target.getZ(), 1.0F * target.getBbWidth(), false, Level.ExplosionInteraction.MOB);
 				}
-				target.hurt(this.damageSources().lightningBolt(), 50.0F);
+				target.hurtServer((ServerLevel) this.level(), this.damageSources().lightningBolt(), 50.0F);
 				LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
 				lightningBolt.setPos(target.getX(), target.getY(), target.getZ());
 				if (!this.level().isClientSide()) {
@@ -611,7 +606,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 				if (!this.level().isClientSide()) {
 					this.level().explode(this, target.getX(), target.getY(), target.getZ(), 2.0F * target.getBbWidth(), false, Level.ExplosionInteraction.MOB);
 				}
-				target.hurt(this.damageSources().lightningBolt(), 100.0F);
+				target.hurtServer((ServerLevel) this.level(), this.damageSources().lightningBolt(), 100.0F);
 				for (int i = 0; i < 4; i++) {
 					LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
 					lightningBolt.setPos(target.getX(), target.getY(), target.getZ());
@@ -633,7 +628,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 
 		if (this.isSensitiveToWater() && this.isInWaterRainOrBubble()) {
 			this.teleport();
-			this.hurt(this.damageSources().onFire(), 4.0F);
+			this.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), 4.0F);
 			this.hurtTime = 1;
 			if (this.level().isClientSide()) {
 				for (int i = 0; i < 15; i++) {
@@ -659,7 +654,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 					this.level().explode(this, this.getX(), this.getY() + 1.0D, this.getZ(), 2.0F, true, Level.ExplosionInteraction.MOB);
 				}
 				this.push(0.0D, 3.0D, 0.0D);
-				this.hurt(this.damageSources().onFire(), Float.MAX_VALUE);
+				this.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), Float.MAX_VALUE);
 			}
 		}
 
@@ -685,9 +680,9 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 			return;
 		}
 		this.captureDrops(new java.util.ArrayList<>());
-		boolean flag = this.lastHurtByPlayerTime > 0;
-		if (this.shouldDropLoot() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.dropFromLootTable(damageSource, flag);
+		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
+		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
 			int i = 0;
@@ -710,15 +705,15 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 			}
 		}
 
-		this.dropEquipment();
+		dropEquipment(level);
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
-			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.lastHurtByPlayer, this.getExperienceReward(level, damageSource.getEntity()));
+			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
 			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
-		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, lastHurtByPlayerTime > 0)) {
+		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, this.getLastHurtByPlayerMemoryTime() > 0)) {
 			for (ItemEntity drop : drops) {
 				this.level().addFreshEntity(drop);
 			}
@@ -819,12 +814,12 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 			if (this.getTarget() != null) {
 				double d0 = this.distanceToSqr(this.getTarget());
 				if (d0 < 4.0D) {
-					this.doHurtTarget(this.getTarget());
+					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
 				}
 				if (this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.teleportTowards(this.getTarget());
 					this.teleport();
-					this.doHurtTarget(this.getTarget());
+					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
 				}
 			}
 		} else if (this.getMinionType() == EnumMinionType.BISHOP) {
@@ -836,7 +831,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 						EntityEnderColossusMinion enderColossusMinion = new EntityEnderColossusMinion(this.level());
 						enderColossusMinion.setPos(this.getX(), this.getY(), this.getZ());
 						enderColossusMinion.setYRot(this.getYRot());
-						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(enderColossusMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(enderColossusMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						enderColossusMinion.setMinionType(0);
 						enderColossusMinion.setHealth(enderColossusMinion.getMaxHealth());
 						this.level().addFreshEntity(enderColossusMinion);
@@ -847,7 +842,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 						EntityEnderColossusMinion enderColossusMinion = new EntityEnderColossusMinion(this.level());
 						enderColossusMinion.setPos(this.getX(), this.getY(), this.getZ());
 						enderColossusMinion.setYRot(this.getYRot());
-						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(enderColossusMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(enderColossusMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						enderColossusMinion.setMinionType(1);
 						enderColossusMinion.setHealth(enderColossusMinion.getMaxHealth());
 						this.level().addFreshEntity(enderColossusMinion);
@@ -884,7 +879,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 						EntityEnderColossusMinion enderColossusMinion = new EntityEnderColossusMinion(this.level());
 						enderColossusMinion.setPos(this.getX(), this.getY(), this.getZ());
 						enderColossusMinion.setYRot(this.getYRot());
-						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(enderColossusMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(enderColossusMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						enderColossusMinion.setMinionType(0);
 						enderColossusMinion.setHealth(enderColossusMinion.getMaxHealth());
 						this.level().addFreshEntity(enderColossusMinion);
@@ -895,7 +890,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 						EntityEnderColossusMinion enderColossusMinion = new EntityEnderColossusMinion(this.level());
 						enderColossusMinion.setPos(this.getX(), this.getY(), this.getZ());
 						enderColossusMinion.setYRot(this.getYRot());
-						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(enderColossusMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(enderColossusMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						enderColossusMinion.setMinionType(1);
 						enderColossusMinion.setHealth(enderColossusMinion.getMaxHealth());
 						this.level().addFreshEntity(enderColossusMinion);
@@ -906,7 +901,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 						EntityEnderColossusMinion enderColossusMinion = new EntityEnderColossusMinion(this.level());
 						enderColossusMinion.setPos(this.getX(), this.getY(), this.getZ());
 						enderColossusMinion.setYRot(this.getYRot());
-						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(enderColossusMinion.blockPosition()), MobSpawnType.SPAWNER, null);
+						enderColossusMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(enderColossusMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
 						enderColossusMinion.setMinionType(2);
 						enderColossusMinion.setHealth(enderColossusMinion.getMaxHealth());
 						this.level().addFreshEntity(enderColossusMinion);
@@ -918,7 +913,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 					this.level().addParticle(ParticleTypes.POOF, this.getX() + (this.getRandom().nextDouble() - 0.5D) * this.getBbWidth(), this.getY(), this.getZ() + (this.getRandom().nextDouble() - 0.5D) * this.getBbWidth(), 0.0D, 0.0D, 0.0D);
 				}
 			} else {
-				this.hasImpulse = false;
+				this.needsSync = false;
 			}
 			if (this.getTarget() != null && this.getRandom().nextInt(60) == 0) {
 				this.goalSelector.removeGoal(this.rangedAttackGoal);
@@ -941,7 +936,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 			if (this.attackPattern == 0 && this.getTarget() != null) {
 				if (this.getTarget().getY() + this.getTarget().getEyeHeight() > this.getY() + this.getEyeHeight() + this.heightOffset) {
 					this.push(0.0D, 0.4D - this.getDeltaMovement().y, 0.0D);
-					this.hasImpulse = true;
+					this.needsSync = true;
 				}
 				this.getLookControl().setLookAt(this.getTarget(), 180.0F, 40.0F);
 				double d0 = this.getTarget().getX() - this.getX();

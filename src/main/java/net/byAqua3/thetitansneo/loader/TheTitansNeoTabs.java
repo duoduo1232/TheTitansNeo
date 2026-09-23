@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class TheTitansNeoTabs {
 
-	public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(BuiltInRegistries.CREATIVE_MODE_TAB, TheTitansNeo.MODID);
+	public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TheTitansNeo.MODID);
 
 	public static final List<Item> BLACK_ITEMS = new ArrayList<Item>();
 
@@ -38,4 +38,5 @@ public class TheTitansNeoTabs {
 
 	public static void registerTabs(IEventBus modEventBus) {
 		TABS.register(modEventBus);
-	}}
+	}
+}

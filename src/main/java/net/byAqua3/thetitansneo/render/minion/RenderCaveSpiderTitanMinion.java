@@ -1,29 +1,42 @@
 package net.byAqua3.thetitansneo.render.minion;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
+import net.byAqua3.thetitansneo.entity.minion.EnumMinionType;
 import net.byAqua3.thetitansneo.entity.minion.IMinion;
-import net.minecraft.client.renderer.entity.CaveSpiderRenderer;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.client.renderer.entity.CaveSpiderRenderer;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.monster.spider.CaveSpider;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderCaveSpiderTitanMinion extends CaveSpiderRenderer {
 
-	public static final ResourceLocation CAVE_SPIDER = ResourceLocation.withDefaultNamespace("textures/entity/spider/cave_spider.png");
-	public static final ResourceLocation CAVE_SPIDER_PRIEST = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_priest.png");
-	public static final ResourceLocation CAVE_SPIDER_ZEALOT = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_zealot.png");
-	public static final ResourceLocation CAVE_SPIDER_BISHOP = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_bishop.png");
-	public static final ResourceLocation CAVE_SPIDER_TEMPLAR = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_templar.png");
+	public static final Identifier CAVE_SPIDER = Identifier.withDefaultNamespace("textures/entity/spider/cave_spider.png");
+	public static final Identifier CAVE_SPIDER_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_priest.png");
+	public static final Identifier CAVE_SPIDER_ZEALOT = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_zealot.png");
+	public static final Identifier CAVE_SPIDER_BISHOP = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_bishop.png");
+	public static final Identifier CAVE_SPIDER_TEMPLAR = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_templar.png");
 
 	public RenderCaveSpiderTitanMinion(EntityRendererProvider.Context context) {
 		super(context);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(CaveSpider entity) {
+	public TitanRenderState createRenderState() {
+		return new TitanRenderState();
+	}
+
+	@Override
+	public void extractRenderState(CaveSpider entity, TitanRenderState state, float partialTicks) {
+		super.extractRenderState(entity, state, partialTicks);
+		// 26.1.2: getTextureLocation 改为按 RenderState 取，所以纹理在这里选定。
+		state.texture = getMinionTexture(entity);
+	}
+
+	private static Identifier getMinionTexture(CaveSpider entity) {
 		if (entity instanceof IMinion) {
 			IMinion minion = (IMinion) entity;
 			switch (minion.getMinionType()) {
@@ -39,5 +52,11 @@ public class RenderCaveSpiderTitanMinion extends CaveSpiderRenderer {
 				return CAVE_SPIDER;
 			}
 		}
-		return super.getTextureLocation(entity);
-	}}
+		return CAVE_SPIDER;
+	}
+
+	@Override
+	public Identifier getTextureLocation(TitanRenderState state) {
+		return state.texture;
+	}
+}

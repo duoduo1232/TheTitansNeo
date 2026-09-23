@@ -24,27 +24,5 @@
             "translation": [ 1.13, 3.2, 1.13],
             "scale": [ 0.68, 0.68, 0.68 ]
         }
-    },
-    "overrides": [
-        {
-            "predicate": {
-                "thetitansneo:pulling": 1
-            },
-            "model": "thetitansneo:item/harcadium_bow_pulling_0"
-        },
-        {
-            "predicate": {
-                "thetitansneo:pulling": 1,
-                "thetitansneo:pull": 0.65
-            },
-            "model": "thetitansneo:item/harcadium_bow_pulling_1"
-        },
-        {
-            "predicate": {
-                "thetitansneo:pulling": 1,
-                "thetitansneo:pull": 0.9
-            },
-            "model": "thetitansneo:item/harcadium_bow_pulling_2"
-        }
-    ]
+    }
 }

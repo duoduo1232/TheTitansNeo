@@ -3,41 +3,45 @@ package net.byAqua3.thetitansneo.render.layer;
 import java.awt.Color;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.byAqua3.thetitansneo.TheTitansNeo;
-import net.byAqua3.thetitansneo.entity.titan.EntitySpiderTitan;
 import net.byAqua3.thetitansneo.model.ModelSpiderTitan;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class LayerSpiderTitanArmor extends RenderLayer<EntitySpiderTitan, ModelSpiderTitan> {
-	
-	private static final ResourceLocation DISINTIGRATION = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/disintigration.png");
+public class LayerSpiderTitanArmor extends RenderLayer<TitanRenderState, ModelSpiderTitan> {
+
+	private static final Identifier DISINTIGRATION = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/disintigration.png");
 	public ModelSpiderTitan model = new ModelSpiderTitan(0.1F);
 
-	public LayerSpiderTitanArmor(RenderLayerParent<EntitySpiderTitan, ModelSpiderTitan> renderer) {
+	public LayerSpiderTitanArmor(RenderLayerParent<TitanRenderState, ModelSpiderTitan> renderer) {
 		super(renderer);
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, EntitySpiderTitan entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-		if (entity.isArmored()) {
-			float f = (float) entity.tickCount + partialTicks;
-			this.model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, TitanRenderState state, float yRot, float xRot) {
+		if (state.isArmored) {
+			float f = state.ageInTicks;
+			// 26.1.2: 改用 SubmitNodeCollector 提交模型，实体数据从 state 读取。
+			RenderType renderType = RenderTypes.energySwirl(DISINTIGRATION, this.xOffset(f) % 1.0F, f * 0.01F % 1.0F);
 			this.getParentModel().copyPropertiesTo(this.model);
-			VertexConsumer vertexconsumer = multiBufferSource.getBuffer(RenderType.energySwirl(DISINTIGRATION, this.xOffset(f) % 1.0F, f * 0.01F % 1.0F));
-			this.model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-			this.model.renderToBuffer(poseStack, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, new Color((float) (0.6F + Math.cos(f * 0.05F) * 0.3F), 0.0F, 0.0F, 1.0F).getRGB());
+			this.model.heldItem.visible = false;
+			submitNodeCollector.submitModel(this.model, state, poseStack, renderType, lightCoords, OverlayTexture.NO_OVERLAY, color(state, f), null, state.outlineColor, null);
 		}
+	}
+
+	protected int color(TitanRenderState state, float f) {
+		return new Color((float) (0.6F + Math.cos(f * 0.05F) * 0.3F), 0.0F, 0.0F, 1.0F).getRGB();
 	}
 
 	protected float xOffset(float tickCount) {

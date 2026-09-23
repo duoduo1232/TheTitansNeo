@@ -1,10 +1,10 @@
 package net.byAqua3.thetitansneo.entity;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface IBossBarDisplay {
 	
-	ResourceLocation getBossBarTexture();
+	Identifier getBossBarTexture();
 	
 	public default int getBossBarNameColor() {
 		return 16777215;

@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,9 +27,10 @@ public class MobEffectRadiation extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity entity, int amplifier) {
-		Holder<DamageType> damageType = entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(TheTitansNeoDamageTypes.RADIATION);
+	public boolean applyEffectTick(net.minecraft.server.level.ServerLevel serverLevel, LivingEntity entity, int amplifier) {
+		Holder<DamageType> damageType = entity.level().registryAccess().holderOrThrow(TheTitansNeoDamageTypes.RADIATION);
 		entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 2.0F, 2.0F, false);
-		entity.hurt(new DamageSource(damageType), 2.0F * (amplifier + 1));
+		entity.hurtServer((ServerLevel) serverLevel, new DamageSource(damageType), 2.0F * (amplifier + 1));
 		return true;
-	}}
+	}
+}

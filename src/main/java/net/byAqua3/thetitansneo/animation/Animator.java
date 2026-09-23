@@ -43,7 +43,7 @@ public class Animator {
 		this.animEntity = entity;
 		this.transformMap.clear();
 		this.prevTransformMap.clear();
-		for (ModelPart part : this.rootModel.getAllParts().toList()) {
+		for (ModelPart part : this.rootModel.getAllParts()) {
 			part.xRot = 0.0F;
 			part.yRot = 0.0F;
 			part.zRot = 0.0F;
@@ -118,7 +118,7 @@ public class Animator {
 					part.z += transform.offsetZ;
 				}
 			} else {
-				float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+				float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 				float tick = ((animTick - this.prevTempTick) + partialTicks) / (this.tempTick - this.prevTempTick);
 				float inc = Mth.sin(tick * Mth.PI / 2.0F);
 				float dec = 1.0F - inc;

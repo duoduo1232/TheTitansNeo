@@ -36,9 +36,9 @@ import net.byAqua3.thetitansneo.entity.titan.EntitySpiderTitan;
 import net.byAqua3.thetitansneo.entity.titan.EntityWitherzilla;
 import net.byAqua3.thetitansneo.entity.titan.EntityZombieTitan;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.animal.golem.SnowGolem;
 import net.minecraft.world.entity.monster.MagmaCube;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
@@ -150,4 +150,5 @@ public class TheTitansNeoPredicateTargets {
 		public boolean test(LivingEntity entity) {
 			return !(entity instanceof EntityWitherzilla) && !(entity instanceof EntityWitherzillaMinion) && !(entity instanceof EntityWitherTurret);
 		}
-	}, true);}
+	}, true);
+}

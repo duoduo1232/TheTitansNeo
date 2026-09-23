@@ -34,10 +34,9 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.byAqua3.thetitansneo.util.AnimationUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -51,7 +50,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -67,6 +66,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	public EntityTitanPart head;
@@ -107,8 +107,8 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/omegafish.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/omegafish.png");
 	}
 
 	@Override
@@ -190,32 +190,32 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		if (tag.hasUUID("Owner")) {
-			this.ownerUUID = tag.getUUID("Owner");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		if (input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+			this.ownerUUID = input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 			this.cachedOwner = null;
 		}
-		this.damageToParts = tag.getInt("DamageToParts");
-		this.isSubdued = tag.getBoolean("IsSubdued");
-		this.isBurrowing = tag.getBoolean("IsBurrowing");
-		this.isStunned = tag.getBoolean("IsStunned");
+		this.damageToParts = input.getIntOr("DamageToParts", 0);
+		this.isSubdued = input.getBooleanOr("IsSubdued", false);
+		this.isBurrowing = input.getBooleanOr("IsBurrowing", false);
+		this.isStunned = input.getBooleanOr("IsStunned", false);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 		if (this.ownerUUID != null) {
-			tag.putUUID("Owner", this.ownerUUID);
+			output.store("Owner", net.minecraft.core.UUIDUtil.CODEC, this.ownerUUID);
 		}
-		tag.putInt("DamageToParts", this.damageToParts);
-		tag.putBoolean("IsSubdued", this.isSubdued);
-		tag.putBoolean("IsBurrowing", this.isBurrowing);
-		tag.putBoolean("IsStunned", this.isStunned);
+		output.putInt("DamageToParts", this.damageToParts);
+		output.putBoolean("IsSubdued", this.isSubdued);
+		output.putBoolean("IsBurrowing", this.isBurrowing);
+		output.putBoolean("IsStunned", this.isStunned);
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.setWaiting(true);
 		return groupData;
@@ -385,10 +385,10 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 		if (entityTitanPart == this.head) {
 			amount *= 2.0F;
 		}
-		if (this.hurt(damageSource, amount)) {
+		if (this.hurtServer((ServerLevel) this.level(), damageSource, amount)) {
 			if (damageSource.getEntity() != null && damageSource.getEntity() instanceof Player && this.damageToParts < 8 && !this.isStunned) {
 				this.damageToParts++;
-				this.hurt(damageSource, 100.0F);
+				this.hurtServer((ServerLevel) this.level(), damageSource, 100.0F);
 				this.setTarget((LivingEntity) damageSource.getEntity());
 				if (this.damageToParts >= 1) {
 					this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());
@@ -401,14 +401,14 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (this.isArmored()) {
 			amount /= 2.0F;
 		}
 		if (this.isStunned) {
 			amount *= 3.0F;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
@@ -561,7 +561,7 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 		if (minionType != EnumMinionType.SPECIAL) {
 			if (entity instanceof EntityOmegafishMinion) {
 				EntityOmegafishMinion omegafishMinion = (EntityOmegafishMinion) entity;
-				omegafishMinion.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, 4, true, false));
+				omegafishMinion.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, true, false));
 			}
 		}
 	}
@@ -586,7 +586,7 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 		if (this.onGround() && player.getXRot() < -80.0F) {
 			this.jumpFromGround();
 		}
-		if (!this.isControlledByLocalInstance()) {
+		if (!this.isLocalInstanceAuthoritative()) {
 			this.calculateEntityAnimation(false);
 		}
 	}
@@ -1054,12 +1054,12 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 			float f1 = Mth.sin(f);
 			float f2 = Mth.cos(f);
 
-			this.head.moveTo(this.getX() - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 3.0F), this.getY() - (Mth.sin(this.getXRot() * Mth.PI / 180.0F) * 2.0F), this.getZ() + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 3.0F));
-			this.body.moveTo(this.getX(), this.getY(), this.getZ());
-			this.tailbase.moveTo(this.getX() + f1 * 4.0D, this.getY(), this.getZ() - f2 * 4.0D);
-			this.tail1.moveTo(this.getX() + f1 * 7.0D, this.getY(), this.getZ() - f2 * 7.0D);
-			this.tail2.moveTo(this.getX() + f1 * 9.5D, this.getY(), this.getZ() - f2 * 9.5D);
-			this.tailtip.moveTo(this.getX() + f1 * 11.5D, this.getY(), this.getZ() - f2 * 11.5D);
+			this.head.setPos(this.getX() - (Mth.sin(this.yHeadRot * Mth.PI / 180.0F) * 3.0F), this.getY() - (Mth.sin(this.getXRot() * Mth.PI / 180.0F) * 2.0F), this.getZ() + (Mth.cos(this.yHeadRot * Mth.PI / 180.0F) * 3.0F));
+			this.body.setPos(this.getX(), this.getY(), this.getZ());
+			this.tailbase.setPos(this.getX() + f1 * 4.0D, this.getY(), this.getZ() - f2 * 4.0D);
+			this.tail1.setPos(this.getX() + f1 * 7.0D, this.getY(), this.getZ() - f2 * 7.0D);
+			this.tail2.setPos(this.getX() + f1 * 9.5D, this.getY(), this.getZ() - f2 * 9.5D);
+			this.tailtip.setPos(this.getX() + f1 * 11.5D, this.getY(), this.getZ() - f2 * 11.5D);
 
 			if (this.isAlive() && !this.isStunned) {
 				this.collideWithEntities(this.head, this.level().getEntities(this, this.head.getBoundingBox().inflate(1.0D, 0.0D, 1.0D)));

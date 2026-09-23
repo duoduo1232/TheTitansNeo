@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.byAqua3.thetitansneo.entity.titan.EntityMagmaCubeTitan;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -13,14 +14,14 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
-public class ModelMagmaCubeTitan extends EntityModel<EntityMagmaCubeTitan> {
+public class ModelMagmaCubeTitan extends EntityModel<TitanRenderState> {
 
 	public ModelPart[] segments = new ModelPart[8];
 	public ModelPart core;
 
 	public ModelMagmaCubeTitan() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.core = root.getChild("core");
 		for (int i = 0; i < this.segments.length; i++) {
 			this.segments[i] = root.getChild("segment" + i);
@@ -48,8 +49,8 @@ public class ModelMagmaCubeTitan extends EntityModel<EntityMagmaCubeTitan> {
 	}
 
 	@Override
-	public void setupAnim(EntityMagmaCubeTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		float f3 = entity.prevSquishFactor + (entity.squishFactor - entity.prevSquishFactor) * ageInTicks;
+	public void setupAnim(TitanRenderState state) {
+		float f3 = state.prevSquishFactor + (state.squishFactor - state.prevSquishFactor) * state.ageInTicks;
 		if (f3 < 0.0F) {
 			f3 = 0.0F;
 		}
@@ -57,11 +58,6 @@ public class ModelMagmaCubeTitan extends EntityModel<EntityMagmaCubeTitan> {
 			this.segments[i].y = -(4 - i) * f3 * 1.7F;
 		}
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.core.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		for (int i = 0; i < this.segments.length; i++) {
-			this.segments[i].render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		}
-	}}
+}

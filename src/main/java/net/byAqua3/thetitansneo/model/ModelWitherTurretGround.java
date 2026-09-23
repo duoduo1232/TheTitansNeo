@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.byAqua3.thetitansneo.entity.EntityWitherTurretGround;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -14,7 +15,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelWitherTurretGround extends EntityModel<EntityWitherTurretGround> {
+public class ModelWitherTurretGround extends EntityModel<TitanRenderState> {
 
 	public ModelPart head1;
 	public ModelPart head2;
@@ -23,8 +24,8 @@ public class ModelWitherTurretGround extends EntityModel<EntityWitherTurretGroun
 	public ModelPart base;
 
 	public ModelWitherTurretGround() {
-		super();
-		ModelPart root = createBodyLayer().bakeRoot();
+		super(createBodyLayer().bakeRoot());
+		ModelPart root = this.root;
 		this.head1 = root.getChild("head1");
 		this.head2 = root.getChild("head2");
 		this.pole = root.getChild("pole");
@@ -45,20 +46,14 @@ public class ModelWitherTurretGround extends EntityModel<EntityWitherTurretGroun
 	}
 
 	@Override
-	public void setupAnim(EntityWitherTurretGround entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		this.head1.xRot = headPitch * Mth.PI / 180.0F;
-		this.head2.xRot = headPitch * Mth.PI / 180.0F;
-		this.head1.yRot = headYaw * Mth.PI / 180.0F;
-		this.head2.yRot = headYaw * Mth.PI / 180.0F;
-		this.pole.yRot = headYaw * Mth.PI / 180.0F / 2.0F;
-		this.support.xRot = headPitch * Mth.PI / 180.0F;
+	public void setupAnim(TitanRenderState state) {
+		this.head1.xRot = state.xRot * Mth.PI / 180.0F;
+		this.head2.xRot = state.xRot * Mth.PI / 180.0F;
+		this.head1.yRot = state.yRot * Mth.PI / 180.0F;
+		this.head2.yRot = state.yRot * Mth.PI / 180.0F;
+		this.pole.yRot = state.yRot * Mth.PI / 180.0F / 2.0F;
+		this.support.xRot = state.xRot * Mth.PI / 180.0F;
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.head1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.head2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.pole.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.support.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.base.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}}
+}

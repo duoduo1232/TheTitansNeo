@@ -17,11 +17,10 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoPredicateTargets;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -34,7 +33,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -47,6 +46,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 
 	private static final EntityDataAccessor<Integer> SLIME_SIZE = SynchedEntityData.defineId(EntitySlimeTitan.class, EntityDataSerializers.INT);
@@ -74,8 +74,8 @@ public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/slime_titan.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/slime_titan.png");
 	}
 
 	@Override
@@ -145,22 +145,22 @@ public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setSlimeSize(tag.getInt("SlimeSize"));
-		this.wasOnGround = tag.getBoolean("wasOnGround");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setSlimeSize(input.getIntOr("SlimeSize", 0));
+		this.wasOnGround = input.getBooleanOr("wasOnGround", false);
 
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putInt("SlimeSize", this.getSlimeSize());
-		tag.putBoolean("wasOnGround", this.wasOnGround);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putInt("SlimeSize", this.getSlimeSize());
+		output.putBoolean("wasOnGround", this.wasOnGround);
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		int i = this.getRandom().nextInt(3);
 		if (i < 2 && this.getRandom().nextFloat() < 0.5F) {
@@ -286,8 +286,8 @@ public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 						Slime slime = this instanceof EntityMagmaCubeTitan ? new MagmaCube(EntityType.MAGMA_CUBE, this.level()) : new Slime(EntityType.SLIME, this.level());
 						this.setPos(this.getX(), this.getY(), this.getZ());
 						this.setYRot(this.getYRot());
-						slime.finalizeSpawn((ServerLevelAccessor) this.level(), this.level().getCurrentDifficultyAt(slime.blockPosition()), MobSpawnType.CONVERSION, null);
-						slime.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, 4, true, false));
+						slime.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(slime.blockPosition()), EntitySpawnReason.CONVERSION, null);
+						slime.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 100, 4, true, false));
 						this.level().addFreshEntity(slime);
 					}
 				}
@@ -302,7 +302,7 @@ public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 	@Override
 	public void jumpFromGround() {
 		this.setTitanDeltaMovement(this.getDeltaMovement().x, 1.5D + (this.getSlimeSize() * 0.2F), this.getDeltaMovement().z);
-		this.hasImpulse = true;
+		this.needsSync = true;
 		if (this.getTarget() != null) {
 			double d0 = this.getTarget().getX() - this.getX();
 			double d1 = this.getTarget().getZ() - this.getZ();
@@ -313,13 +313,13 @@ public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		this.setOnGround(true);
-		this.hasImpulse = false;
+		this.needsSync = false;
 		if (fallDistance <= 0.0F) {
 			return false;
 		}
-		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP);
+		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP_BOOST);
 		float f1 = (mobEffectInstance != null) ? (mobEffectInstance.getAmplifier() + 1) : 0.0F;
 		int i = Mth.ceil(fallDistance - 12.0F - f1);
 		if (i > 0) {
@@ -353,9 +353,10 @@ public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 		return true;
 	}
 
+	// 26.1.2: Entity.kill() 改为 kill(ServerLevel)，覆写需同步签名。
 	@Override
-	public void kill() {
-		super.kill();
+	public void kill(ServerLevel level) {
+		super.kill(level);
 		this.setTitanHealth(0.0F);
 	}
 

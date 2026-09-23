@@ -11,7 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 public class DamageSourceTitanAttack extends DamageSource {
 
 	public DamageSourceTitanAttack(Entity attacker) {
-		super(attacker.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(TheTitansNeoDamageTypes.TITAN_ATTACK), attacker);
+		super(attacker.level().registryAccess().holderOrThrow(TheTitansNeoDamageTypes.TITAN_ATTACK), attacker);
 	}
 
 	@Override

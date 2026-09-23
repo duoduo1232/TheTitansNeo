@@ -22,11 +22,10 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -38,7 +37,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -52,6 +51,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 
 	private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(EntityGhastTitan.class, EntityDataSerializers.BOOLEAN);
@@ -75,8 +75,8 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/ghast_titan.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/ghast_titan.png");
 	}
 
 	@Override
@@ -141,13 +141,13 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
 	}
 
 	public float rotlerp(float angle, float targetAngle, float maxIncrease) {
@@ -162,7 +162,7 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		return groupData;
 	}
@@ -323,22 +323,22 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (damageSource.is(DamageTypes.IN_FIRE) || damageSource.is(DamageTypes.ON_FIRE)) {
 			this.heal(amount);
 			return false;
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		return false;
 	}
 
 	@Override
 	public void travel(Vec3 travelVector) {
-		if (this.isControlledByLocalInstance()) {
+		if (this.isLocalInstanceAuthoritative()) {
 			if (this.isInWater()) {
 				this.moveRelative(0.02F, travelVector);
 				this.move(MoverType.SELF, this.getDeltaMovement());
@@ -493,18 +493,18 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 			if (player != null && this.getTarget() == player) {
 				player.setRemainingFireTicks(50);
 				if (this.getRandom().nextInt(200) == 0 && this.getHealth() <= getMaxHealth() / 100.0F) {
-					player.hurt(this.damageSources().onFire(), Float.MAX_VALUE);
+					player.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), Float.MAX_VALUE);
 				}
 				if (player.getAbsorptionAmount() <= 0.0F && this.tickCount % 10 == 0) {
-					player.hurt(this.damageSources().onFire(), 12.0F);
+					player.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), 12.0F);
 					if (!this.level().isClientSide()) {
-						player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 400, 9));
+						player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 400, 9));
 						if (player.getHealth() <= 5.0F) {
 							player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 400, 1));
 						}
 					}
 				} else if (player.getAbsorptionAmount() >= 0.0F && this.tickCount % 20 == 0) {
-					player.hurt(this.damageSources().onFire(), 12.0F);
+					player.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), 12.0F);
 				}
 			}
 		}
@@ -512,4 +512,5 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 		for (int i = 0; i < this.getParticleCount(); i++) {
 			this.level().addParticle(this.getParticles(), this.getX() + (this.getRandom().nextDouble() - 0.5D) * 96.0D, this.getY() + this.getRandom().nextDouble() * 96.0D, this.getZ() + (this.getRandom().nextDouble() - 0.5D) * 96.0D, 0.0D, 0.5D, 0.0D);
 		}
-	}}
+	}
+}

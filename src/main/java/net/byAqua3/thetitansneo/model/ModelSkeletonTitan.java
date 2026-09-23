@@ -8,6 +8,7 @@ import net.byAqua3.thetitansneo.entity.titan.EntitySkeletonTitan;
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -17,7 +18,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
+public class ModelSkeletonTitan extends EntityModel<TitanRenderState> {
 
 	private Animator animator;
 	public boolean isWither;
@@ -43,8 +44,8 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 	public ModelPart rightFemur;
 
 	public ModelSkeletonTitan(float grow) {
-		super();
-		ModelPart root = createBodyLayer(grow).bakeRoot();
+		super(createBodyLayer(grow).bakeRoot());
+		ModelPart root = this.root;
 		this.hips = root.getChild("hips");
 		this.spine1 = root.getChild("hips").getChild("spine1");
 		this.spine2 = root.getChild("hips").getChild("spine1").getChild("spine2");
@@ -94,8 +95,8 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 	}
 
 	@Override
-	public void setupAnim(EntitySkeletonTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		if (entity.getSkeletonType() == 1) {
+	public void setupAnim(TitanRenderState state) {
+		if (state.skeletonType == 1) {
 			this.isWither = true;
 			this.heldItem.visible = false;
 			if (TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.titanWeaponOldModel, false)) {
@@ -108,15 +109,10 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 			}
 			this.heldItem2.visible = false;
 		}
-		this.animate(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch);
+		this.animate((EntitySkeletonTitan) state.titan, state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
+	// 26.1.2: Model.renderToBuffer 已被基类 final 化，改为渲染整棵 root。
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		this.hips.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.leftThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		this.rightThigh.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
 
 	public void setAngles() {
 		this.head.x = 0.0F;
@@ -150,7 +146,7 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 	}
 
 	public void animate(EntitySkeletonTitan entity, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
-		float partialTicks = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTicks = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		this.animator.update(entity);
 		this.setAngles();
 
@@ -166,7 +162,7 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 				this.rightShoulder.yRot = (0.025F + 0.025F * f6) * Mth.PI;
 				this.leftShoulder.yRot = (-0.025F + -0.025F * f6) * Mth.PI;
 			}
-			if (this.riding) {
+			if (entity.isPassenger()) {
 				this.rightThigh.xRot = -1.5707964F;
 				this.leftThigh.xRot = -1.5707964F;
 				this.rightThigh.yRot = 0.31415927F;
@@ -195,7 +191,7 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 				if (this.leftFemur.xRot < 0.13962634F) {
 					this.leftFemur.xRot = 0.13962634F;
 				}
-				if (!this.riding) {
+				if (!entity.isPassenger()) {
 					this.rightShoulder.xRot = 0.08726646F + Mth.cos(limbSwing * fo + 3.1415927F) * 1.0F * limbSwingAmount;
 					this.leftShoulder.xRot = 0.08726646F + Mth.cos(limbSwing * fo) * 1.0F * limbSwingAmount;
 					this.rightForearm.xRot = -0.17453292F + Mth.cos(limbSwing * fo + 2.1415927F) * 1.0F * limbSwingAmount;
@@ -227,7 +223,7 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 				this.head.xRot += facePitch * 0.9F;
 				this.head.yRot += faceYaw * 0.9F;
 			}
-			if (!entity.onGround() && !this.riding) {
+			if (!entity.onGround() && !entity.isPassenger()) {
 				this.spine6.yRot = 0.0F;
 				this.spine5.yRot = 0.0F;
 				this.spine4.yRot = 0.0F;
@@ -1641,4 +1637,5 @@ public class ModelSkeletonTitan extends EntityModel<EntitySkeletonTitan> {
 		this.animator.endPhase();
 		this.animator.setStationaryPhase(10);
 		this.animator.resetPhase(40);
-	}}
+	}
+}

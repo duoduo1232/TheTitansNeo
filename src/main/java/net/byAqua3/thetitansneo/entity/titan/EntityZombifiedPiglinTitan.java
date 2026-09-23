@@ -37,12 +37,11 @@ import net.byAqua3.thetitansneo.util.AnimationUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -56,7 +55,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -71,6 +70,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	private static final EntityDataAccessor<Boolean> BABY = SynchedEntityData.defineId(EntityZombifiedPiglinTitan.class, EntityDataSerializers.BOOLEAN);
@@ -104,8 +104,8 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 	}
 
 	@Override
-	public ResourceLocation getBossBarTexture() {
-		return ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/zombified_piglin_titan.png");
+	public Identifier getBossBarTexture() {
+		return Identifier.tryBuild(TheTitansNeo.MODID, "textures/gui/bossbar/zombified_piglin_titan.png");
 	}
 
 	@Override
@@ -183,21 +183,21 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		this.setBaby(tag.getBoolean("IsBaby"));
-		this.isStunned = tag.getBoolean("IsStunned");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.setBaby(input.getBooleanOr("IsBaby", false));
+		this.isStunned = input.getBooleanOr("IsStunned", false);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.putBoolean("IsBaby", this.isBaby());
-		tag.putBoolean("IsStunned", this.isStunned);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putBoolean("IsBaby", this.isBaby());
+		output.putBoolean("IsStunned", this.isStunned);
 	}
 
 	@Override
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
 		SpawnGroupData groupData = super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
 		this.setWaiting(true);
 		if (level.getRandom().nextFloat() < 0.05F) {
@@ -449,12 +449,12 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 		if (entityTitanPart != this.head) {
 			amount /= 3.0F;
 		}
-		this.hurt(damageSource, amount);
+		this.hurtServer((ServerLevel) this.level(), damageSource, amount);
 		return true;
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		if (this.isArmored()) {
 			amount /= 3.0F;
 		}
@@ -481,7 +481,7 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 				}
 			}
 		}
-		return super.hurt(damageSource, amount);
+		return super.hurtServer(level, damageSource, amount);
 	}
 	
 	@Override
@@ -581,7 +581,7 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 			if (entity instanceof EntityZombifiedPiglinTitanMinion) {
 				EntityZombifiedPiglinTitanMinion zombifiedPiglinTitanMinion = (EntityZombifiedPiglinTitanMinion) entity;
 				zombifiedPiglinTitanMinion.setBaby(this.isBaby());
-				zombifiedPiglinTitanMinion.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, 4, true, false));
+				zombifiedPiglinTitanMinion.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, true, false));
 				zombifiedPiglinTitanMinion.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, Integer.MAX_VALUE, 0, true, false));
 			}
 		}
@@ -966,7 +966,7 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 					if (entity != null && entity instanceof LivingEntity && this.canAttackEntity(entity)) {
 						LivingEntity livingEntity = (LivingEntity) entity;
 						if (!this.level().isClientSide()) {
-							livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4));
+							livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, 4));
 						}
 					}
 				}
@@ -1056,12 +1056,12 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 				this.rightLeg.setSize(4.0F, 12.0F);
 			}
 			
-			this.head.moveTo(this.getX(), this.getY() + (this.isBaby() ? 12.0D : 24.0D), this.getZ());
-			this.body.moveTo(this.getX(), this.getY() + (this.isBaby() ? 6.0D : 12.0D), this.getZ());
-			this.leftArm.moveTo(this.getX() - f2 * (this.isBaby() ? 3.0D : 6.0D), this.getY() + (this.isBaby() ? 10.0D : 20.0D), this.getZ() - f1 * (this.isBaby() ? 3.0D : 6.0D));
-			this.rightArm.moveTo(this.getX() + f2 * (this.isBaby() ? 3.0D : 6.0D), this.getY() + (this.isBaby() ? 10.0D : 20.0D), this.getZ() + f1 * (this.isBaby() ? 3.0D : 6.0D));
-			this.leftLeg.moveTo(this.getX() - f2 * (this.isBaby() ? 1.0D : 2.0D), this.getY(), this.getZ() - f1 * (this.isBaby() ? 1.0D : 2.0D));
-			this.rightLeg.moveTo(this.getX() + f2 * (this.isBaby() ? 1.0D : 2.0D), this.getY(), this.getZ() + f1 * (this.isBaby() ? 1.0D : 2.0D));
+			this.head.setPos(this.getX(), this.getY() + (this.isBaby() ? 12.0D : 24.0D), this.getZ());
+			this.body.setPos(this.getX(), this.getY() + (this.isBaby() ? 6.0D : 12.0D), this.getZ());
+			this.leftArm.setPos(this.getX() - f2 * (this.isBaby() ? 3.0D : 6.0D), this.getY() + (this.isBaby() ? 10.0D : 20.0D), this.getZ() - f1 * (this.isBaby() ? 3.0D : 6.0D));
+			this.rightArm.setPos(this.getX() + f2 * (this.isBaby() ? 3.0D : 6.0D), this.getY() + (this.isBaby() ? 10.0D : 20.0D), this.getZ() + f1 * (this.isBaby() ? 3.0D : 6.0D));
+			this.leftLeg.setPos(this.getX() - f2 * (this.isBaby() ? 1.0D : 2.0D), this.getY(), this.getZ() - f1 * (this.isBaby() ? 1.0D : 2.0D));
+			this.rightLeg.setPos(this.getX() + f2 * (this.isBaby() ? 1.0D : 2.0D), this.getY(), this.getZ() + f1 * (this.isBaby() ? 1.0D : 2.0D));
 
 			if (this.isAlive() && !this.isStunned) {
 				for (EntityTitanPart part : this.parts) {
@@ -1142,4 +1142,5 @@ public class EntityZombifiedPiglinTitan extends EntityTitan implements IEntityMu
 			}
 		}
 		this.animationTick();
-	}}
+	}
+}

@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.syncher.SynchedEntityData.Builder;
 import net.minecraft.server.level.ServerChunkCache;
@@ -47,15 +46,15 @@ public class EntityExperienceOrbTitan extends Entity {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag tag) {
-		this.age = tag.getInt("Age");
-		this.count = tag.getInt("Count");
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		this.age = input.getIntOr("Age", 0);
+		this.count = input.getIntOr("Count", 0);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag tag) {
-		tag.putInt("Age", this.age);
-		tag.putInt("Count", this.count);
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		output.putInt("Age", this.age);
+		output.putInt("Count", this.count);
 	}
 
 	private int repairPlayerItems(ServerPlayer player, int value) {
@@ -94,7 +93,7 @@ public class EntityExperienceOrbTitan extends Entity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
 		return false;
 	}
 
@@ -102,14 +101,11 @@ public class EntityExperienceOrbTitan extends Entity {
 	protected void doWaterSplashEffect() {
 	}
 	
-	@Override
-	public void updateFluidHeightAndDoFluidPushing() {
-	}
 
 	@Override
-	public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource damageSource) {
+	public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource damageSource) {
 		this.setOnGround(true);
-		this.hasImpulse = false;
+		this.needsSync = false;
 		if (fallDistance <= 0.0F) {
 			return false;
 		}
@@ -130,8 +126,8 @@ public class EntityExperienceOrbTitan extends Entity {
 			
 			ServerLevel serverLevel = (ServerLevel) this.level();
 			ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
-			Holder<SoundEvent> holder = serverLevel.registryAccess().registryOrThrow(Registries.SOUND_EVENT).wrapAsHolder(SoundEvents.EXPERIENCE_ORB_PICKUP);
-			serverChunkCache.broadcastAndSend(player, new ClientboundSoundPacket(holder, SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 5.0F, (1.0F + (this.level().getRandom().nextFloat() - this.level().getRandom().nextFloat()) * 0.2F) * 0.7F, serverLevel.getServer().getWorldData().worldGenOptions().seed()));
+			Holder<SoundEvent> holder = serverLevel.registryAccess().lookupOrThrow(Registries.SOUND_EVENT).wrapAsHolder(SoundEvents.EXPERIENCE_ORB_PICKUP);
+			serverChunkCache.sendToTrackingPlayersAndSelf(player, new ClientboundSoundPacket(holder, SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 5.0F, (1.0F + (this.level().getRandom().nextFloat() - this.level().getRandom().nextFloat()) * 0.2F) * 0.7F, serverLevel.getServer().getWorldGenSettings().options().seed()));
 
 			int i = this.repairPlayerItems((ServerPlayer) player, count);
 			if (i > 0) {
@@ -173,4 +169,5 @@ public class EntityExperienceOrbTitan extends Entity {
 				this.discard();
 			}
 		}
-	}}
+	}
+}

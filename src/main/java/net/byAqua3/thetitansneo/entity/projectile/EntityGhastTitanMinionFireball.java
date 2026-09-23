@@ -6,11 +6,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityGhastTitanMinionFireball extends LargeFireball {
 
 	private int explosionPower = 1;
@@ -48,9 +49,9 @@ public class EntityGhastTitanMinionFireball extends LargeFireball {
 				float amount = (float) owner.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
 				livingEntity.invulnerableTime = 0;
 				livingEntity.setRemainingFireTicks((int) amount);
-				owner.doHurtTarget(livingEntity);
+				owner.doHurtTarget((ServerLevel) this.level(), livingEntity);
 			} else {
-				livingEntity.hurt(this.damageSources().fireball(this, owner), 17.0F);
+				livingEntity.hurtServer((ServerLevel) this.level(), this.damageSources().fireball(this, owner), 17.0F);
 			}
 
 			if (!this.level().isClientSide()) {

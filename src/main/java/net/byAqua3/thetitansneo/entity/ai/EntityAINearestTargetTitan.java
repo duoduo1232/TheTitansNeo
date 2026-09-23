@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityAINearestTargetTitan<T extends LivingEntity> extends TargetGoal {
 
 	protected final Class<T> targetType;
@@ -58,10 +59,10 @@ public class EntityAINearestTargetTitan<T extends LivingEntity> extends TargetGo
 
 	protected void findTarget() {
 		if (this.targetType != Player.class && this.targetType != ServerPlayer.class) {
-			T target = this.mob.level().getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+			T target = ((ServerLevel) this.mob.level()).getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 
 			if (this.mob instanceof EntityTitan) {
-				EntityTitan titan = this.mob.level().getNearestEntity(this.mob.level().getEntitiesOfClass(EntityTitan.class, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+				EntityTitan titan = ((ServerLevel) this.mob.level()).getNearestEntity(this.mob.level().getEntitiesOfClass(EntityTitan.class, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 
 				if (titan != null) {
 					this.target = titan;

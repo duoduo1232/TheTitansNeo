@@ -5,6 +5,7 @@ import java.awt.Color;
 import net.byAqua3.thetitansneo.entity.titan.EntityTitan;
 import net.byAqua3.thetitansneo.entity.titan.EntityTitanSpirit;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
@@ -25,10 +26,10 @@ public class MobEffectDeath extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+	public boolean applyEffectTick(net.minecraft.server.level.ServerLevel serverLevel, LivingEntity entity, int amplifier) {
 		if (entity.isAlive()) {
 			entity.setRemainingFireTicks(20);
-			entity.hurt(entity.damageSources().fellOutOfWorld(), 4.0F * (amplifier + 1));
+			entity.hurtServer((ServerLevel) serverLevel, entity.damageSources().fellOutOfWorld(), 4.0F * (amplifier + 1));
 
 			if (entity.deathTime > 0) {
 				entity.deathTime++;
@@ -54,4 +55,5 @@ public class MobEffectDeath extends MobEffect {
 			}
 		}
 		return true;
-	}}
+	}
+}

@@ -23,6 +23,9 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 public class BlockVoidBlock extends DropExperienceBlock {
 
 	public BlockVoidBlock(Properties properties) {
@@ -31,7 +34,7 @@ public class BlockVoidBlock extends DropExperienceBlock {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+	public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, net.minecraft.world.item.ItemStack toolStack, boolean willHarvest, FluidState fluid) {
 		if (!(player.getMainHandItem().isEnchanted() && player.getMainHandItem().getEnchantments().keySet().contains(level.registryAccess().holderOrThrow(Enchantments.SILK_TOUCH)))) {
 			if (!level.isClientSide()) {
 				for (int i = 0; i < 9; i++) {
@@ -39,7 +42,7 @@ public class BlockVoidBlock extends DropExperienceBlock {
 				}
 			}
 		}
-		return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+		return super.onDestroyedByPlayer(state, level, pos, player, toolStack, willHarvest, fluid);
 	}
 
 	@Override
@@ -48,12 +51,12 @@ public class BlockVoidBlock extends DropExperienceBlock {
 	}
 
 	@Override
-	public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+	public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
 		if (entity != null) {
 			if (!level.isClientSide()) {
 				level.explode(null, entity.getX(), entity.getY(), entity.getZ(), 3.0F, false, ExplosionInteraction.BLOCK);
 			}
-			entity.hurt(entity.damageSources().fellOutOfWorld(), 36.0F);
+			entity.hurtServer((ServerLevel) level, entity.damageSources().fellOutOfWorld(), 36.0F);
 			entity.setDeltaMovement(entity.getDeltaMovement().x * 0.2D, entity.getDeltaMovement().y, entity.getDeltaMovement().z * 0.2D);
 
 			if (entity instanceof LivingEntity) {
@@ -73,11 +76,11 @@ public class BlockVoidBlock extends DropExperienceBlock {
 
 	private static void spawnParticles(Level level, BlockPos pos) {
 		double d0 = 0.5625D;
-		RandomSource randomSource = level.random;
+		RandomSource randomSource = level.getRandom();
 
 		for (Direction direction : Direction.values()) {
 			BlockPos blockPos = pos.relative(direction);
-			if (!level.getBlockState(blockPos).isSolidRender(level, blockPos)) {
+			if (!level.getBlockState(blockPos).isSolidRender()) {
 				Direction.Axis direction$axis = direction.getAxis();
 				double d1 = direction$axis == Direction.Axis.X ? 0.5D + d0 * (double) direction.getStepX() : (double) randomSource.nextFloat();
 				double d2 = direction$axis == Direction.Axis.Y ? 0.5D + d0 * (double) direction.getStepY() : (double) randomSource.nextFloat();
@@ -99,4 +102,5 @@ public class BlockVoidBlock extends DropExperienceBlock {
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		level.playLocalSound(pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F, TheTitansNeoSounds.HARCACADIUM_BLOCK_HUM.get(), SoundSource.BLOCKS, 2.0F, 0.75F, false);
 		spawnParticles(level, pos);
-	}}
+	}
+}

@@ -24,3 +24,8 @@ runs
 run-data
 
 repo
+
+# 26.1.2 迁移过程中的源码备份（不进版本库）
+src_backup_stage*/
+src_backup*/
+*.log

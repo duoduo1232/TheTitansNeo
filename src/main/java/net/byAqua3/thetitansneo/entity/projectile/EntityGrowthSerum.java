@@ -21,30 +21,31 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoSounds;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
+import net.minecraft.world.entity.animal.golem.SnowGolem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Blaze;
-import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.world.entity.monster.spider.CaveSpider;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.MagmaCube;
 import net.minecraft.world.entity.monster.Silverfish;
-import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.monster.Spider;
-import net.minecraft.world.entity.monster.WitherSkeleton;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.monster.ZombieVillager;
-import net.minecraft.world.entity.monster.ZombifiedPiglin;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.monster.spider.Spider;
+import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 
+import net.minecraft.server.level.ServerLevel;
 public class EntityGrowthSerum extends ThrowableItemProjectile {
 
 	public EntityGrowthSerum(EntityType<EntityGrowthSerum> entityType, Level level) {
@@ -317,7 +318,7 @@ public class EntityGrowthSerum extends ThrowableItemProjectile {
 				}
 			} else if (result.getEntity() instanceof LivingEntity) {
 				result.getEntity().setRemainingFireTicks(20);
-				result.getEntity().hurt(result.getEntity().damageSources().onFire(), 2000.0F);
+				result.getEntity().hurtServer((ServerLevel) this.level(), result.getEntity().damageSources().onFire(), 2000.0F);
 			}
 		}
 		if (!this.level().isClientSide()) {

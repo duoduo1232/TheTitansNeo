@@ -6,26 +6,28 @@ import net.byAqua3.thetitansneo.loader.TheTitansNeoTiers;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 
+import net.minecraft.server.level.ServerLevel;
 public class ItemHarcadiumShovel extends ShovelItem {
 
 	public ItemHarcadiumShovel(Properties properties) {
-		super(TheTitansNeoTiers.HARCADIUM, properties.attributes(ShovelItem.createAttributes(TheTitansNeoTiers.HARCADIUM, 47, -2.0F)));
+		super(TheTitansNeoTiers.HARCADIUM, 47, -2.0F, properties.shovel(TheTitansNeoTiers.HARCADIUM, 47, -2.0F));
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack pStack) {
-		return UseAnim.BOW;
+	public ItemUseAnimation getUseAnimation(ItemStack pStack) {
+		return ItemUseAnimation.BOW;
 	}
 
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
+	public void hurtEnemy(ItemStack stack, LivingEntity entity, LivingEntity attacker) {
 		if (entity != null) {
 			if (entity.getBbHeight() >= 6.0F || entity instanceof EntityTitan || !entity.onGround()) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				entity.hurt(entity.damageSources().mobAttack(attacker), 350.0F);
+				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), 350.0F);
 			}
 		}
-		return super.hurtEnemy(stack, entity, attacker);
-	}}
+		super.hurtEnemy(stack, entity, attacker);
+	}
+}

@@ -4,53 +4,57 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.byAqua3.thetitansneo.TheTitansNeo;
 import net.byAqua3.thetitansneo.entity.titan.EntityIronGolemTitan;
 import net.byAqua3.thetitansneo.model.ModelIronGolemTitan;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderIronGolemTitan extends LivingEntityRenderer<EntityIronGolemTitan, ModelIronGolemTitan> {
+public class RenderIronGolemTitan extends LivingEntityRenderer<EntityIronGolemTitan, TitanRenderState, ModelIronGolemTitan> {
 
-	public static final ResourceLocation IRON_GOLEM_TITAN = ResourceLocation.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/iron_golem_titan.png");
+	public static final Identifier IRON_GOLEM_TITAN = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/titans/iron_golem_titan.png");
 
 	public RenderIronGolemTitan(Context context) {
 		super(context, new ModelIronGolemTitan(), 1.0F);
 	}
 
 	@Override
-	public void render(EntityIronGolemTitan entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
-		super.render(entity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+	public TitanRenderState createRenderState() {
+		return new TitanRenderState();
 	}
 
 	@Override
-	protected void scale(EntityIronGolemTitan entity, PoseStack poseStack, float partialTick) {
+	public void extractRenderState(EntityIronGolemTitan entity, TitanRenderState state, float partialTicks) {
+		super.extractRenderState(entity, state, partialTicks);
+		state.titan = entity;
+		state.invulTime = entity.getInvulTime();
+		state.extraPower = entity.getExtraPower();
+	}
+
+	@Override
+	protected void scale(TitanRenderState state, PoseStack poseStack) {
 		float f1 = 24.0F;
-		int i = entity.getInvulTime();
+		int i = state.invulTime;
 		if (i > 0) {
-			f1 -= (i - partialTick) / 440.0F * 7.75F;
+			f1 -= (i - state.partialTick) / 440.0F * 7.75F;
 		}
-		int i2 = entity.getExtraPower();
+		int i2 = state.extraPower;
 		if (i2 > 0) {
 			f1 += i2 * 0.5F;
 		}
 		poseStack.scale(f1, f1, f1);
 		poseStack.translate(0.0F, 0.01F, 0.0F);
 	}
-	
-	@Override
-	protected float getShadowRadius(EntityIronGolemTitan entity) {
-		return this.shadowRadius * entity.getBbWidth();
-    }
 
 	@Override
-	protected boolean shouldShowName(EntityIronGolemTitan entity) {
+	protected boolean shouldShowName(EntityIronGolemTitan entity, double distanceToCameraSq) {
 		return false;
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EntityIronGolemTitan entity) {
+	protected Identifier getTextureLocation(TitanRenderState state) {
 		return IRON_GOLEM_TITAN;
-	}}
+	}
+}
