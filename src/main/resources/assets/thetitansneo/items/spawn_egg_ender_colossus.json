@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "thetitansneo:item/spawn_egg_ender_colossus",
+    "model": {
+      "type": "thetitansneo:titan_spawn_egg"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "thetitansneo:item/ultima_blade",
+    "model": {
+      "type": "thetitansneo:ultima_blade"
+    }
+  }
+}

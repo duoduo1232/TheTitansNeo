@@ -59,6 +59,8 @@ public class TheTitansNeo {
 		TheTitansNeoConfigs.registerConfigs();
 		if (FMLEnvironment.getDist().isClient()) {
 			TheTitansNeoEntityRenderers.registerEntityRenderers(modEventBus);
+			// 26.1.2: 武器 / 刷怪蛋的自定义模型渲染器走数据驱动的 special model 注册。
+			modEventBus.addListener(net.byAqua3.thetitansneo.render.item.TheTitansNeoSpecialModels::register);
 		}
 		modEventBus.addListener(this::commonSetup);
 		modEventBus.addListener(this::clientSetup);

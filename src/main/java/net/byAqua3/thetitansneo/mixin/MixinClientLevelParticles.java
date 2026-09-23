@@ -6,14 +6,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.byAqua3.thetitansneo.loader.TheTitansNeoConfigs;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 
-@Mixin({ LevelRenderer.class })
-public class MixinLevelRenderer {
+@Mixin({ ClientLevel.class })
+public class MixinClientLevelParticles {
 
-	@Inject(method = { "addParticle(Lnet/minecraft/core/particles/ParticleOptions;ZZDDDDDD)V" }, at = { @At("HEAD") }, cancellable = true)
+	// 26.1.2: LevelRenderer.addParticle 已删除，客户端粒子入口迁到 ClientLevel.doAddParticle(...)。
+	@Inject(method = { "doAddParticle(Lnet/minecraft/core/particles/ParticleOptions;ZZDDDDDD)V" }, at = { @At("HEAD") }, cancellable = true)
 	public void addParticle(ParticleOptions options, boolean force, boolean decreased, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, CallbackInfo callbackInfo) {
 		if (options == ParticleTypes.DAMAGE_INDICATOR && TheTitansNeoConfigs.getBoolean(TheTitansNeoConfigs.damageIndicatorHiddenParticles, false)) {
 			callbackInfo.cancel();

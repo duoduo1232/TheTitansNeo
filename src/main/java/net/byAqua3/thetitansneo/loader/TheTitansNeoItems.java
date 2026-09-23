@@ -36,11 +36,9 @@ import net.byAqua3.thetitansneo.item.ItemVoidSword;
 import net.byAqua3.thetitansneo.item.ItemWitherTurret;
 import net.byAqua3.thetitansneo.item.ItemWitherTurretGround;
 import net.byAqua3.thetitansneo.item.ItemWitherTurretMortar;
-import net.byAqua3.thetitansneo.render.item.IItemRenderer;
 import net.byAqua3.thetitansneo.render.item.RenderOptimaAxe;
 import net.byAqua3.thetitansneo.render.item.RenderTitanSpawnEgg;
 import net.byAqua3.thetitansneo.render.item.RenderUltimaBlade;
-import net.byAqua3.thetitansneo.render.item.RenderWitherzillaSpawnEgg;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -62,7 +60,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class TheTitansNeoItems {
 
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, TheTitansNeo.MODID);
-	public static final Map<Item, IItemRenderer> ITEMRENDERERS = new HashMap<Item, IItemRenderer>();
 
 	public static final Rarity GODLY_RARITY = TheTitansNeoEnumParams.GODLY_RARITY_ENUM_PROXY.getValue();
 

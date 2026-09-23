@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "thetitansneo:item/spawn_egg_creeper_titan",
+    "model": {
+      "type": "thetitansneo:titan_spawn_egg"
+    }
+  }
+}
