@@ -50,6 +50,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.item.ItemStack;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 
@@ -126,8 +127,8 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 
 		for (LivingEntity entity : entities) {
 			if (entity != null && entity != this && entity.isAlive() && !(entity instanceof EntityZombieTitan) && !(entity instanceof EntityZombieTitanMinion) && !(entity instanceof EntityZombieTitanGiantMinion)) {
-				entity.hurtServer((ServerLevel) this.level(), this.damageSources().explosion(null), (float) damage);
-				entity.hurtServer((ServerLevel) this.level(), this.damageSources().fall(), (float) damage / 4.0F);
+				ServerSafe.hurtServer(entity, this.level(), this.damageSources().explosion(null), (float) damage);
+				ServerSafe.hurtServer(entity, this.level(), this.damageSources().fall(), (float) damage / 4.0F);
 				this.level().playSound(entity, entity.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.MASTER, 0.85F, 1.0F + (this.getRandom().nextFloat() - this.getRandom().nextFloat()) * 0.5F);
 				if (knockback != 0) {
 					double ks = 0.75D + this.getRandom().nextDouble() + this.getRandom().nextDouble();
@@ -150,21 +151,21 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 		int j = this.getRandom().nextInt(13) + this.getRandom().nextInt(1 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.FEATHER, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.FEATHER, 1));
 		}
 		j = this.getRandom().nextInt(13) + this.getRandom().nextInt(2 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ROTTEN_FLESH, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.ROTTEN_FLESH, 1));
 		}
 		if (attackedRecently) {
 			if (this.getRandom().nextInt(5) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.IRON_INGOT, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.IRON_INGOT, 1));
 			}
 			if (this.getRandom().nextInt(5) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.CARROT, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.CARROT, 1));
 			}
 			if (this.getRandom().nextInt(5) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.POTATO, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.POTATO, 1));
 			}
 		}
 	}
@@ -403,7 +404,7 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 				}
 			}
 			if (this.tickCount % 20 == 0 && this.distanceToSqr(this.getTarget()) <= ((14.0F + this.getTarget().getBbWidth() / 2.0F) * (14.0F + this.getTarget().getBbWidth() / 2.0F))) {
-				this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
+				ServerSafe.doHurtTarget(this, this.level(), this.getTarget());
 			}
 		}
 		if (this.getMaster() != null) {
@@ -432,7 +433,7 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 	protected void dropAllDeathLoot(ServerLevel level, DamageSource damageSource) {
 		this.captureDrops(new java.util.ArrayList<>());
 		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
-		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (shouldDropLoot(level) && ServerSafe.mobDrops(level)) {
 			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
@@ -459,7 +460,7 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 		dropEquipment(level);
 
 		int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
-		ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+		ServerSafe.awardExperience(this.level(), this.position(), reward);
 
 		Collection<ItemEntity> drops = captureDrops(null);
 		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, this.getLastHurtByPlayerMemoryTime() > 0)) {

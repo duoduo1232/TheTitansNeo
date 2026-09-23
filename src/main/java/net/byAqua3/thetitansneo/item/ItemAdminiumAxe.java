@@ -8,6 +8,7 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class ItemAdminiumAxe extends AxeItem {
 
 	public ItemAdminiumAxe(Properties properties) {
@@ -26,7 +27,7 @@ public class ItemAdminiumAxe extends AxeItem {
 		if (entity != null) {
 			if (entity.getBbHeight() >= 6.0F || entity instanceof EntityTitan || !entity.onGround()) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 100.0F, 0.5F);
-				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), 4.0E9F);
+				ServerSafe.hurtServer(entity, entity.level(), entity.damageSources().mobAttack(attacker), 4.0E9F);
 			}
 		}
 		super.hurtEnemy(stack, entity, attacker);

@@ -9,6 +9,7 @@ import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ItemUseAnimation;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class ItemHarcadiumShovel extends ShovelItem {
 
 	public ItemHarcadiumShovel(Properties properties) {
@@ -25,7 +26,7 @@ public class ItemHarcadiumShovel extends ShovelItem {
 		if (entity != null) {
 			if (entity.getBbHeight() >= 6.0F || entity instanceof EntityTitan || !entity.onGround()) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), 350.0F);
+				ServerSafe.hurtServer(entity, entity.level(), entity.damageSources().mobAttack(attacker), 350.0F);
 			}
 		}
 		super.hurtEnemy(stack, entity, attacker);

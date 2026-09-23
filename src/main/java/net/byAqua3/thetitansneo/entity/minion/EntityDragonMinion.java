@@ -33,6 +33,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityDragonMinion extends EnderDragon implements IMinion {
 
@@ -195,7 +196,7 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 				this.flapTime++;
 				this.playAmbientSound();
 				DamageSource damageSource = this.damageSources().mobAttack(this);
-				entity.hurtServer((ServerLevel) this.level(), damageSource, 200.0F);
+				ServerSafe.hurtServer(entity, this.level(), damageSource, 200.0F);
 				entity.invulnerableTime = 0;
 				if (this.level() instanceof ServerLevel serverlevel) {
 					EnchantmentHelper.doPostAttackEffects(serverlevel, entity, damageSource);

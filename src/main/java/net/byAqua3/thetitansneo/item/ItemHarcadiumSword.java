@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class ItemHarcadiumSword extends Item {
 
 	public ItemHarcadiumSword(Properties properties) {
@@ -41,7 +42,7 @@ public class ItemHarcadiumSword extends Item {
 		if (entity != null) {
 			if (entity.getBbHeight() >= 6.0F || entity instanceof EntityTitan || !entity.onGround()) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), 500.0F);
+				ServerSafe.hurtServer(entity, entity.level(), entity.damageSources().mobAttack(attacker), 500.0F);
 			}
 		}
 		super.hurtEnemy(stack, entity, attacker);
@@ -95,7 +96,7 @@ public class ItemHarcadiumSword extends Item {
 			if (entity != null && entity instanceof LivingEntity) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
 				entity.playSound(TheTitansNeoSounds.SLASH_FLESH.get(), 2.0F, 1.25F);
-				entity.hurtServer((ServerLevel) livingEntity.level(), entity.damageSources().mobAttack(player), 1000.0F * (f + 1.0F));
+				ServerSafe.hurtServer(entity, livingEntity.level(), entity.damageSources().mobAttack(player), 1000.0F * (f + 1.0F));
 			}
 		}
 		return true;

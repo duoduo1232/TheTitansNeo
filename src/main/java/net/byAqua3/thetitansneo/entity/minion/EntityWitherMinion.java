@@ -29,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityWitherMinion extends WitherBoss implements IMinion {
 
 	private static final EntityDataAccessor<Integer> MINION_TYPE = SynchedEntityData.defineId(EntityWitherMinion.class, EntityDataSerializers.INT);
@@ -243,7 +244,7 @@ public class EntityWitherMinion extends WitherBoss implements IMinion {
 			this.performRangedAttack(head, target.getX(), target.getY() + target.getEyeHeight(), target.getZ(), false);
 		} else {
 			this.performRangedAttack(head, target.getX(), target.getY() + target.getEyeHeight() * 0.5D, target.getZ(), (head == 0 && this.getRandom().nextFloat() < 0.001F));
-			target.hurtServer((ServerLevel) target.level(), this.damageSources().mobAttack(this), 100.0F);
+			ServerSafe.hurtServer(target, target.level(), this.damageSources().mobAttack(this), 100.0F);
 			target.invulnerableTime = 0;
 		}
 	}

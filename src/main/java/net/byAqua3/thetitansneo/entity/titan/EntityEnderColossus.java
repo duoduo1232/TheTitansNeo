@@ -72,6 +72,7 @@ import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityEnderColossus extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
@@ -473,7 +474,7 @@ public class EntityEnderColossus extends EntityTitan implements IEntityMultiPart
 
 	@Override
 	public boolean attackEntityFromPart(EntityTitanPart entityTitanPart, DamageSource damageSource, float amount) {
-		this.hurtServer((ServerLevel) this.level(), damageSource, amount);
+		ServerSafe.hurtServer(this, this.level(), damageSource, amount);
 		return true;
 	}
 

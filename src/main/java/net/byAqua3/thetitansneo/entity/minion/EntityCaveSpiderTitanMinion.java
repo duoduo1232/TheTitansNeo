@@ -71,6 +71,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAttackMob, IMinion {
 
@@ -176,15 +177,15 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 
 	protected void dropFewItems(boolean attackedRecently, int loottingLevel) {
 		if (attackedRecently && (this.getRandom().nextInt(3) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0)) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.SPIDER_EYE, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.SPIDER_EYE, 1));
 		}
 		int j = this.getRandom().nextInt(3 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.MELON_SEEDS, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.MELON_SEEDS, 1));
 		}
 		if (this.getRandom().nextInt(60) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.COBWEB), 0.0F);
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.COBWEB), 0.0F);
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(2);
@@ -192,7 +193,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -200,7 +201,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 					j += this.getRandom().nextInt(loottingLevel + 1);
 				}
 				for (k = 0; k < j; k++) {
-					this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
+					ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLDEN_APPLE, 1));
 				}
 				if (this.getMinionTypeInt() >= 3) {
 					j = this.getRandom().nextInt(2);
@@ -210,28 +211,28 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 							break;
 						case 1:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 							break;
 						case 2:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 3:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 4:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -240,13 +241,13 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 								break;
 							case 1:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 								break;
 							case 2:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 								break;
 							}
 						}
@@ -504,7 +505,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 	public void performRangedAttack(LivingEntity target, float velocity) {
 		this.swing(InteractionHand.MAIN_HAND);
 		if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 36.0D) {
-			this.doHurtTarget((ServerLevel) this.level(), target);
+			ServerSafe.doHurtTarget(this, this.level(), target);
 		} else {
 			int randomInt = this.getRandom().nextInt(5);
 
@@ -591,7 +592,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 				this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 4.0F, (1.0F + this.getRandom().nextFloat() - this.getRandom().nextFloat() * 0.2F) * 0.7F);
 
 				target.setRemainingFireTicks(10);
-				target.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), 20.0F);
+				ServerSafe.hurtServer(target, this.level(), this.damageSources().onFire(), 20.0F);
 				target.push(0.0D, 1.0D, 0.0D);
 
 				if (!this.level().isClientSide()) {
@@ -618,7 +619,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 		}
 		this.captureDrops(new java.util.ArrayList<>());
 		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
-		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (shouldDropLoot(level) && ServerSafe.mobDrops(level)) {
 			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
@@ -646,7 +647,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
 			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
-			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+			ServerSafe.awardExperience(this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
@@ -744,7 +745,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 			if (this.getTarget() != null) {
 				double d0 = this.distanceToSqr(this.getTarget());
 				if (d0 < 0.8D) {
-					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
+					ServerSafe.doHurtTarget(this, this.level(), this.getTarget());
 				}
 				if (this.getTarget() != null && this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.lookAt(this.getTarget(), 180.0F, 180.0F);
@@ -768,7 +769,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 						EntityCaveSpiderTitanMinion caveSpiderTitanMinion = new EntityCaveSpiderTitanMinion(this.level());
 						caveSpiderTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						caveSpiderTitanMinion.setYRot(this.getYRot());
-						caveSpiderTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(caveSpiderTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(caveSpiderTitanMinion, this.level(), caveSpiderTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						caveSpiderTitanMinion.setMinionType(0);
 						caveSpiderTitanMinion.setHealth(caveSpiderTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(caveSpiderTitanMinion);
@@ -779,7 +780,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 						EntityCaveSpiderTitanMinion caveSpiderTitanMinion = new EntityCaveSpiderTitanMinion(this.level());
 						caveSpiderTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						caveSpiderTitanMinion.setYRot(this.getYRot());
-						caveSpiderTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(caveSpiderTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(caveSpiderTitanMinion, this.level(), caveSpiderTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						caveSpiderTitanMinion.setMinionType(1);
 						caveSpiderTitanMinion.setHealth(caveSpiderTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(caveSpiderTitanMinion);
@@ -816,7 +817,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 						EntityCaveSpiderTitanMinion caveSpiderTitanMinion = new EntityCaveSpiderTitanMinion(this.level());
 						caveSpiderTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						caveSpiderTitanMinion.setYRot(this.getYRot());
-						caveSpiderTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(caveSpiderTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(caveSpiderTitanMinion, this.level(), caveSpiderTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						caveSpiderTitanMinion.setMinionType(0);
 						caveSpiderTitanMinion.setHealth(caveSpiderTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(caveSpiderTitanMinion);
@@ -827,7 +828,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 						EntityCaveSpiderTitanMinion caveSpiderTitanMinion = new EntityCaveSpiderTitanMinion(this.level());
 						caveSpiderTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						caveSpiderTitanMinion.setYRot(this.getYRot());
-						caveSpiderTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(caveSpiderTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(caveSpiderTitanMinion, this.level(), caveSpiderTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						caveSpiderTitanMinion.setMinionType(1);
 						caveSpiderTitanMinion.setHealth(caveSpiderTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(caveSpiderTitanMinion);
@@ -838,7 +839,7 @@ public class EntityCaveSpiderTitanMinion extends CaveSpider implements RangedAtt
 						EntityCaveSpiderTitanMinion caveSpiderTitanMinion = new EntityCaveSpiderTitanMinion(this.level());
 						caveSpiderTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						caveSpiderTitanMinion.setYRot(this.getYRot());
-						caveSpiderTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(caveSpiderTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(caveSpiderTitanMinion, this.level(), caveSpiderTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						caveSpiderTitanMinion.setMinionType(2);
 						caveSpiderTitanMinion.setHealth(caveSpiderTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(caveSpiderTitanMinion);

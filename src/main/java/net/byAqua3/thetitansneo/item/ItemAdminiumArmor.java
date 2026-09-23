@@ -42,6 +42,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class ItemAdminiumArmor extends Item {
 
 	public ItemAdminiumArmor(Properties properties) {
@@ -136,7 +137,7 @@ public class ItemAdminiumArmor extends Item {
 						BlockState blockState = level.getBlockState(blockPos);
 						// Block block = blockState.getBlock();
 						if (!player.onGround() && blockState.isSolid()) {
-							if (player.getBoundingBox() != null && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
+							if (player.getBoundingBox() != null && ServerSafe.mobGriefing(level)) {
 								int minX = Mth.floor(player.getBoundingBox().minX - 3.0D);
 								int minY = Mth.floor(player.getBoundingBox().minY - 1.0D);
 								int minZ = Mth.floor(player.getBoundingBox().minZ - 3.0D);

@@ -20,6 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityLightningBall extends AbstractHurtingProjectile implements IEntityProjectileTitan, ItemSupplier {
 
 	public EntityLightningBall(EntityType<? extends EntityLightningBall> entityType, Level level) {
@@ -104,7 +105,7 @@ public class EntityLightningBall extends AbstractHurtingProjectile implements IE
 				
 				if (titan.canAttackEntity(livingEntity)) {
 					livingEntity.setRemainingFireTicks(15);
-					livingEntity.hurtServer((ServerLevel) this.level(), this.damageSources().lightningBolt(), 100.0F);
+					ServerSafe.hurtServer(livingEntity, this.level(), this.damageSources().lightningBolt(), 100.0F);
 
 					EntityColorLightningBolt colorLightningBolt1 = new EntityColorLightningBolt(this.level(), 1.0F, 0.0F, 1.0F);
 					colorLightningBolt1.setPos(this.getX(), this.getY(), this.getZ());

@@ -73,6 +73,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntitySkeletonTitan extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(EntitySkeletonTitan.class, EntityDataSerializers.INT);
@@ -505,7 +506,7 @@ public class EntitySkeletonTitan extends EntityTitan implements IEntityMultiPart
 		if (entityTitanPart != this.head) {
 			amount /= 3.0F;
 		}
-		this.hurtServer((ServerLevel) this.level(), damageSource, amount);
+		ServerSafe.hurtServer(this, this.level(), damageSource, amount);
 		return true;
 	}
 

@@ -72,6 +72,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob, IMinion {
 
@@ -185,10 +186,10 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 		}
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.PAPER, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.PAPER, 1));
 		}
 		if (this.getRandom().nextInt(30) == 0 || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.STONE), 0.0F);
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.STONE), 0.0F);
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(2);
@@ -196,7 +197,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -204,7 +205,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 					j += this.getRandom().nextInt(loottingLevel + 1);
 				}
 				for (k = 0; k < j; k++) {
-					this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
+					ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLDEN_APPLE, 1));
 				}
 				if (this.getMinionTypeInt() >= 3) {
 					j = this.getRandom().nextInt(2);
@@ -214,28 +215,28 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 							break;
 						case 1:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 							break;
 						case 2:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 3:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 4:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -244,13 +245,13 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 								break;
 							case 1:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 								break;
 							case 2:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 								break;
 							}
 						}
@@ -515,7 +516,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 	public void performRangedAttack(LivingEntity target, float velocity) {
 		this.swing(InteractionHand.MAIN_HAND);
 		if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 36.0D) {
-			this.doHurtTarget((ServerLevel) this.level(), target);
+			ServerSafe.doHurtTarget(this, this.level(), target);
 		} else {
 			int randomInt = this.getRandom().nextInt(4);
 
@@ -609,7 +610,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 		}
 		this.captureDrops(new java.util.ArrayList<>());
 		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
-		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (shouldDropLoot(level) && ServerSafe.mobDrops(level)) {
 			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
@@ -637,7 +638,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
 			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
-			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+			ServerSafe.awardExperience(this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
@@ -738,7 +739,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 			if (zealousTarget != null) {
 				double d0 = this.distanceToSqr(zealousTarget);
 				if (d0 < 4.0D) {
-					this.doHurtTarget((ServerLevel) this.level(), zealousTarget);
+					ServerSafe.doHurtTarget(this, this.level(), zealousTarget);
 					zealousTarget = this.getTarget();
 				}
 				if (zealousTarget != null && this.onGround() && d0 < 256.0D && zealousTarget.getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
@@ -763,7 +764,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 						EntityOmegafishMinion omegafishMinion = new EntityOmegafishMinion(this.level());
 						omegafishMinion.setPos(this.getX(), this.getY(), this.getZ());
 						omegafishMinion.setYRot(this.getYRot());
-						omegafishMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(omegafishMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(omegafishMinion, this.level(), omegafishMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						omegafishMinion.setMinionType(0);
 						omegafishMinion.setHealth(omegafishMinion.getMaxHealth());
 						this.level().addFreshEntity(omegafishMinion);
@@ -774,7 +775,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 						EntityOmegafishMinion omegafishMinion = new EntityOmegafishMinion(this.level());
 						omegafishMinion.setPos(this.getX(), this.getY(), this.getZ());
 						omegafishMinion.setYRot(this.getYRot());
-						omegafishMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(omegafishMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(omegafishMinion, this.level(), omegafishMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						omegafishMinion.setMinionType(1);
 						omegafishMinion.setHealth(omegafishMinion.getMaxHealth());
 						this.level().addFreshEntity(omegafishMinion);
@@ -811,7 +812,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 						EntityOmegafishMinion omegafishMinion = new EntityOmegafishMinion(this.level());
 						omegafishMinion.setPos(this.getX(), this.getY(), this.getZ());
 						omegafishMinion.setYRot(this.getYRot());
-						omegafishMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(omegafishMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(omegafishMinion, this.level(), omegafishMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						omegafishMinion.setMinionType(0);
 						omegafishMinion.setHealth(omegafishMinion.getMaxHealth());
 						this.level().addFreshEntity(omegafishMinion);
@@ -822,7 +823,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 						EntityOmegafishMinion omegafishMinion = new EntityOmegafishMinion(this.level());
 						omegafishMinion.setPos(this.getX(), this.getY(), this.getZ());
 						omegafishMinion.setYRot(this.getYRot());
-						omegafishMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(omegafishMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(omegafishMinion, this.level(), omegafishMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						omegafishMinion.setMinionType(1);
 						omegafishMinion.setHealth(omegafishMinion.getMaxHealth());
 						this.level().addFreshEntity(omegafishMinion);
@@ -833,7 +834,7 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 						EntityOmegafishMinion omegafishMinion = new EntityOmegafishMinion(this.level());
 						omegafishMinion.setPos(this.getX(), this.getY(), this.getZ());
 						omegafishMinion.setYRot(this.getYRot());
-						omegafishMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(omegafishMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(omegafishMinion, this.level(), omegafishMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						omegafishMinion.setMinionType(2);
 						omegafishMinion.setHealth(omegafishMinion.getMaxHealth());
 						this.level().addFreshEntity(omegafishMinion);

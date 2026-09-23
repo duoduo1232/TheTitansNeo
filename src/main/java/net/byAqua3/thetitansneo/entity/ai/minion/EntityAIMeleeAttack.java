@@ -7,6 +7,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityAIMeleeAttack extends Goal {
 	protected final PathfinderMob mob;
@@ -143,7 +144,7 @@ public class EntityAIMeleeAttack extends Goal {
 		if (this.canPerformAttack(target)) {
 			this.resetAttackCooldown();
 			this.mob.swing(InteractionHand.MAIN_HAND);
-			this.mob.doHurtTarget((ServerLevel) this.mob.level(), target);
+			ServerSafe.doHurtTarget(this.mob, this.mob.level(), target);
 		}
 	}
 

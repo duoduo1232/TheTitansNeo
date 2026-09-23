@@ -26,6 +26,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class BlockVoidOre extends DropExperienceBlock {
 
 	public BlockVoidOre(Properties properties) {
@@ -51,7 +52,7 @@ public class BlockVoidOre extends DropExperienceBlock {
 	@Override
 	public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
 		if (entity != null) {
-			entity.hurtServer((ServerLevel) level, entity.damageSources().fellOutOfWorld(), 4.0F);
+			ServerSafe.hurtServer(entity, level, entity.damageSources().fellOutOfWorld(), 4.0F);
 			entity.setDeltaMovement(entity.getDeltaMovement().x * 0.2D, entity.getDeltaMovement().y, entity.getDeltaMovement().z * 0.2D);
 
 			if (entity instanceof LivingEntity) {

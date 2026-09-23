@@ -12,6 +12,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityGhastTitanMinionFireball extends LargeFireball {
 
 	private int explosionPower = 1;
@@ -49,13 +50,13 @@ public class EntityGhastTitanMinionFireball extends LargeFireball {
 				float amount = (float) owner.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
 				livingEntity.invulnerableTime = 0;
 				livingEntity.setRemainingFireTicks((int) amount);
-				owner.doHurtTarget((ServerLevel) this.level(), livingEntity);
+				ServerSafe.doHurtTarget(owner, this.level(), livingEntity);
 			} else {
-				livingEntity.hurtServer((ServerLevel) this.level(), this.damageSources().fireball(this, owner), 17.0F);
+				ServerSafe.hurtServer(livingEntity, this.level(), this.damageSources().fireball(this, owner), 17.0F);
 			}
 
 			if (!this.level().isClientSide()) {
-				boolean flag = net.neoforged.neoforge.event.EventHooks.canEntityGrief((ServerLevel) this.level(), this.getOwner());
+				boolean flag = ServerSafe.canEntityGrief(this.level(), this.getOwner());
 				this.level().explode(this, this.getX(), this.getY(), this.getZ(), this.explosionPower, flag, Level.ExplosionInteraction.MOB);
 				this.discard();
 			}

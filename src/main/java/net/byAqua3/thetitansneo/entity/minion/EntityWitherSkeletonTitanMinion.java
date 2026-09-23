@@ -74,6 +74,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements RangedAttackMob, IMinion {
 
@@ -131,7 +132,10 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 	@Override
 	public void setMinionType(int minionType) {
 		this.getEntityData().set(MINION_TYPE, minionType);
-		this.populateDefaultEquipmentSlots(this.level().getRandom(), ((ServerLevel) this.level()).getCurrentDifficultyAt(this.blockPosition()));
+		// 26.1.2: getCurrentDifficultyAt 只有 ServerLevel 才有；客户端跳过装备生成，避免 ClientLevel 强转崩溃。
+		if (this.level() instanceof ServerLevel serverLevel) {
+			this.populateDefaultEquipmentSlots(this.level().getRandom(), serverLevel.getCurrentDifficultyAt(this.blockPosition()));
+		}
 		this.refreshAttributes();
 	}
 
@@ -176,22 +180,22 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 	}
 
 	protected void dropRareDrop(int count) {
-		this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.WITHER_SKELETON_SKULL, 1));
+		ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.WITHER_SKELETON_SKULL, 1));
 	}
 
 	protected void dropFewItems(boolean attackedRecently, int loottingLevel) {
 		int j = this.getRandom().nextInt(3 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.BONE, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.BONE, 1));
 		}
 		j = this.getRandom().nextInt(5 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.BONE_MEAL, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.BONE_MEAL, 1));
 		}
 		j = this.getRandom().nextInt(3 + loottingLevel) - 1;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.COAL, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.COAL, 1));
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(4);
@@ -199,7 +203,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -208,9 +212,9 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 				}
 				for (k = 0; k < j; k++) {
 					if (this.getRandom().nextInt(10) == 0) {
-						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ENCHANTED_GOLDEN_APPLE, 1));
+						ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.ENCHANTED_GOLDEN_APPLE, 1));
 					} else {
-						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
+						ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLDEN_APPLE, 1));
 					}
 				}
 				if (this.getMinionTypeInt() >= 3) {
@@ -221,28 +225,28 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
 							break;
 						case 1:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
 							break;
 						case 2:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						case 3:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						case 4:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -251,17 +255,17 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.EMERALD_BLOCK), 0.0F);
 								break;
 							case 1:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.DIAMOND_BLOCK), 0.0F);
 								break;
 							case 2:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.GOLD_BLOCK), 0.0F);
 								break;
 							}
 						}
-						this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.OBSIDIAN), 0.0F);
+						ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.OBSIDIAN), 0.0F);
 					}
 				}
 			}
@@ -551,7 +555,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 	public void performRangedAttack(LivingEntity target, float velocity) {
 		this.swing(InteractionHand.MAIN_HAND);
 		if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 36.0D) {
-			this.doHurtTarget((ServerLevel) this.level(), target);
+			ServerSafe.doHurtTarget(this, this.level(), target);
 		} else {
 			int randomInt = this.getRandom().nextInt(5);
 
@@ -626,13 +630,13 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 				if (!this.level().isClientSide()) {
 					target.addEffect(new MobEffectInstance(MobEffects.WITHER, 100, 2));
 				}
-				target.hurtServer((ServerLevel) this.level(), this.damageSources().wither(), 5.0F);
+				ServerSafe.hurtServer(target, this.level(), this.damageSources().wither(), 5.0F);
 				target.invulnerableTime = 1;
 			} else if (randomInt == 4) {
 				if (!this.level().isClientSide()) {
 					this.level().explode(this, target.getX(), target.getY(), target.getZ(), 2.0F * target.getBbWidth(), false, Level.ExplosionInteraction.MOB);
 				}
-				target.hurtServer((ServerLevel) this.level(), this.damageSources().lightningBolt(), 100.0F);
+				ServerSafe.hurtServer(target, this.level(), this.damageSources().lightningBolt(), 100.0F);
 				for (int i = 0; i < 4; i++) {
 					LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level());
 					lightningBolt.setPos(target.getX(), target.getY(), target.getZ());
@@ -661,7 +665,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 		}
 		this.captureDrops(new java.util.ArrayList<>());
 		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
-		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (shouldDropLoot(level) && ServerSafe.mobDrops(level)) {
 			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
@@ -689,7 +693,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
 			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
-			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+			ServerSafe.awardExperience(this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
@@ -787,7 +791,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 			if (this.getTarget() != null) {
 				double d0 = this.distanceToSqr(this.getTarget());
 				if (d0 < 4.0D) {
-					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
+					ServerSafe.doHurtTarget(this, this.level(), this.getTarget());
 				}
 				if (this.getTarget() != null && this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.lookAt(this.getTarget(), 180.0F, 180.0F);
@@ -808,7 +812,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 						EntityWitherSkeletonTitanMinion witherSkeletonTitanMinion = new EntityWitherSkeletonTitanMinion(this.level());
 						witherSkeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						witherSkeletonTitanMinion.setYRot(this.getYRot());
-						witherSkeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(witherSkeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(witherSkeletonTitanMinion, this.level(), witherSkeletonTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						witherSkeletonTitanMinion.setMinionType(0);
 						witherSkeletonTitanMinion.setHealth(witherSkeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(witherSkeletonTitanMinion);
@@ -819,7 +823,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 						EntityWitherSkeletonTitanMinion witherSkeletonTitanMinion = new EntityWitherSkeletonTitanMinion(this.level());
 						witherSkeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						witherSkeletonTitanMinion.setYRot(this.getYRot());
-						witherSkeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(witherSkeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(witherSkeletonTitanMinion, this.level(), witherSkeletonTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						witherSkeletonTitanMinion.setMinionType(1);
 						witherSkeletonTitanMinion.setHealth(witherSkeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(witherSkeletonTitanMinion);
@@ -856,7 +860,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 						EntityWitherSkeletonTitanMinion witherSkeletonTitanMinion = new EntityWitherSkeletonTitanMinion(this.level());
 						witherSkeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						witherSkeletonTitanMinion.setYRot(this.getYRot());
-						witherSkeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(witherSkeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(witherSkeletonTitanMinion, this.level(), witherSkeletonTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						witherSkeletonTitanMinion.setMinionType(0);
 						witherSkeletonTitanMinion.setHealth(witherSkeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(witherSkeletonTitanMinion);
@@ -867,7 +871,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 						EntityWitherSkeletonTitanMinion witherSkeletonTitanMinion = new EntityWitherSkeletonTitanMinion(this.level());
 						witherSkeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						witherSkeletonTitanMinion.setYRot(this.getYRot());
-						witherSkeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(witherSkeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(witherSkeletonTitanMinion, this.level(), witherSkeletonTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						witherSkeletonTitanMinion.setMinionType(1);
 						witherSkeletonTitanMinion.setHealth(witherSkeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(witherSkeletonTitanMinion);
@@ -878,7 +882,7 @@ public class EntityWitherSkeletonTitanMinion extends WitherSkeleton implements R
 						EntityWitherSkeletonTitanMinion witherSkeletonTitanMinion = new EntityWitherSkeletonTitanMinion(this.level());
 						witherSkeletonTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						witherSkeletonTitanMinion.setYRot(this.getYRot());
-						witherSkeletonTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(witherSkeletonTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(witherSkeletonTitanMinion, this.level(), witherSkeletonTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						witherSkeletonTitanMinion.setMinionType(2);
 						witherSkeletonTitanMinion.setHealth(witherSkeletonTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(witherSkeletonTitanMinion);

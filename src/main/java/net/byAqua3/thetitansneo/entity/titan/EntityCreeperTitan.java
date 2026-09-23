@@ -71,6 +71,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
@@ -242,7 +243,7 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 			int knockbackAmount = this.getKnockbackAmount();
 
 			if (entity != this) {
-				entity.hurtServer((ServerLevel) entity.level(), this.damageSources().lightningBolt(), 50.0F);
+				ServerSafe.hurtServer(entity, entity.level(), this.damageSources().lightningBolt(), 50.0F);
 				this.attackEntity(entity, amount);
 				this.knockbackEntity(entity, knockbackAmount);
 			}
@@ -264,7 +265,7 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 			int knockbackAmount = this.getKnockbackAmount();
 
 			if (entity != this) {
-				entity.hurtServer((ServerLevel) entity.level(), this.damageSources().lightningBolt(), 50.0F);
+				ServerSafe.hurtServer(entity, entity.level(), this.damageSources().lightningBolt(), 50.0F);
 				this.attackEntity(entity, amount);
 				this.knockbackEntity(entity, knockbackAmount);
 			}
@@ -515,10 +516,10 @@ public class EntityCreeperTitan extends EntityTitan implements IEntityMultiPartT
 			this.heal(amount);
 			return false;
 		}
-		if (this.hurtServer((ServerLevel) this.level(), damageSource, amount)) {
+		if (ServerSafe.hurtServer(this, this.level(), damageSource, amount)) {
 			if (damageSource.getEntity() != null && damageSource.getEntity() instanceof Player && this.damageToLegs < 8 && !this.isStunned && (entityTitanPart == this.leg1 || entityTitanPart == this.leg2 || entityTitanPart == this.leg3 || entityTitanPart == this.leg4)) {
 				this.damageToLegs++;
-				this.hurtServer((ServerLevel) this.level(), damageSource, 100.0F);
+				ServerSafe.hurtServer(this, this.level(), damageSource, 100.0F);
 				this.setTarget((LivingEntity) damageSource.getEntity());
 				if (this.damageToLegs >= 8) {
 					this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());

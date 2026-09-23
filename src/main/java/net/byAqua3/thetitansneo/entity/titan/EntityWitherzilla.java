@@ -72,6 +72,7 @@ import net.minecraft.world.entity.EntityType;
 import java.util.List;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, IBossBarDisplay {
 
@@ -318,7 +319,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 					this.attackEntity(livingEntity, 20.0F);
 					if (livingEntity.getBbHeight() >= 6.0F || livingEntity.isInvulnerable()) {
 						livingEntity.setHealth(0.0F);
-						livingEntity.hurtServer((ServerLevel) entity.level(), this.damageSources().fellOutOfWorld(), Float.MAX_VALUE);
+						ServerSafe.hurtServer(livingEntity, entity.level(), this.damageSources().fellOutOfWorld(), Float.MAX_VALUE);
 						livingEntity.die(this.damageSources().fellOutOfWorld());
 						livingEntity.discard();
 					}
@@ -330,7 +331,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 					}
 				} else {
 					DamageSourceTitanAttack damageSource = new DamageSourceTitanAttack(this);
-					entity.hurtServer((ServerLevel) entity.level(), damageSource, 20.0F);
+					ServerSafe.hurtServer(entity, entity.level(), damageSource, 20.0F);
 					entity.discard();
 				}
 				entity.push(0.0D, 0.5D, 0.0D);
@@ -568,7 +569,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 			}
 			if (this.blockBreakCounter > 0) {
 				this.blockBreakCounter--;
-				if (this.blockBreakCounter == 0 && EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
+				if (this.blockBreakCounter == 0 && ServerSafe.canEntityGrief(this.level(), this)) {
 					boolean flag = false;
 					int l = Mth.floor(32.0F);
 					for (BlockPos blockPos : BlockPos.betweenClosed(this.getBlockX() - l, this.getBlockY() - 32, this.getBlockZ() - l, this.getBlockX() + l, this.getBlockY() + 246, this.getBlockZ() + l)) {

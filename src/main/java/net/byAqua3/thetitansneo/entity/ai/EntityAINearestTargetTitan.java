@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityAINearestTargetTitan<T extends LivingEntity> extends TargetGoal {
 
 	protected final Class<T> targetType;
@@ -59,10 +60,10 @@ public class EntityAINearestTargetTitan<T extends LivingEntity> extends TargetGo
 
 	protected void findTarget() {
 		if (this.targetType != Player.class && this.targetType != ServerPlayer.class) {
-			T target = ((ServerLevel) this.mob.level()).getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+			T target = ServerSafe.whenServer(this.mob.level(), sl -> sl.getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ()));
 
 			if (this.mob instanceof EntityTitan) {
-				EntityTitan titan = ((ServerLevel) this.mob.level()).getNearestEntity(this.mob.level().getEntitiesOfClass(EntityTitan.class, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+				EntityTitan titan = ServerSafe.whenServer(this.mob.level(), sl -> sl.getNearestEntity(this.mob.level().getEntitiesOfClass(EntityTitan.class, this.getTargetSearchArea(this.getFollowDistance())), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ()));
 
 				if (titan != null) {
 					this.target = titan;
@@ -73,7 +74,7 @@ public class EntityAINearestTargetTitan<T extends LivingEntity> extends TargetGo
 				this.target = target;
 			}
 		} else {
-			this.target = ((ServerLevel) this.mob.level()).getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+			this.target = ServerSafe.whenServer(this.mob.level(), sl -> sl.getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ()));
 		}
 	}
 

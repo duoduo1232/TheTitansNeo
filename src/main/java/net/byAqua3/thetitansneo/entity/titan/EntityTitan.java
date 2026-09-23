@@ -83,6 +83,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.EventHooks;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEntityAnimatedHealth {
 
@@ -941,7 +942,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 
 	@SuppressWarnings("deprecation")
 	public void destroyBlocksInAABB(AABB aabb, boolean topless) {
-		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
+		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !ServerSafe.canEntityGrief(this.level(), this)) {
 			return;
 		}
 
@@ -1017,7 +1018,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	}
 
 	public boolean destroyBlocksInAABBGriefingBypass(AABB aabb) {
-		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
+		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !ServerSafe.canEntityGrief(this.level(), this)) {
 			return false;
 		}
 
@@ -1045,7 +1046,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 	}
 
 	public void destroyBlocksInAABBGriefingBypassAsync(AABB aabb) {
-		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
+		if (this.getWaiting() || aabb == null || this.level().isClientSide() || !ServerSafe.canEntityGrief(this.level(), this)) {
 			return;
 		}
 
@@ -1106,7 +1107,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 					}
 
 					if (entity.getY() <= part.getY() - part.getBbHeight() - 0.01D) {
-						entity.hurtServer((ServerLevel) this.level(), this.damageSources().thorns(this), 20.0F);
+						ServerSafe.hurtServer(entity, this.level(), this.damageSources().thorns(this), 20.0F);
 					}
 					if (entity instanceof LivingEntity) {
 						LivingEntity livingEntity = (LivingEntity) entity;
@@ -1151,7 +1152,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+							ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(0);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1174,7 +1175,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+							ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(1);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1198,7 +1199,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+							ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(2);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1222,7 +1223,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+							ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(3);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1246,7 +1247,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+							ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(4);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1278,7 +1279,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 							IMinion minion = (IMinion) entity;
 
 							mob.setPos(d0, d1, d2);
-							mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+							ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 							minion.setMaster(this);
 							minion.setMinionType(0);
 							this.finalizeMinionSummon(mob, minion.getMinionType());
@@ -1450,7 +1451,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			EntityTitan titan = (EntityTitan) entity;
 			if (titan.getInvulTime() <= 0) {
 				this.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				titan.hurtServer((ServerLevel) entity.level(), damageSource, amount);
+				ServerSafe.hurtServer(titan, entity.level(), damageSource, amount);
 			}
 		} else {
 			float health = entity.getHealth();
@@ -1462,7 +1463,7 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			boolean isInvulnerable = false;
 
 			entity.invulnerableTime = 0;
-			if (amount >= 0.0F && !entity.hurtServer((ServerLevel) entity.level(), damageSource, amount)) {
+			if (amount >= 0.0F && !ServerSafe.hurtServer(entity, entity.level(), damageSource, amount)) {
 				entity.setAbsorptionAmount(0.0F);
 				if (entity.invulnerableTime <= 0) {
 					isInvulnerable = true;

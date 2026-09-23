@@ -46,6 +46,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityGrowthSerum extends ThrowableItemProjectile {
 
 	public EntityGrowthSerum(EntityType<EntityGrowthSerum> entityType, Level level) {
@@ -318,7 +319,7 @@ public class EntityGrowthSerum extends ThrowableItemProjectile {
 				}
 			} else if (result.getEntity() instanceof LivingEntity) {
 				result.getEntity().setRemainingFireTicks(20);
-				result.getEntity().hurtServer((ServerLevel) this.level(), result.getEntity().damageSources().onFire(), 2000.0F);
+				ServerSafe.hurtServer(result.getEntity(), this.level(), result.getEntity().damageSources().onFire(), 2000.0F);
 			}
 		}
 		if (!this.level().isClientSide()) {

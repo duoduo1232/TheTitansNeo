@@ -20,6 +20,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityMortarWitherSkull extends WitherSkull {
 
 	private static final EntityDataAccessor<Boolean> BULLET = SynchedEntityData.defineId(EntityMortarWitherSkull.class, EntityDataSerializers.BOOLEAN);
@@ -103,20 +104,20 @@ public class EntityMortarWitherSkull extends WitherSkull {
 					EntityTitan titan = (EntityTitan) entity;
 					titan.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 0.9F);
 					
-					titan.hurtServer((ServerLevel) this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
+					ServerSafe.hurtServer(titan, this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
 					if (titanDamage > 0) {
 						titan.setTitanHealth(Math.max(titan.getHealth() - titanDamage, 0.0F));
 					}
 				} else {
 					if (entity.getBbHeight() >= 6.0F) {
 						entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 0.9F);
-						entity.hurtServer((ServerLevel) this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 5000.0F + (this.extraDamage * 1000.0F));
+						ServerSafe.hurtServer(entity, this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 100.0F + this.extraDamage : 5000.0F + (this.extraDamage * 1000.0F));
 					} else {
-						entity.hurtServer((ServerLevel) this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 10.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
+						ServerSafe.hurtServer(entity, this.level(), this.damageSources().witherSkull(this, livingEntity), this.isBullet() ? 10.0F + this.extraDamage : 500.0F + (this.extraDamage * 100.0F));
 					}
 				}
 			} else {
-				entity.hurtServer((ServerLevel) this.level(), this.damageSources().magic(), this.isBullet() ? 5.0F : 500.0F);
+				ServerSafe.hurtServer(entity, this.level(), this.damageSources().magic(), this.isBullet() ? 5.0F : 500.0F);
 			}
 			if (entity instanceof LivingEntity) {
 				LivingEntity livingEntity = (LivingEntity) entity;

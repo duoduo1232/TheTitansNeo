@@ -15,11 +15,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class CommandTheTitansNeo {
 	
 	private static int kill(CommandSourceStack source, Collection<? extends Entity> targets) {
         for (Entity entity : targets) {
-            entity.kill((ServerLevel) entity.level());
+            ServerSafe.kill(entity, entity.level());
             
             if (entity instanceof EntityTitan) {
 				EntityTitan titan = (EntityTitan) entity;

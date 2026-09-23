@@ -25,6 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class ItemAdminiumSword extends Item {
 
 	public ItemAdminiumSword(Properties properties) {
@@ -71,7 +72,7 @@ public class ItemAdminiumSword extends Item {
 				}
 			} else {
 				entity.invulnerableTime = 0;
-				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), Float.MAX_VALUE);
+				ServerSafe.hurtServer(entity, entity.level(), entity.damageSources().mobAttack(attacker), Float.MAX_VALUE);
 				entity.setHealth(0.0F);
 				entity.push(0.0D, 1.0D, 0.0D);
 			}

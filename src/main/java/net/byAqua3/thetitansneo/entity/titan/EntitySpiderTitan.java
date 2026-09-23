@@ -70,6 +70,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(EntitySpiderTitan.class, EntityDataSerializers.BYTE);
@@ -398,10 +399,10 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 		if (entityTitanPart == this.head) {
 			amount *= 2.0F;
 		}
-		if (this.hurtServer((ServerLevel) this.level(), damageSource, amount)) {
+		if (ServerSafe.hurtServer(this, this.level(), damageSource, amount)) {
 			if (damageSource.getEntity() != null && damageSource.getEntity() instanceof Player && this.damageToLegs < 8 && !this.isStunned && (entityTitanPart == this.leftlegs || entityTitanPart == this.rightlegs)) {
 				this.damageToLegs++;
-				this.hurtServer((ServerLevel) this.level(), damageSource, 100.0F);
+				ServerSafe.hurtServer(this, this.level(), damageSource, 100.0F);
 				this.setTarget((LivingEntity) damageSource.getEntity());
 				if (this.damageToLegs >= 8) {
 					this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());
@@ -521,7 +522,7 @@ public class EntitySpiderTitan extends EntityTitan implements IEntityMultiPartTi
 					Mob mob = skeletonTitan.getSkeletonType() == 1 ? new EntityWitherSkeletonTitanMinion(this.level()) : new EntitySkeletonTitanMinion(this.level());
 					mob.setPos(spiderTitanMinion.getX(), spiderTitanMinion.getY(), spiderTitanMinion.getZ());
 					mob.setYRot(spiderTitanMinion.getYRot());
-					mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.SPAWNER, null);
+					ServerSafe.finalizeSpawn(mob, this.level(), mob.blockPosition(), EntitySpawnReason.SPAWNER, null);
 					if (mob instanceof IMinion) {
 						IMinion minion = (IMinion) mob;
 						minion.setMinionType(spiderTitanMinion.getMinionTypeInt());

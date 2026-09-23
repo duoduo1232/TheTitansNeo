@@ -26,6 +26,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class BlockVoidBlock extends DropExperienceBlock {
 
 	public BlockVoidBlock(Properties properties) {
@@ -56,7 +57,7 @@ public class BlockVoidBlock extends DropExperienceBlock {
 			if (!level.isClientSide()) {
 				level.explode(null, entity.getX(), entity.getY(), entity.getZ(), 3.0F, false, ExplosionInteraction.BLOCK);
 			}
-			entity.hurtServer((ServerLevel) level, entity.damageSources().fellOutOfWorld(), 36.0F);
+			ServerSafe.hurtServer(entity, level, entity.damageSources().fellOutOfWorld(), 36.0F);
 			entity.setDeltaMovement(entity.getDeltaMovement().x * 0.2D, entity.getDeltaMovement().y, entity.getDeltaMovement().z * 0.2D);
 
 			if (entity instanceof LivingEntity) {

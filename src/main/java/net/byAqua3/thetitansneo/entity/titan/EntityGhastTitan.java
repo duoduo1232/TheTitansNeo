@@ -52,6 +52,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 
 	private static final EntityDataAccessor<Boolean> CHARGING = SynchedEntityData.defineId(EntityGhastTitan.class, EntityDataSerializers.BOOLEAN);
@@ -493,10 +494,10 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 			if (player != null && this.getTarget() == player) {
 				player.setRemainingFireTicks(50);
 				if (this.getRandom().nextInt(200) == 0 && this.getHealth() <= getMaxHealth() / 100.0F) {
-					player.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), Float.MAX_VALUE);
+					ServerSafe.hurtServer(player, this.level(), this.damageSources().onFire(), Float.MAX_VALUE);
 				}
 				if (player.getAbsorptionAmount() <= 0.0F && this.tickCount % 10 == 0) {
-					player.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), 12.0F);
+					ServerSafe.hurtServer(player, this.level(), this.damageSources().onFire(), 12.0F);
 					if (!this.level().isClientSide()) {
 						player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 400, 9));
 						if (player.getHealth() <= 5.0F) {
@@ -504,7 +505,7 @@ public class EntityGhastTitan extends EntityTitan implements IBossBarDisplay {
 						}
 					}
 				} else if (player.getAbsorptionAmount() >= 0.0F && this.tickCount % 20 == 0) {
-					player.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), 12.0F);
+					ServerSafe.hurtServer(player, this.level(), this.damageSources().onFire(), 12.0F);
 				}
 			}
 		}

@@ -12,6 +12,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class MobEffectDeath extends MobEffect {
 
@@ -29,7 +30,7 @@ public class MobEffectDeath extends MobEffect {
 	public boolean applyEffectTick(net.minecraft.server.level.ServerLevel serverLevel, LivingEntity entity, int amplifier) {
 		if (entity.isAlive()) {
 			entity.setRemainingFireTicks(20);
-			entity.hurtServer((ServerLevel) serverLevel, entity.damageSources().fellOutOfWorld(), 4.0F * (amplifier + 1));
+			ServerSafe.hurtServer(entity, serverLevel, entity.damageSources().fellOutOfWorld(), 4.0F * (amplifier + 1));
 
 			if (entity.deathTime > 0) {
 				entity.deathTime++;

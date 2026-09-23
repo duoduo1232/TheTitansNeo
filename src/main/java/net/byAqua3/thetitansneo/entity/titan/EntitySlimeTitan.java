@@ -47,6 +47,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 
 	private static final EntityDataAccessor<Integer> SLIME_SIZE = SynchedEntityData.defineId(EntitySlimeTitan.class, EntityDataSerializers.INT);
@@ -286,7 +287,7 @@ public class EntitySlimeTitan extends EntityTitan implements IBossBarDisplay {
 						Slime slime = this instanceof EntityMagmaCubeTitan ? new MagmaCube(EntityType.MAGMA_CUBE, this.level()) : new Slime(EntityType.SLIME, this.level());
 						this.setPos(this.getX(), this.getY(), this.getZ());
 						this.setYRot(this.getYRot());
-						slime.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(slime.blockPosition()), EntitySpawnReason.CONVERSION, null);
+						ServerSafe.finalizeSpawn(slime, this.level(), slime.blockPosition(), EntitySpawnReason.CONVERSION, null);
 						slime.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 100, 4, true, false));
 						this.level().addFreshEntity(slime);
 					}

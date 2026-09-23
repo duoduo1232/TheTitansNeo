@@ -35,6 +35,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.ItemStack;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityGhastGuardMinion extends Ghast implements IMinion {
 
@@ -123,11 +124,11 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 		int j = this.getRandom().nextInt(2) + this.getRandom().nextInt(1 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GHAST_TEAR, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GHAST_TEAR, 1));
 		}
 		j = this.getRandom().nextInt(3) + this.getRandom().nextInt(1 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GUNPOWDER, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GUNPOWDER, 1));
 		}
 	}
 
@@ -260,7 +261,7 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 	protected void dropAllDeathLoot(ServerLevel level, DamageSource damageSource) {
 		this.captureDrops(new java.util.ArrayList<>());
 		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
-		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (shouldDropLoot(level) && ServerSafe.mobDrops(level)) {
 			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
@@ -287,7 +288,7 @@ public class EntityGhastGuardMinion extends Ghast implements IMinion {
 		dropEquipment(level);
 
 		int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
-		ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+		ServerSafe.awardExperience(this.level(), this.position(), reward);
 
 		Collection<ItemEntity> drops = captureDrops(null);
 		if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, damageSource, drops, this.getLastHurtByPlayerMemoryTime() > 0)) {

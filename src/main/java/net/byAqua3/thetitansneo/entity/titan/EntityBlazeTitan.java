@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(EntityBlazeTitan.class, EntityDataSerializers.BYTE);
@@ -325,7 +326,7 @@ public class EntityBlazeTitan extends EntityTitan implements IEntityMultiPartTit
 
 	@Override
 	public boolean attackEntityFromPart(EntityTitanPart entityTitanPart, DamageSource damageSource, float amount) {
-		this.hurtServer((ServerLevel) this.level(), damageSource, amount);
+		ServerSafe.hurtServer(this, this.level(), damageSource, amount);
 		return true;
 	}
 

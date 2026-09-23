@@ -5,6 +5,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityAIRandomDoHurtTarget extends Goal {
 
@@ -28,7 +29,7 @@ public class EntityAIRandomDoHurtTarget extends Goal {
 			if (mob.level().getRandom().nextInt(5) == 1) {
 				if (mob.distanceToSqr(target) < (mob.getBbWidth() * mob.getBbWidth() + target.getBbWidth() * target.getBbWidth()) + 16.0D) {
 					if (mob.level().getRandom().nextInt(3) == 0 || mob.level().getRandom().nextInt(2) == 1) {
-						mob.doHurtTarget((ServerLevel) mob.level(), target);
+						ServerSafe.doHurtTarget(mob, mob.level(), target);
 					}
 				}
 			}

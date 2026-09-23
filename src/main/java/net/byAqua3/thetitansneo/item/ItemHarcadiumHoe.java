@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class ItemHarcadiumHoe extends HoeItem {
 
 	public ItemHarcadiumHoe(Properties properties) {
@@ -29,7 +30,7 @@ public class ItemHarcadiumHoe extends HoeItem {
 		if (entity != null) {
 			if (entity.getBbHeight() >= 6.0F || entity instanceof EntityTitan || !entity.onGround()) {
 				entity.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
-				entity.hurtServer((ServerLevel) entity.level(), entity.damageSources().mobAttack(attacker), 300.0F);
+				ServerSafe.hurtServer(entity, entity.level(), entity.damageSources().mobAttack(attacker), 300.0F);
 			}
 		}
 		super.hurtEnemy(stack, entity, attacker);

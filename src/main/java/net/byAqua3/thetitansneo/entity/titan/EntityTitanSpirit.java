@@ -36,6 +36,7 @@ import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityTitanSpirit extends EntityFlying {
 
 	private static final EntityDataAccessor<String> SPIRIT_NAME = SynchedEntityData.defineId(EntityTitanSpirit.class, EntityDataSerializers.STRING);
@@ -494,7 +495,7 @@ public class EntityTitanSpirit extends EntityFlying {
 				LivingEntity livingEntity = (LivingEntity) entity;
 
 				if (this.tickCount % 40 == 0) {
-					livingEntity.hurtServer((ServerLevel) this.level(), new DamageSource(damageType, this), 2.0F);
+					ServerSafe.hurtServer(livingEntity, this.level(), new DamageSource(damageType, this), 2.0F);
 					this.setSoul(this.getSoul() + 2.0F);
 				}
 				double speed = livingEntity.isCrouching() ? 0.2D : 0.4D;
@@ -523,14 +524,14 @@ public class EntityTitanSpirit extends EntityFlying {
 				if (entity instanceof LivingEntity && !(entity instanceof EntityTitan) && !(entity instanceof EntityTitanSpirit) && !this.transformTitan(entity)) {
 					LivingEntity livingEntity = (LivingEntity) entity;
 
-					livingEntity.hurtServer((ServerLevel) this.level(), new DamageSource(damageType, this), 100.0F);
+					ServerSafe.hurtServer(livingEntity, this.level(), new DamageSource(damageType, this), 100.0F);
 					if (!this.level().isClientSide()) {
 						livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 300, 3));
 					}
 				} else if (entity instanceof EndCrystal) {
 					EndCrystal endCrystal = (EndCrystal) entity;
 
-					endCrystal.hurtServer((ServerLevel) this.level(), new DamageSource(damageType, this), 100.0F);
+					ServerSafe.hurtServer(endCrystal, this.level(), new DamageSource(damageType, this), 100.0F);
 				}
 			}
 		}

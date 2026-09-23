@@ -12,6 +12,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityAITitanWatchClosest extends Goal {
 	public static final float DEFAULT_PROBABILITY = 0.02F;
 	protected final EntityTitan titan;
@@ -56,9 +57,9 @@ public class EntityAITitanWatchClosest extends Goal {
 			}
 
 			if (this.lookAtType == Player.class) {
-				this.lookAt = ((ServerLevel) this.titan.level()).getNearestPlayer(this.lookAtContext, this.titan, this.titan.getX(), this.titan.getEyeY(), this.titan.getZ());
+				this.lookAt = ServerSafe.whenServer(this.titan.level(), sl -> sl.getNearestPlayer(this.lookAtContext, this.titan, this.titan.getX(), this.titan.getEyeY(), this.titan.getZ()));
 			} else {
-				this.lookAt = ((ServerLevel) this.titan.level()).getNearestEntity(this.titan.level().getEntitiesOfClass(this.lookAtType, this.titan.getBoundingBox().inflate(this.lookDistance, this.lookDistance, this.lookDistance), entity -> true), this.lookAtContext, this.titan, this.titan.getX(), this.titan.getEyeY(), this.titan.getZ());
+				this.lookAt = ServerSafe.whenServer(this.titan.level(), sl -> sl.getNearestEntity(this.titan.level().getEntitiesOfClass(this.lookAtType, this.titan.getBoundingBox().inflate(this.lookDistance, this.lookDistance, this.lookDistance), entity -> true), this.lookAtContext, this.titan, this.titan.getX(), this.titan.getEyeY(), this.titan.getZ()));
 			}
 			return (!this.titan.getWaiting() && this.titan.getAnimationID() != 13 && this.titan.getTarget() == null && this.lookAt != null);
 		}

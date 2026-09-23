@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class ItemOptimaAxe extends Item {
 
@@ -128,7 +129,7 @@ public class ItemOptimaAxe extends Item {
 						if (!rangeState.isAir()) {
 							if (!level.isClientSide() && !player.isCreative()) {
 								List<ItemStack> drops = new ArrayList<>();
-								List<ItemStack> blockDrops = Block.getDrops(rangeState, (ServerLevel) level, rangePos, null);
+								List<ItemStack> blockDrops = ServerSafe.getBlockDrops(rangeState, level, rangePos, null);
 
 								if (!blockDrops.isEmpty()) {
 									drops.addAll(blockDrops);
@@ -190,7 +191,7 @@ public class ItemOptimaAxe extends Item {
 								player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
 
 								EntityTitan titan = (EntityTitan) entity;
-								titan.hurtServer((ServerLevel) livingEntity.level(), damageSource, 2000.0F);
+								ServerSafe.hurtServer(titan, livingEntity.level(), damageSource, 2000.0F);
 							} else if (entity instanceof PrimedTnt) {
 								if (!level.isClientSide()) {
 									level.explode(player, entity.getX(), entity.getY(), entity.getZ(), 4.0F, false, Level.ExplosionInteraction.MOB);
@@ -203,7 +204,7 @@ public class ItemOptimaAxe extends Item {
 								}
 							} else if (entity instanceof LivingEntity) {
 								entity.setRemainingFireTicks(Integer.MAX_VALUE);
-								if (!entity.hurtServer((ServerLevel) level, damageSource, 20000.0F)) {
+								if (!ServerSafe.hurtServer(entity, level, damageSource, 20000.0F)) {
 									((LivingEntity) entity).setHealth(0.0F);
 								}
 								entity.push(-Math.sin(player.getYRot() * Math.PI / 180.0F) * 6.0D, 6.0D, Math.cos(player.getYRot() * Math.PI / 180.0F) * 6.0D);
@@ -230,15 +231,15 @@ public class ItemOptimaAxe extends Item {
 							player.playSound(TheTitansNeoSounds.TITAN_PUNCH.get(), 10.0F, 1.0F);
 
 							EntityTitan titan = (EntityTitan) entity;
-							titan.hurtServer((ServerLevel) level, damageSource, 2000.0F);
+							ServerSafe.hurtServer(titan, level, damageSource, 2000.0F);
 						} else if (entity instanceof LivingEntity) {
 							entity.setRemainingFireTicks(Integer.MAX_VALUE);
-							if (!entity.hurtServer((ServerLevel) level, damageSource, Float.MAX_VALUE)) {
+							if (!ServerSafe.hurtServer(entity, level, damageSource, Float.MAX_VALUE)) {
 								((LivingEntity) entity).setHealth(0.0F);
 							}
 							entity.push(-Math.sin(player.getYRot() * Math.PI / 180.0F) * 6.0D, 6.0D, Math.cos(player.getYRot() * Math.PI / 180.0F) * 6.0D);
 						} else {
-							entity.hurtServer((ServerLevel) level, entity.damageSources().playerAttack(player), 20000.0F);
+							ServerSafe.hurtServer(entity, level, entity.damageSources().playerAttack(player), 20000.0F);
 						}
 					}
 				}

@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityBlazeTitanMinionSmallFireball extends SmallFireball {
 
@@ -43,7 +44,7 @@ public class EntityBlazeTitanMinionSmallFireball extends SmallFireball {
 
 			livingEntity.invulnerableTime = 0;
 			livingEntity.setRemainingFireTicks((int) amount);
-			owner.doHurtTarget((ServerLevel) this.level(), livingEntity);
+			ServerSafe.doHurtTarget(owner, this.level(), livingEntity);
 
 			if (!this.level().isClientSide()) {
 				this.discard();

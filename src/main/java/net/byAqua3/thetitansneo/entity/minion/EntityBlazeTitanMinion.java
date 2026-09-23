@@ -67,6 +67,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IMinion {
 
@@ -175,19 +176,19 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 		int j = this.getRandom().nextInt(2 + loottingLevel);
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.BLAZE_ROD, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.BLAZE_ROD, 1));
 		}
 		j = this.getRandom().nextInt(3 + loottingLevel);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GLOWSTONE_DUST, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GLOWSTONE_DUST, 1));
 		}
 		if (this.isOnFire()) {
 			j = this.getRandom().nextInt(2 + loottingLevel);
 			for (k = 0; k < j; k++)
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.BLAZE_ROD, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.BLAZE_ROD, 1));
 		}
 		if (this.getRandom().nextInt(60) == 0 || (this.isOnFire() && this.getRandom().nextInt(2) == 0) || this.getRandom().nextInt(1 + loottingLevel) > 0) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Blocks.FIRE), 0.0F);
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Blocks.FIRE), 0.0F);
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(2);
@@ -195,7 +196,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -203,7 +204,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 					j += this.getRandom().nextInt(loottingLevel + 1);
 				}
 				for (k = 0; k < j; k++) {
-					this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
+					ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLDEN_APPLE, 1));
 				}
 				if (this.getMinionTypeInt() >= 3) {
 					j = this.getRandom().nextInt(2);
@@ -213,28 +214,28 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 							break;
 						case 1:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 							break;
 						case 2:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 3:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 4:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -243,13 +244,13 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 								break;
 							case 1:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 								break;
 							case 2:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 								break;
 							}
 						}
@@ -515,7 +516,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 	public void performRangedAttack(LivingEntity target, float velocity) {
 		this.swing(InteractionHand.MAIN_HAND);
 		if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 36.0D) {
-			this.doHurtTarget((ServerLevel) this.level(), target);
+			ServerSafe.doHurtTarget(this, this.level(), target);
 		} else {
 			int randomInt = this.getRandom().nextInt(4);
 
@@ -593,7 +594,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 		}
 		this.captureDrops(new java.util.ArrayList<>());
 		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
-		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (shouldDropLoot(level) && ServerSafe.mobDrops(level)) {
 			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
@@ -621,7 +622,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
 			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
-			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+			ServerSafe.awardExperience(this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
@@ -719,7 +720,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 			if (this.getTarget() != null) {
 				double d0 = this.distanceToSqr(this.getTarget());
 				if (d0 < 0.8D) {
-					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
+					ServerSafe.doHurtTarget(this, this.level(), this.getTarget());
 				}
 				if (this.getTarget() != null && this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.lookAt(this.getTarget(), 180.0F, 180.0F);
@@ -740,7 +741,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 						EntityBlazeTitanMinion blazeTitanMinion = new EntityBlazeTitanMinion(this.level());
 						blazeTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						blazeTitanMinion.setYRot(this.getYRot());
-						blazeTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(blazeTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(blazeTitanMinion, this.level(), blazeTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						blazeTitanMinion.setMinionType(0);
 						blazeTitanMinion.setHealth(blazeTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(blazeTitanMinion);
@@ -751,7 +752,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 						EntityBlazeTitanMinion blazeTitanMinion = new EntityBlazeTitanMinion(this.level());
 						blazeTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						blazeTitanMinion.setYRot(this.getYRot());
-						blazeTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(blazeTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(blazeTitanMinion, this.level(), blazeTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						blazeTitanMinion.setMinionType(1);
 						blazeTitanMinion.setHealth(blazeTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(blazeTitanMinion);
@@ -788,7 +789,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 						EntityBlazeTitanMinion blazeTitanMinion = new EntityBlazeTitanMinion(this.level());
 						blazeTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						blazeTitanMinion.setYRot(this.getYRot());
-						blazeTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(blazeTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(blazeTitanMinion, this.level(), blazeTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						blazeTitanMinion.setMinionType(0);
 						blazeTitanMinion.setHealth(blazeTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(blazeTitanMinion);
@@ -799,7 +800,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 						EntityBlazeTitanMinion blazeTitanMinion = new EntityBlazeTitanMinion(this.level());
 						blazeTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						blazeTitanMinion.setYRot(this.getYRot());
-						blazeTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(blazeTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(blazeTitanMinion, this.level(), blazeTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						blazeTitanMinion.setMinionType(1);
 						blazeTitanMinion.setHealth(blazeTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(blazeTitanMinion);
@@ -810,7 +811,7 @@ public class EntityBlazeTitanMinion extends Blaze implements RangedAttackMob, IM
 						EntityBlazeTitanMinion blazeTitanMinion = new EntityBlazeTitanMinion(this.level());
 						blazeTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						blazeTitanMinion.setYRot(this.getYRot());
-						blazeTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(blazeTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(blazeTitanMinion, this.level(), blazeTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						blazeTitanMinion.setMinionType(2);
 						blazeTitanMinion.setHealth(blazeTitanMinion.getMaxHealth());
 						this.level().addFreshEntity(blazeTitanMinion);

@@ -25,6 +25,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityProtoBall extends ThrowableProjectile {
 
 	public EntityProtoBall(EntityType<? extends EntityProtoBall> entityType, Level level) {
@@ -52,7 +53,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 						mob.setPos(this.getX(), this.getY(), this.getZ());
 						mob.setXRot(-this.getXRot());
 						mob.setYRot(-this.getYRot());
-						mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+						ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 						minion.setMaster(titan);
 						minion.setMinionType(0);
 						titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -83,7 +84,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+								ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(0);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -104,7 +105,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+								ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(1);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -126,7 +127,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+								ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(2);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());
@@ -148,7 +149,7 @@ public class EntityProtoBall extends ThrowableProjectile {
 								mob.setPos(this.getX(), this.getY(), this.getZ());
 								mob.setXRot(-this.getXRot());
 								mob.setYRot(-this.getYRot());
-								mob.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
+								ServerSafe.finalizeSpawn(mob, this.level(), entity.blockPosition(), EntitySpawnReason.SPAWNER, null);
 								minion.setMaster(titan);
 								minion.setMinionType(3);
 								titan.finalizeMinionSummon(mob, minion.getMinionType());

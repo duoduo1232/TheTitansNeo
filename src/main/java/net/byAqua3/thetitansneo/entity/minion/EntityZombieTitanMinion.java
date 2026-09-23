@@ -71,6 +71,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.Level.ExplosionInteraction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, IMinion {
 
@@ -185,7 +186,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 	}
 
 	protected void dropRareDrop(int count) {
-		this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.ZOMBIE_HEAD, 1));
+		ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.ZOMBIE_HEAD, 1));
 	}
 
 	protected void dropFewItems(boolean attackedRecently, int loottingLevel) {
@@ -195,11 +196,11 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 		}
 		int k;
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.FEATHER, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.FEATHER, 1));
 		}
 		j = this.getRandom().nextInt(2);
 		for (k = 0; k < j; k++) {
-			this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.BONE, 1));
+			ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.BONE, 1));
 		}
 		if (this.getMinionTypeInt() >= 1) {
 			j = this.getRandom().nextInt(2);
@@ -207,7 +208,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 				j += this.getRandom().nextInt(loottingLevel + 1);
 			}
 			for (k = 0; k < j; k++) {
-				this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
+				ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EXPERIENCE_BOTTLE, 1));
 			}
 			if (this.getMinionTypeInt() >= 2) {
 				j = this.getRandom().nextInt(2);
@@ -215,7 +216,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 					j += this.getRandom().nextInt(loottingLevel + 1);
 				}
 				for (k = 0; k < j; k++) {
-					this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLDEN_APPLE, 1));
+					ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLDEN_APPLE, 1));
 				}
 				if (this.getMinionTypeInt() >= 3) {
 					j = this.getRandom().nextInt(2);
@@ -225,28 +226,28 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 					for (k = 0; k < j; k++) {
 						switch (this.getRandom().nextInt(5)) {
 						case 0:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 							break;
 						case 1:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 							break;
 						case 2:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 3:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						case 4:
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 							break;
 						}
 					}
 					if (this.getMinionTypeInt() >= 4) {
 						if (this.getRandom().nextInt(5) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.PLEASANT_BLADE_SEED.get()), 0.0F);
 						}
 						if (this.getRandom().nextInt(100) == 0) {
-							this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
+							ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(TheTitansNeoBlocks.MALGRUM_SEEDS.get()), 0.0F);
 						}
 						j = 2 + this.getRandom().nextInt(5);
 						if (loottingLevel > 0) {
@@ -255,13 +256,13 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 						for (k = 0; k < j; k++) {
 							switch (this.getRandom().nextInt(3)) {
 							case 0:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.EMERALD, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.EMERALD, 1));
 								break;
 							case 1:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.DIAMOND, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.DIAMOND, 1));
 								break;
 							case 2:
-								this.spawnAtLocation(((ServerLevel) this.level()), new ItemStack(Items.GOLD_INGOT, 1));
+								ServerSafe.spawnAtLocation(this, this.level(), new ItemStack(Items.GOLD_INGOT, 1));
 								break;
 							}
 						}
@@ -533,7 +534,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 	public void performRangedAttack(LivingEntity target, float velocity) {
 		this.swing(InteractionHand.MAIN_HAND);
 		if (this.distanceToSqr(target) < (target.getBbWidth() * target.getBbWidth()) + 36.0D) {
-			this.doHurtTarget((ServerLevel) this.level(), target);
+			ServerSafe.doHurtTarget(this, this.level(), target);
 		} else {
 			int randomInt = this.getRandom().nextInt(4);
 
@@ -602,7 +603,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 				if (!this.level().isClientSide()) {
 					target.addEffect(new MobEffectInstance(MobEffects.HUNGER, 100, 2));
 				}
-				target.hurtServer((ServerLevel) this.level(), this.damageSources().starve(), 5.0F);
+				ServerSafe.hurtServer(target, this.level(), this.damageSources().starve(), 5.0F);
 				target.invulnerableTime = 0;
 			}
 		}
@@ -631,7 +632,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 		}
 		this.captureDrops(new java.util.ArrayList<>());
 		boolean flag = this.getLastHurtByPlayerMemoryTime() > 0;
-		if (shouldDropLoot(level) && ((ServerLevel) level).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (shouldDropLoot(level) && ServerSafe.mobDrops(level)) {
 			dropFromLootTable(level, damageSource, flag);
 			this.dropCustomDeathLoot(level, damageSource, flag);
 
@@ -659,7 +660,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 
 		if (this.getMinionType() != EnumMinionType.TEMPLAR || (this.getMinionType() == EnumMinionType.TEMPLAR && this.deathTicks == 200)) {
 			int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, damageSource.getEntity()));
-			ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+			ServerSafe.awardExperience(this.level(), this.position(), reward);
 		}
 
 		Collection<ItemEntity> drops = captureDrops(null);
@@ -757,7 +758,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 			if (this.getTarget() != null) {
 				double d0 = this.distanceToSqr(this.getTarget());
 				if (d0 < 0.8D) {
-					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
+					ServerSafe.doHurtTarget(this, this.level(), this.getTarget());
 				}
 				if (this.getTarget() != null && this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.lookAt(this.getTarget(), 180.0F, 180.0F);
@@ -778,7 +779,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 						EntityZombieTitanMinion zombieTitanMinion = new EntityZombieTitanMinion(this.level());
 						zombieTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						zombieTitanMinion.setYRot(this.getYRot());
-						zombieTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(zombieTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(zombieTitanMinion, this.level(), zombieTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						zombieTitanMinion.setMinionType(0);
 						zombieTitanMinion.setVillager(this.isVillager());
 						zombieTitanMinion.setBaby(this.isBaby());
@@ -791,7 +792,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 						EntityZombieTitanMinion zombieTitanMinion = new EntityZombieTitanMinion(this.level());
 						zombieTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						zombieTitanMinion.setYRot(this.getYRot());
-						zombieTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(zombieTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(zombieTitanMinion, this.level(), zombieTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						zombieTitanMinion.setMinionType(1);
 						zombieTitanMinion.setVillager(this.isVillager());
 						zombieTitanMinion.setBaby(this.isBaby());
@@ -830,7 +831,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 						EntityZombieTitanMinion zombieTitanMinion = new EntityZombieTitanMinion(this.level());
 						zombieTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						zombieTitanMinion.setYRot(this.getYRot());
-						zombieTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(zombieTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(zombieTitanMinion, this.level(), zombieTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						zombieTitanMinion.setMinionType(0);
 						zombieTitanMinion.setVillager(this.isVillager());
 						zombieTitanMinion.setBaby(this.isBaby());
@@ -843,7 +844,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 						EntityZombieTitanMinion zombieTitanMinion = new EntityZombieTitanMinion(this.level());
 						zombieTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						zombieTitanMinion.setYRot(this.getYRot());
-						zombieTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(zombieTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(zombieTitanMinion, this.level(), zombieTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						zombieTitanMinion.setMinionType(1);
 						zombieTitanMinion.setVillager(this.isVillager());
 						zombieTitanMinion.setBaby(this.isBaby());
@@ -856,7 +857,7 @@ public class EntityZombieTitanMinion extends Zombie implements RangedAttackMob, 
 						EntityZombieTitanMinion zombieTitanMinion = new EntityZombieTitanMinion(this.level());
 						zombieTitanMinion.setPos(this.getX(), this.getY(), this.getZ());
 						zombieTitanMinion.setYRot(this.getYRot());
-						zombieTitanMinion.finalizeSpawn((ServerLevelAccessor) this.level(), ((ServerLevel) this.level()).getCurrentDifficultyAt(zombieTitanMinion.blockPosition()), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
+						ServerSafe.finalizeSpawn(zombieTitanMinion, this.level(), zombieTitanMinion.blockPosition(), EntitySpawnReason.SPAWNER, new Zombie.ZombieGroupData(false, true));
 						zombieTitanMinion.setMinionType(2);
 						zombieTitanMinion.setVillager(this.isVillager());
 						zombieTitanMinion.setBaby(this.isBaby());

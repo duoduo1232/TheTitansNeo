@@ -45,6 +45,7 @@ import net.neoforged.neoforge.client.event.PlayerHeartTypeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.ExplosionKnockbackEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class TheTitansNeoEvent {
 	
@@ -124,7 +125,7 @@ if (itemStack.is(TheTitansNeoItemTags.IMMORTAL)) {
 				if (b > 0 && !(damageSource instanceof DamageSourceTitanAttack)) {
 					if (event.getEntity() instanceof EntityTitan) {
 						EntityTitan titan = (EntityTitan) event.getEntity();
-						titan.hurtServer((ServerLevel) titan.level(), new DamageSourceTitanAttack(player), b * 100.0F);
+						ServerSafe.hurtServer(titan, titan.level(), new DamageSourceTitanAttack(player), b * 100.0F);
 					}
 				}
 			}
@@ -146,7 +147,7 @@ if (itemStack.is(TheTitansNeoItemTags.IMMORTAL)) {
 		if (ItemUtils.isAdminiumTool(item)) {
 			if (!level.isClientSide() && !player.isCreative()) {
 				List<ItemStack> drops = new ArrayList<>();
-				List<ItemStack> blockDrops = Block.getDrops(blockState, (ServerLevel) level, blockPos, null);
+				List<ItemStack> blockDrops = ServerSafe.getBlockDrops(blockState, level, blockPos, null);
 				if (!blockDrops.isEmpty()) {
 					drops.addAll(blockDrops);
 				} else {

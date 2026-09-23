@@ -67,6 +67,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import net.minecraft.server.level.ServerLevel;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTitan, IBossBarDisplay {
 
 	public EntityTitanPart head;
@@ -385,10 +386,10 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 		if (entityTitanPart == this.head) {
 			amount *= 2.0F;
 		}
-		if (this.hurtServer((ServerLevel) this.level(), damageSource, amount)) {
+		if (ServerSafe.hurtServer(this, this.level(), damageSource, amount)) {
 			if (damageSource.getEntity() != null && damageSource.getEntity() instanceof Player && this.damageToParts < 8 && !this.isStunned) {
 				this.damageToParts++;
-				this.hurtServer((ServerLevel) this.level(), damageSource, 100.0F);
+				ServerSafe.hurtServer(this, this.level(), damageSource, 100.0F);
 				this.setTarget((LivingEntity) damageSource.getEntity());
 				if (this.damageToParts >= 1) {
 					this.playSound(this.getDeathSound(), this.getSoundVolume(), this.getVoicePitch());

@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class MobEffectRadiation extends MobEffect {
 
@@ -30,7 +31,7 @@ public class MobEffectRadiation extends MobEffect {
 	public boolean applyEffectTick(net.minecraft.server.level.ServerLevel serverLevel, LivingEntity entity, int amplifier) {
 		Holder<DamageType> damageType = entity.level().registryAccess().holderOrThrow(TheTitansNeoDamageTypes.RADIATION);
 		entity.level().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT, SoundSource.PLAYERS, 2.0F, 2.0F, false);
-		entity.hurtServer((ServerLevel) serverLevel, new DamageSource(damageType), 2.0F * (amplifier + 1));
+		ServerSafe.hurtServer(entity, serverLevel, new DamageSource(damageType), 2.0F * (amplifier + 1));
 		return true;
 	}
 }
