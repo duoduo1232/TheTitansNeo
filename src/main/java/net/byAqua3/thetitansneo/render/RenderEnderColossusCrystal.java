@@ -29,8 +29,8 @@ public class RenderEnderColossusCrystal extends EntityRenderer<EntityEnderColoss
 	public static final Identifier ENDER_COLOSSUS_CRYSTAL_BEAM = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/endercrystal_beam.png");
 
 	// 26.1.2: 贴图固定，RenderType 在类加载期构建。
-	private static final RenderType CRYSTAL_RENDER_TYPE = RenderTypes.entityCutoutNoCull(ENDER_COLOSSUS_CRYSTAL);
-	private static final RenderType BEAM_RENDER_TYPE = RenderTypes.entitySmoothCutout(ENDER_COLOSSUS_CRYSTAL_BEAM);
+	private static final RenderType CRYSTAL_RENDER_TYPE = RenderTypes.entityCutout(ENDER_COLOSSUS_CRYSTAL);
+	private static final RenderType BEAM_RENDER_TYPE = RenderTypes.entityTranslucent(ENDER_COLOSSUS_CRYSTAL_BEAM);
 	private static final int CRYSTAL_COLOR = new Color(1.0F, 1.0F, 1.0F, 1.0F).getRGB();
 
 	private final ModelEnderColossusCrystal model = new ModelEnderColossusCrystal();

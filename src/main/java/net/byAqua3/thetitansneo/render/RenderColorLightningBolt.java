@@ -21,6 +21,9 @@ import org.joml.Matrix4fc;
 @OnlyIn(Dist.CLIENT)
 public class RenderColorLightningBolt extends EntityRenderer<EntityColorLightningBolt, LightningBoltRenderState> {
 
+	private EntityColorLightningBolt cachedBolt;
+
+
 	public RenderColorLightningBolt(EntityRendererProvider.Context context) {
 		super(context);
 	}
@@ -32,6 +35,7 @@ public class RenderColorLightningBolt extends EntityRenderer<EntityColorLightnin
 
 	@Override
 	public void extractRenderState(EntityColorLightningBolt entity, LightningBoltRenderState state, float partialTicks) {
+		this.cachedBolt = entity;
 		super.extractRenderState(entity, state, partialTicks);
 		state.seed = entity.seed;
 	}
@@ -65,7 +69,7 @@ public class RenderColorLightningBolt extends EntityRenderer<EntityColorLightnin
 		float red = 0.45F;
 		float green = 0.45F;
 		float blue = 0.5F;
-		net.minecraft.world.entity.Entity entity = state.entity;
+		net.minecraft.world.entity.Entity entity = this.cachedBolt;
 		if (entity instanceof EntityColorLightningBolt colorBolt) {
 			red = colorBolt.getRed();
 			green = colorBolt.getGreen();

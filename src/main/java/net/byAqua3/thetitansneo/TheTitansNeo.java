@@ -40,7 +40,7 @@ public class TheTitansNeo {
 	public static final Logger LOGGER = LogUtils.getLogger();
 
 	public TheTitansNeo(IEventBus modEventBus) {
-		TheTitansNeoArmorMaterials.registerArmorMaterials(modEventBus);
+		// 26.1.2: ArmorMaterial 不再走注册表，无需注册。
 		TheTitansNeoAttributes.registerAttributes(modEventBus);
 		TheTitansNeoItems.registerItems(modEventBus);
 		TheTitansNeoBlocks.registerBlocks(modEventBus);
@@ -57,7 +57,7 @@ public class TheTitansNeo {
 		TheTitansNeoEvents.registerEvents();
 		TheTitansNeoMinions.registerMinions();
 		TheTitansNeoConfigs.registerConfigs();
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			TheTitansNeoEntityRenderers.registerEntityRenderers(modEventBus);
 		}
 		modEventBus.addListener(this::commonSetup);
@@ -73,10 +73,11 @@ public class TheTitansNeo {
 
 	private void clientSetup(final FMLClientSetupEvent event) {
 		event.enqueueWork(() -> {
-			TheTitansNeoItems.registerItemRenderers();
+			// 26.1.2: 物品渲染器改由 RegisterSpecialModelRendererEvent 数据驱动注册。
 			TheTitansNeoConfigs.registerConfigScreen();
 		});
 	}
 
 	private void serverSetup(final FMLDedicatedServerSetupEvent event) {
-	}}
+	}
+}

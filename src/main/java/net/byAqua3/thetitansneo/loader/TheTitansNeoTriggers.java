@@ -12,7 +12,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class TheTitansNeoTriggers {
 
-	public static final DeferredRegister<CriterionTrigger<?>> TRIGGERS = DeferredRegister.create(Registries.TRIGGER_TYPES, TheTitansNeo.MODID);
+	public static final DeferredRegister<CriterionTrigger<?>> TRIGGERS = DeferredRegister.create(Registries.TRIGGER_TYPE, TheTitansNeo.MODID);
 
 	public static final DeferredHolder<CriterionTrigger<?>, TriggerRoot> ROOT = TRIGGERS.register("root", TriggerRoot::new);
 	public static final DeferredHolder<CriterionTrigger<?>, TriggerTitanWake> TITAN_WAKE = TRIGGERS.register("titan_wake", TriggerTitanWake::new);

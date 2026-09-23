@@ -18,6 +18,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
 @OnlyIn(Dist.CLIENT)
 public class LayerSkeletonTitanArmor extends RenderLayer<TitanRenderState, ModelSkeletonTitan> {
@@ -42,5 +43,9 @@ public class LayerSkeletonTitanArmor extends RenderLayer<TitanRenderState, Model
 
 	protected float xOffset(float tickCount) {
 		return Mth.cos(tickCount * 0.02F) * 3.0F;
+	}
+
+	protected int color(TitanRenderState state, float f) {
+		return new java.awt.Color(0.1F, (float) (0.6F + Math.cos(f * 0.05F) * 0.1F), (float) (0.7F + Math.cos(f * 0.05F) * 0.1F), 1.0F).getRGB();
 	}
 }

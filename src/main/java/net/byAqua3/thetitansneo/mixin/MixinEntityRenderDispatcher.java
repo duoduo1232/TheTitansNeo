@@ -41,7 +41,7 @@ public class MixinEntityRenderDispatcher {
 
 					poseStack.translate(d3, d4, d5);
 
-					LevelRenderer.renderLineBox(poseStack, vertexConsumer, aabb, boxRed / 255.0F, boxGreen / 255.0F, boxBlue / 255.0F, 1.0F);
+					// 26.1.2: LevelRenderer.renderLineBox 已删除，泰坦部件调试线框暂不绘制。
 
 					poseStack.popPose();
 				}

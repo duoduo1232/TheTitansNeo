@@ -33,8 +33,6 @@ public class RenderOptimaAxe implements net.minecraft.client.renderer.special.Sp
 	public RenderOptimaAxe(SpriteGetter sprites) {
 		this.sprites = sprites;
 	}
-
-	@Override
 	public void submit(ItemStack stack, ItemDisplayContext context, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
 		Identifier texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/optima_axe");
 		// 26.1.2: Material.buffer(MultiBufferSource, ...) is gone; this is replaced by a submitted model.
@@ -126,7 +124,7 @@ public class RenderOptimaAxe implements net.minecraft.client.renderer.special.Sp
 		}
 
 		@Override
-		public net.minecraft.client.renderer.special.SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
+		public net.minecraft.client.renderer.special.SpecialModelRenderer<ItemStack> bake(SpecialModelRenderer.BakingContext context) {
 			return new RenderOptimaAxe(context.sprites());
 		}
 	}

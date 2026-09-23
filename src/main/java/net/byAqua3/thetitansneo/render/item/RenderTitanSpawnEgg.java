@@ -116,8 +116,6 @@ public class RenderTitanSpawnEgg implements net.minecraft.client.renderer.specia
 
 		poseStack.popPose();
 	}
-
-	@Override
 	public void submit(ItemStack stack, ItemDisplayContext context, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
 		Minecraft mc = Minecraft.getInstance();
 		Item item = stack.getItem();
@@ -353,8 +351,7 @@ public class RenderTitanSpawnEgg implements net.minecraft.client.renderer.specia
 		if (texture != null) {
 			// 26.1.2: Material.buffer(MultiBufferSource, ...) is gone; the model is now submitted through
 			// submitModelPart, which resolves the sprite and render type for us.
-			final Material material = new Material(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS, texture);
-			final SpriteId spriteId = new SpriteId(material.sprite(), material.sprite());
+			final SpriteId spriteId = new SpriteId(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS, texture);
 			final ModelTitanSpawnEgg eggModel = this.model;
 
 			switch (context) {
@@ -442,7 +439,7 @@ public class RenderTitanSpawnEgg implements net.minecraft.client.renderer.specia
 		}
 
 		@Override
-		public net.minecraft.client.renderer.special.SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
+		public net.minecraft.client.renderer.special.SpecialModelRenderer<ItemStack> bake(SpecialModelRenderer.BakingContext context) {
 			return new RenderTitanSpawnEgg(context.sprites());
 		}
 	}

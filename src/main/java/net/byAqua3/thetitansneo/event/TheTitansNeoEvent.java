@@ -124,7 +124,7 @@ if (itemStack.is(TheTitansNeoItemTags.IMMORTAL)) {
 				if (b > 0 && !(damageSource instanceof DamageSourceTitanAttack)) {
 					if (event.getEntity() instanceof EntityTitan) {
 						EntityTitan titan = (EntityTitan) event.getEntity();
-						titan.hurtServer((ServerLevel) level, new DamageSourceTitanAttack(player), b * 100.0F);
+						titan.hurtServer((ServerLevel) titan.level(), new DamageSourceTitanAttack(player), b * 100.0F);
 					}
 				}
 			}

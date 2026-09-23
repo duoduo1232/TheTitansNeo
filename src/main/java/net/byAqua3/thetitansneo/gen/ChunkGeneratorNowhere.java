@@ -60,7 +60,8 @@ public class ChunkGeneratorNowhere extends NoiseBasedChunkGenerator implements I
 //		HolderSet<Biome> holderSet = structure.biomes();
 //		Predicate<Holder<Biome>> predicate = holderSet::contains;
 		Predicate<Holder<Biome>> predicate = holder -> true;
-		StructureStart structurestart = structure.generate(registryAccess, this, this.biomeSource, random, structureTemplateManager, seed, chunkPos, i, chunk, predicate);
+		// 26.1.2: Structure.generate 需要 Holder<Structure> + ResourceKey<Level>。
+		StructureStart structurestart = structure.generate(structureSelectionEntry.structure(), net.minecraft.world.level.Level.OVERWORLD, registryAccess, this, this.biomeSource, random, structureTemplateManager, seed, chunkPos, i, chunk, predicate);
 		if (structurestart.isValid()) {
 			structureManager.setStartForStructure(sectionPos, structure, structurestart, chunk);
 			return true;
@@ -70,8 +71,8 @@ public class ChunkGeneratorNowhere extends NoiseBasedChunkGenerator implements I
 	}
 
 	@Override
-	public void createStructures(RegistryAccess registryAccess, ChunkGeneratorStructureState structureState, StructureManager structureManager, ChunkAccess chunk, StructureTemplateManager structureTemplateManager) {
-		super.createStructures(registryAccess, structureState, structureManager, chunk, structureTemplateManager);
+	public void createStructures(RegistryAccess registryAccess, ChunkGeneratorStructureState structureState, StructureManager structureManager, ChunkAccess chunk, StructureTemplateManager structureTemplateManager, ResourceKey<net.minecraft.world.level.Level> level) {
+		super.createStructures(registryAccess, structureState, structureManager, chunk, structureTemplateManager, level);
 		
 		Registry<StructureSet> registry = registryAccess.lookupOrThrow(Registries.STRUCTURE_SET);
 		List<Holder<StructureSet>> structureSets = new ArrayList<>();
@@ -80,7 +81,7 @@ public class ChunkGeneratorNowhere extends NoiseBasedChunkGenerator implements I
 		for (Entry<ResourceKey<StructureSet>, StructureSet> entry : registry.entrySet()) {
 			ResourceKey<StructureSet> resourceKey = entry.getKey();
 			StructureSet structureSet = entry.getValue();
-			Identifier resourceLocation = resourceKey.location();
+			Identifier resourceLocation = resourceKey.identifier();
 
 			if (!resourceLocation.getNamespace().equals(Identifier.DEFAULT_NAMESPACE) && !resourceLocation.getNamespace().equals(TheTitansNeo.MODID)) {
 				structureSets.add(registry.wrapAsHolder(structureSet));

@@ -3,6 +3,7 @@ package net.byAqua3.thetitansneo.render.item;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * 26.1.2: shared "unbaked" counterpart for the mod's item renderers. It binds the wildcard-free

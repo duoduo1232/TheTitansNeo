@@ -33,8 +33,6 @@ public class RenderWitherzillaSpawnEgg implements net.minecraft.client.renderer.
 	public RenderWitherzillaSpawnEgg(SpriteGetter sprites) {
 		this.sprites = sprites;
 	}
-
-	@Override
 	public void submit(ItemStack stack, ItemDisplayContext context, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
 		Minecraft mc = Minecraft.getInstance();
 
@@ -130,7 +128,7 @@ public class RenderWitherzillaSpawnEgg implements net.minecraft.client.renderer.
 		}
 
 		@Override
-		public net.minecraft.client.renderer.special.SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
+		public net.minecraft.client.renderer.special.SpecialModelRenderer<ItemStack> bake(SpecialModelRenderer.BakingContext context) {
 			return new RenderWitherzillaSpawnEgg(context.sprites());
 		}
 	}

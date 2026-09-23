@@ -248,7 +248,8 @@ public class FeatureNowhere extends Feature<NoneFeatureConfiguration> {
 			int i1 = 2 + l / 4;
 			int j1 = 76 + l * 3;
 			boolean flag = l == 1 || l == 2;
-			Feature.END_SPIKE.place(new SpikeConfiguration(false, List.of(new SpikeFeature.EndSpike(i, j, i1, j1, flag)), null), worldGenLevel, chunkGenerator, randomSource, new BlockPos(i, k, j));
+			// 26.1.2: SpikeConfiguration 改为 (BlockState, BlockPredicate, BlockPredicate)，末地尖刺不再由配置传入。
+			Feature.END_SPIKE.place(new net.minecraft.world.level.levelgen.feature.configurations.EndSpikeConfiguration(false, List.of(new net.minecraft.world.level.levelgen.feature.EndSpikeFeature.EndSpike(i, j, i1, j1, flag)), (net.minecraft.core.BlockPos) null), worldGenLevel, chunkGenerator, randomSource, new BlockPos(i, k, j));
 		}
 		for (int k1 = 0; k1 < 100; k1++) {
 			int i = blockPos.getX() + randomSource.nextInt(16) + 8;
@@ -268,4 +269,5 @@ public class FeatureNowhere extends Feature<NoneFeatureConfiguration> {
 			worldGenLevel.setBlock(new BlockPos(0, k + 1, 0), TheTitansNeoBlocks.ADAMANTIUM_ORE_BLOCK.get().defaultBlockState(), 0, 3);
 		}
 		return true;
-	}}
+	}
+}

@@ -789,7 +789,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 
 		if (!this.level().isClientSide()) {
 			ServerLevel serverLevel = (ServerLevel) this.level();
-			serverLevel.getServer().clockManager().addTicks(serverLevel.getServer().registryAccess().getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD), 18000L - serverLevel.getOverworldClockTime() % 24000L);
+			serverLevel.getServer().clockManager().addTicks(serverLevel.getServer().registryAccess().getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD), (int) (18000L - serverLevel.getOverworldClockTime() % 24000L));
 		}
 
 		if (this.getTarget() != null && !this.getTarget().isAlive()) {

@@ -11,7 +11,7 @@ public class TheTitansNeoEvents {
 
 	public static void registerEvents() {
 		NeoForge.EVENT_BUS.register(new TheTitansNeoEvent());
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			NeoForge.EVENT_BUS.register(new TheTitansNeoClientEvent());
 			NeoForge.EVENT_BUS.register(new PlayerHealthBarEvent());
 			NeoForge.EVENT_BUS.register(new TheTitansBossBarEvent());

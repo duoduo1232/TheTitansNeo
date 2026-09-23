@@ -189,8 +189,6 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 		}
 		return super.hurtServer(level, damageSource, amount);
 	}
-
-	@Override
 	public void hurtEntities(List<Entity> entities) {
 		for (Entity entity : entities) {
 			if (entity instanceof LivingEntity) {

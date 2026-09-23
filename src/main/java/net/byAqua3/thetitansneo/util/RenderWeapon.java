@@ -22,14 +22,14 @@ public class RenderWeapon {
 	private static final float SIZE = 16.0F;
 
 	public static void submitItemSprite(Identifier texture, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords) {
-		TextureAtlas textureAtlas = Minecraft.getInstance().getModelManager().getAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
+		TextureAtlas textureAtlas = (TextureAtlas) Minecraft.getInstance().getTextureManager().getTexture(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
 		TextureAtlasSprite sprite = textureAtlas.getSprite(texture);
 		float u0 = sprite.getU0();
 		float u1 = sprite.getU1();
 		float v0 = sprite.getV0();
 		float v1 = sprite.getV1();
 
-		submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.translucentItemSheet(), (pose, vertexConsumer) -> {
+		submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.itemTranslucent(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS), (pose, vertexConsumer) -> {
 			vertex(vertexConsumer, pose, 0.0F, 0.0F, u0, v1, lightCoords);
 			vertex(vertexConsumer, pose, SIZE, 0.0F, u1, v1, lightCoords);
 			vertex(vertexConsumer, pose, SIZE, SIZE, u1, v0, lightCoords);

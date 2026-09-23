@@ -18,13 +18,9 @@ public class ItemWitherTurret extends Item {
 	public ItemWitherTurret(Properties properties) {
 		super(properties.stacksTo(1));
 	}
-	
-	@Override
 	public boolean isEnchantable(ItemStack stack) {
         return true;
     }
-	
-	@Override
     public int getEnchantmentValue() {
         return 50;
     }
@@ -84,4 +80,5 @@ public class ItemWitherTurret extends Item {
 			itemStack.shrink(1);
 		}
 		return InteractionResult.SUCCESS;
-	}}
+	}
+}

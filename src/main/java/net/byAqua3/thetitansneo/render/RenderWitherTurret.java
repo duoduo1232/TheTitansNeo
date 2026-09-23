@@ -29,7 +29,6 @@ public class RenderWitherTurret extends LivingEntityRenderer<EntityWitherTurret,
 	public void extractRenderState(EntityWitherTurret entity, TitanRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		state.titan = entity;
-		state.invulTime = entity.getInvulTime();
 	}
 
 	@Override

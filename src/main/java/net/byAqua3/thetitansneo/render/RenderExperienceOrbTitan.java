@@ -38,7 +38,6 @@ public class RenderExperienceOrbTitan extends EntityRenderer<EntityExperienceOrb
 	@Override
 	public void extractRenderState(EntityExperienceOrbTitan entity, ExperienceOrbRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
-		state.icon = entity.getIcon();
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, float x, float y, int red, int green, int blue, float u, float v, int lightCoords) {

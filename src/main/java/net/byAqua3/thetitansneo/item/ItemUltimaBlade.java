@@ -146,8 +146,6 @@ public class ItemUltimaBlade extends Item {
 		}
 		return super.mineBlock(stack, level, state, pos, livingEntity);
 	}
-
-	@Override
 	public boolean onEntitySwing(ItemStack stack, LivingEntity livingEntity) {
 		Level level = livingEntity.level();
 

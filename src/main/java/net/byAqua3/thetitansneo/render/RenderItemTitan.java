@@ -17,6 +17,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderItemTitan extends EntityRenderer<EntityItemTitan, ItemEntityRenderState> {
@@ -59,7 +60,7 @@ public class RenderItemTitan extends EntityRenderer<EntityItemTitan, ItemEntityR
 		poseStack.scale(16.0F, 16.0F, 16.0F);
 		float spin = ItemEntity.getSpin(state.ageInTicks, state.bobOffset);
 		poseStack.mulPose(Axis.YP.rotation(spin));
-		ItemEntityRenderer.submitMultipleFromCount(poseStack, submitNodeCollector, state.lightCoords, state, this.random, boundingBox);
+		ItemEntityRenderer.submitMultipleFromCount(poseStack, submitNodeCollector, state.lightCoords, state, net.minecraft.util.RandomSource.create(), boundingBox);
 		poseStack.popPose();
 		super.submit(state, poseStack, submitNodeCollector, camera);
 	}

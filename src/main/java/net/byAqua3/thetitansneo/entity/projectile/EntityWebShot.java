@@ -59,7 +59,7 @@ public class EntityWebShot extends Projectile implements IEntityProjectileTitan 
 		super.readAdditionalSaveData(input);
 		this.life = input.getShortOr("life", (short) 0);
 		if (input.child("inBlockState").isPresent()) {
-			this.lastState = input.read("inBlockState", net.minecraft.world.level.block.state.BlockState.CODEC.codec()).orElse(net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+			this.lastState = input.read("inBlockState", net.minecraft.world.level.block.state.BlockState.CODEC).orElse(net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
 		}
 
 		this.shakeTime = input.getByteOr("shake", (byte) 0) & 255;

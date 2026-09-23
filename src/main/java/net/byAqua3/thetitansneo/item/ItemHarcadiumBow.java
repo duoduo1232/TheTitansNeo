@@ -73,7 +73,7 @@ public class ItemHarcadiumBow extends BowItem {
 
 			int k = EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().holderOrThrow(Enchantments.POWER), stack);
 			if (k > 0) {
-				arrow.setBaseDamage(arrow.getBaseDamage() + k * 100.0D);
+				arrow.setBaseDamage(30.0D + k * 100.0D);
 			}
 
 			int l = EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().holderOrThrow(Enchantments.PUNCH), stack);

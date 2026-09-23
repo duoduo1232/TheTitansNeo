@@ -42,6 +42,6 @@ public class ModelZombifiedPiglinTitanMinion extends HumanoidModel<MinionHumanoi
 		this.leftEar.zRot = -f - Mth.cos(f1 * 1.2F) * f2;
 		this.rightEar.zRot = f + Mth.cos(f1) * f2;
 		float attackTime = state instanceof net.minecraft.client.renderer.entity.state.ArmedEntityRenderState armed ? armed.attackTime : 0.0F;
-		AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, state.isAggressive(), state instanceof net.minecraft.client.renderer.entity.state.ArmedEntityRenderState armed ? armed.attackTime : 0.0F, state.ageInTicks);
+		AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, false, state);
 	}
 }
