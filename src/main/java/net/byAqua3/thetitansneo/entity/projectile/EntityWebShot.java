@@ -58,8 +58,8 @@ public class EntityWebShot extends Projectile implements IEntityProjectileTitan 
 	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.life = input.getShortOr("life", (short) 0);
-		if (input.contains("inBlockState", 10)) {
-			this.lastState = NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), input.childOrEmpty("inBlockState"));
+		if (input.child("inBlockState").isPresent()) {
+			this.lastState = input.read("inBlockState", net.minecraft.world.level.block.state.BlockState.CODEC.codec()).orElse(net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
 		}
 
 		this.shakeTime = input.getByteOr("shake", (byte) 0) & 255;
@@ -213,7 +213,7 @@ public class EntityWebShot extends Projectile implements IEntityProjectileTitan 
 			this.shakeTime--;
 		}
 
-		if (this.isInWaterOrRain() || blockstate.is(Blocks.POWDER_SNOW) || this.isInFluidType((fluidType, height) -> this.canFluidExtinguish(fluidType))) {
+		if (this.isInWaterOrRain() || blockstate.is(Blocks.POWDER_SNOW) || this.isInWater()) {
 			this.clearFire();
 		}
 

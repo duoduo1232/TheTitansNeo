@@ -34,8 +34,6 @@ public class LayerCreeperTitanArmor extends RenderLayer<TitanRenderState, ModelC
 			float f = state.ageInTicks;
 			// 26.1.2: 改用 SubmitNodeCollector 提交模型，实体数据从 state 读取。
 			RenderType renderType = RenderTypes.energySwirl(DISINTIGRATION, this.xOffset(f) % 1.0F, f * 0.01F % 1.0F);
-			this.getParentModel().copyPropertiesTo(this.model);
-			this.model.heldItem.visible = false;
 			submitNodeCollector.submitModel(this.model, state, poseStack, renderType, lightCoords, OverlayTexture.NO_OVERLAY, color(state, f), null, state.outlineColor, null);
 		}
 	}

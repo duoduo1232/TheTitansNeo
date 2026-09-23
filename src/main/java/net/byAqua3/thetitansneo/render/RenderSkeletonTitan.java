@@ -70,7 +70,7 @@ public class RenderSkeletonTitan extends LivingEntityRenderer<EntitySkeletonTita
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return (state.skeletonType == 1) ? WITHER_SKELETON_TITAN : ((state.attackTimer < 20 && state.attackTimer >= 10) ? SKELETON_TITAN_PULL_0 : ((state.attackTimer < 30 && state.attackTimer >= 20) ? SKELETON_TITAN_PULL_1 : ((state.attackTimer >= 30) ? SKELETON_TITAN_PULL_2 : (state.isStunned ? SKELETON_TITAN_BROKEN_BOW : SKELETON_TITAN))));
 	}
 }

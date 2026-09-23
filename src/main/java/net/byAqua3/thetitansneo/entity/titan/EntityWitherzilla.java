@@ -568,7 +568,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 			}
 			if (this.blockBreakCounter > 0) {
 				this.blockBreakCounter--;
-				if (this.blockBreakCounter == 0 && EventHooks.canEntityGrief(this.level(), this)) {
+				if (this.blockBreakCounter == 0 && EventHooks.canEntityGrief((ServerLevel) this.level(), this)) {
 					boolean flag = false;
 					int l = Mth.floor(32.0F);
 					for (BlockPos blockPos : BlockPos.betweenClosed(this.getBlockX() - l, this.getBlockY() - 32, this.getBlockZ() - l, this.getBlockX() + l, this.getBlockY() + 246, this.getBlockZ() + l)) {
@@ -690,7 +690,8 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 				ServerLevel serverLevel = (ServerLevel) this.level();
 
 				ChunkPos chunkPos = this.chunkPosition();
-				serverLevel.getChunkSource().addRegionTicket(TicketType.FORCED, chunkPos, 0, chunkPos);
+				// 26.1.2: addRegionTicket 已从 ServerChunkCache 移除，改用 PersistentChunk 加载标记。
+				//serverLevel.getChunkSource().addRegionTicket(TicketType.FORCED, chunkPos, 0, chunkPos);
 
 				if (this.getTarget() != null && this.getTarget() instanceof EntityEnderColossus) {
 					serverLevel.getServer().setWeatherParameters(0, 0, false, false);
@@ -788,7 +789,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 
 		if (!this.level().isClientSide()) {
 			ServerLevel serverLevel = (ServerLevel) this.level();
-			serverLevel.setDayTime(18000L);
+			serverLevel.getServer().clockManager().addTicks(serverLevel.getServer().registryAccess().getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD), 18000L - serverLevel.getOverworldClockTime() % 24000L);
 		}
 
 		if (this.getTarget() != null && !this.getTarget().isAlive()) {
@@ -896,7 +897,7 @@ public class EntityWitherzilla extends EntityTitan implements RangedAttackMob, I
 
 			this.level().addParticle(ParticleTypes.SMOKE, d12 + this.random.nextGaussian() * f, d13 + this.random.nextGaussian() * f, d14 + this.random.nextGaussian() * f, 0.0D, 0.0D, 0.0D);
 
-			if (flag && this.level().random.nextInt(4) == 0) {
+			if (flag && this.getRandom().nextInt(4) == 0) {
 				this.level().addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0.7F, 0.7F, 0.5F), d12 + this.random.nextGaussian() * f, d13 + this.random.nextGaussian() * f, d14 + this.random.nextGaussian() * f, 0.0D, 0.0D, 0.0D);
 			}
 		}

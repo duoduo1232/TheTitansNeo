@@ -27,8 +27,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 public class EntityItemTitan extends ItemEntity {
 
-	public static final Codec<ItemStack> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(ItemStack.ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder), ExtraCodecs.intRange(1, Integer.MAX_VALUE).fieldOf("count").orElse(1).forGetter(ItemStack::getCount), DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.getComponentsPatch())).apply(instance, ItemStack::new)));
-
 	private static final int LIFETIME = 6000;
 
 	public EntityItemTitan(EntityType<? extends ItemEntity> entityType, Level level) {
@@ -54,52 +52,12 @@ public class EntityItemTitan extends ItemEntity {
 
 	@Override
 	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
-		this.health = input.getShortOr("Health", (short) 0);
-		this.age = input.getShortOr("Age", (short) 0);
-		if (input.contains("PickupDelay")) {
-			this.pickupDelay = input.getShortOr("PickupDelay", (short) 0);
-		}
-		if (input.contains("Lifespan")) {
-			this.lifespan = input.getIntOr("Lifespan", 0);
-		}
-
-		this.target = input.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
-
-		this.thrower = input.read("Thrower", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
-		this.cachedThrower = null;
-
-		if (input.contains("Item", 10)) {
-			CompoundTag compoundTag = input.childOrEmpty("Item");
-			ItemStack itemStack = CODEC.parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), compoundTag).resultOrPartial(error -> TheTitansNeo.LOGGER.error("Tried to load invalid item: '{}'", error)).orElse(ItemStack.EMPTY);
-			this.setItem(itemStack);
-		} else {
-			this.setItem(ItemStack.EMPTY);
-		}
-
-		if (this.getItem().isEmpty()) {
-			this.discard();
-		}
+		super.readAdditionalSaveData(input);
 	}
 
 	@Override
 	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
-		output.putShort("Health", (short) this.health);
-		output.putShort("Age", (short) this.age);
-		output.putShort("PickupDelay", (short) this.pickupDelay);
-		output.putInt("Lifespan", this.lifespan);
-		if (this.thrower != null) {
-			output.store("Thrower", net.minecraft.core.UUIDUtil.CODEC, this.thrower);
-		}
-
-		if (this.target != null) {
-			output.store("Owner", net.minecraft.core.UUIDUtil.CODEC, this.target);
-		}
-
-		if (!this.getItem().isEmpty()) {
-			// 26.1.2: 原 DataComponentUtil.wrapEncodingExceptions(...) 已删除，
-			// ValueOutput 直接支持按 Codec 写入子节点。
-			output.store("Item", ItemStack.CODEC, this.getItem());
-		}
+		super.addAdditionalSaveData(output);
 	}
 
 	@Override

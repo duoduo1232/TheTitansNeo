@@ -19,6 +19,14 @@ public class TitanRenderState extends LivingEntityRenderState {
 	 */
 	public net.minecraft.world.entity.Entity titan;
 
+	/** 26.1.2: getTextureLocation 改为按 RenderState 取，minion 的纹理在这里选定。 */
+	public net.minecraft.resources.Identifier texture;
+
+public boolean isPassenger;
+public boolean isCharging;
+public int icon;
+public boolean isAggressive;
+	public net.minecraft.world.entity.Entity entity;
 	public int invulTime;
 	public int extraPower;
 	public int animationID;

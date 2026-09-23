@@ -40,7 +40,7 @@ public class EntityAITitanWatchClosest extends Goal {
 		this.onlyHorizontal = onlyHorizontal;
 		this.setFlags(EnumSet.of(Goal.Flag.LOOK));
 		if (lookAtType == Player.class) {
-			this.lookAtContext = TargetingConditions.forNonCombat().ignoreLineOfSight().ignoreInvisibilityTesting().range(lookDistance).selector(entity -> EntitySelector.notRiding(titan).test(entity));
+			this.lookAtContext = TargetingConditions.forNonCombat().ignoreLineOfSight().ignoreInvisibilityTesting().range(lookDistance).selector((entity, lv) -> EntitySelector.notRiding(titan).test(entity));
 		} else {
 			this.lookAtContext = TargetingConditions.forNonCombat().ignoreLineOfSight().ignoreInvisibilityTesting().range(lookDistance);
 		}
@@ -56,7 +56,7 @@ public class EntityAITitanWatchClosest extends Goal {
 			}
 
 			if (this.lookAtType == Player.class) {
-				this.lookAt = this.titan.level().getNearestPlayer(this.lookAtContext, this.titan, this.titan.getX(), this.titan.getEyeY(), this.titan.getZ());
+				this.lookAt = ((ServerLevel) this.titan.level()).getNearestPlayer(this.lookAtContext, this.titan, this.titan.getX(), this.titan.getEyeY(), this.titan.getZ());
 			} else {
 				this.lookAt = ((ServerLevel) this.titan.level()).getNearestEntity(this.titan.level().getEntitiesOfClass(this.lookAtType, this.titan.getBoundingBox().inflate(this.lookDistance, this.lookDistance, this.lookDistance), entity -> true), this.lookAtContext, this.titan, this.titan.getX(), this.titan.getEyeY(), this.titan.getZ());
 			}

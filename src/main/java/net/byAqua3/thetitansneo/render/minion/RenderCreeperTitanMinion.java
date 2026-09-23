@@ -10,9 +10,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.monster.Creeper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderCreeperTitanMinion extends CreeperRenderer {
+
+	private Identifier currentTexture;
+
 
 	public static final Identifier CREEPER = Identifier.withDefaultNamespace("textures/entity/creeper/creeper.png");
 	public static final Identifier CREEPER_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/creeper/creeper_priest.png");
@@ -24,16 +28,13 @@ public class RenderCreeperTitanMinion extends CreeperRenderer {
 		super(context);
 	}
 
-	@Override
-	public TitanRenderState createRenderState() {
-		return new TitanRenderState();
-	}
+
 
 	@Override
-	public void extractRenderState(Creeper entity, TitanRenderState state, float partialTicks) {
+	public void extractRenderState(Creeper entity, CreeperRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		// 26.1.2: getTextureLocation 改为按 RenderState 取，所以纹理在这里选定。
-		state.texture = getMinionTexture(entity);
+		this.currentTexture = getMinionTexture(entity);
 	}
 
 	private static Identifier getMinionTexture(Creeper entity) {
@@ -56,7 +57,7 @@ public class RenderCreeperTitanMinion extends CreeperRenderer {
 	}
 
 	@Override
-	public Identifier getTextureLocation(TitanRenderState state) {
-		return state.texture;
+	public Identifier getTextureLocation(CreeperRenderState state) {
+		return this.currentTexture == null ? CREEPER : this.currentTexture;
 	}
 }

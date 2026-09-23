@@ -58,7 +58,7 @@ public class RenderBlazeTitan extends LivingEntityRenderer<EntityBlazeTitan, Tit
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return BLAZE_TITAN;
 	}
 }

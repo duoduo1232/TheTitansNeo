@@ -36,7 +36,6 @@ public class LayerWitherzillaArmor extends RenderLayer<TitanRenderState, ModelWi
 		int i = state.invulTime;
 		Identifier texture = (i > 0 && (i > 300 || i / 10 % 2 != 1)) ? DISINTIGRATION : WITHERZILLA_AURA;
 		RenderType renderType = RenderTypes.energySwirl(texture, f * 0.015F % 1.0F, f * 0.01F % 1.0F);
-		this.getParentModel().copyPropertiesTo(this.model);
 		submitNodeCollector.submitModel(this.model, state, poseStack, renderType, lightCoords, OverlayTexture.NO_OVERLAY, new Color(0.5F, 0.5F, 0.5F, 1.0F).getRGB(), null, state.outlineColor, null);
 	}
 

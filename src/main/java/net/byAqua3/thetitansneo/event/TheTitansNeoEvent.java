@@ -55,9 +55,7 @@ public class TheTitansNeoEvent {
 		if (entity instanceof ItemEntity) {
 			ItemEntity itemEntity = (ItemEntity) entity;
 			ItemStack itemStack = itemEntity.getItem();
-			List<TagKey<Item>> tags = itemStack.getTags().toList();
-
-			if (tags.contains(TheTitansNeoItemTags.IMMORTAL)) {
+if (itemStack.is(TheTitansNeoItemTags.IMMORTAL)) {
 				itemEntity.setInvulnerable(true);
 			}
 		}

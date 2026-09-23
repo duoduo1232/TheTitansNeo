@@ -24,7 +24,7 @@ import org.joml.Vector3fc;
  * {@link net.minecraft.client.renderer.special.SpecialModelRenderer}. Transforms are unchanged; drawing now
  * goes through the deferred node collector and the atlas sprite getter.
  */
-public class RenderWitherzillaSpawnEgg implements IItemRenderer {
+public class RenderWitherzillaSpawnEgg implements net.minecraft.client.renderer.special.SpecialModelRenderer<ItemStack> {
 
 	public ModelTitanSpawnEgg model = new ModelTitanSpawnEgg();
 
@@ -43,7 +43,7 @@ public class RenderWitherzillaSpawnEgg implements IItemRenderer {
 
 		Identifier texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/eggs/witherzilla_egg");
 		// 26.1.2: Material.buffer(MultiBufferSource, ...) is gone; this is replaced by a submitted model.
-		final SpriteId spriteId = new SpriteId(InventoryMenu.BLOCK_ATLAS, texture);
+		final SpriteId spriteId = new SpriteId(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS, texture);
 		final ModelTitanSpawnEgg eggModel = this.model;
 
 		switch (context) {
@@ -130,8 +130,17 @@ public class RenderWitherzillaSpawnEgg implements IItemRenderer {
 		}
 
 		@Override
-		public RenderWitherzillaSpawnEgg bake(SpecialModelRenderer.BakingContext context) {
+		public net.minecraft.client.renderer.special.SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
 			return new RenderWitherzillaSpawnEgg(context.sprites());
 		}
+	}
+	@Override
+	public net.minecraft.world.item.ItemStack extractArgument(ItemStack stack) {
+		return stack;
+	}
+
+	@Override
+	public void submit(ItemStack stack, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
+		this.submit(stack, net.minecraft.world.item.ItemDisplayContext.NONE, poseStack, submitNodeCollector, packedLight, packedOverlay, hasFoil, outlineColor);
 	}
 }

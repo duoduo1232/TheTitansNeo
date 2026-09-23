@@ -10,9 +10,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.monster.skeleton.WitherSkeleton;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.renderer.entity.state.SkeletonRenderState;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderWitherSkeletonTitanMinion extends WitherSkeletonRenderer {
+
+	private Identifier currentTexture;
+
 
 	public static final Identifier WITHER_SKELETON = Identifier.withDefaultNamespace("textures/entity/skeleton/wither_skeleton.png");
 	public static final Identifier WITHER_SKELETON_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/skeleton/wither_skeleton_priest.png");
@@ -24,16 +28,13 @@ public class RenderWitherSkeletonTitanMinion extends WitherSkeletonRenderer {
 		super(context);
 	}
 
-	@Override
-	public TitanRenderState createRenderState() {
-		return new TitanRenderState();
-	}
+
 
 	@Override
-	public void extractRenderState(WitherSkeleton entity, TitanRenderState state, float partialTicks) {
+	public void extractRenderState(WitherSkeleton entity, SkeletonRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		// 26.1.2: getTextureLocation 改为按 RenderState 取，所以纹理在这里选定。
-		state.texture = getMinionTexture(entity);
+		this.currentTexture = getMinionTexture(entity);
 	}
 
 	private static Identifier getMinionTexture(WitherSkeleton entity) {
@@ -56,7 +57,7 @@ public class RenderWitherSkeletonTitanMinion extends WitherSkeletonRenderer {
 	}
 
 	@Override
-	public Identifier getTextureLocation(TitanRenderState state) {
-		return state.texture;
+	public Identifier getTextureLocation(SkeletonRenderState state) {
+		return this.currentTexture == null ? WITHER_SKELETON : this.currentTexture;
 	}
 }

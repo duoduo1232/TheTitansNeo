@@ -55,7 +55,7 @@ public class EntityGhastTitanMinionFireball extends LargeFireball {
 			}
 
 			if (!this.level().isClientSide()) {
-				boolean flag = net.neoforged.neoforge.event.EventHooks.canEntityGrief(this.level(), this.getOwner());
+				boolean flag = net.neoforged.neoforge.event.EventHooks.canEntityGrief((ServerLevel) this.level(), this.getOwner());
 				this.level().explode(this, this.getX(), this.getY(), this.getZ(), this.explosionPower, flag, Level.ExplosionInteraction.MOB);
 				this.discard();
 			}

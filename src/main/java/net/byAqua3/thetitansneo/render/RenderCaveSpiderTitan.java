@@ -40,7 +40,7 @@ public class RenderCaveSpiderTitan extends RenderSpiderTitan {
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return CAVE_SPIDER_TITAN;
 	}
 }

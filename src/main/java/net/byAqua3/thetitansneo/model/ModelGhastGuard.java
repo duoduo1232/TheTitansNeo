@@ -14,8 +14,9 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.byAqua3.thetitansneo.render.state.TitanRenderState;
 
-public class ModelGhastGuard<T extends Entity> extends EntityModel<LivingEntityRenderState> {
+public class ModelGhastGuard extends EntityModel<TitanRenderState> {
 
 	public ModelPart body;
 	public ModelPart[] tentacles = new ModelPart[9];
@@ -45,7 +46,7 @@ public class ModelGhastGuard<T extends Entity> extends EntityModel<LivingEntityR
 	}
 
 	@Override
-	public void setupAnim(LivingEntityRenderState state) {
+	public void setupAnim(TitanRenderState state) {
 		for (int i = 0; i < this.tentacles.length; i++) {
 			this.tentacles[i].xRot = 0.2F * Mth.sin(state.ageInTicks * 0.3F + (float) i) + 0.4F;
 		}

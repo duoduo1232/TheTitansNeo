@@ -28,7 +28,6 @@ public class LayerSlimeTitanOuter extends RenderLayer<TitanRenderState, ModelSli
 	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, TitanRenderState state, float yRot, float xRot) {
 		boolean flag = state.appearsGlowing() && state.isInvisible;
 		if (!state.isInvisible || flag) {
-			this.getParentModel().copyPropertiesTo(this.model);
 			// 26.1.2: 用 appearsGlowing() 取代 Minecraft.shouldEntityAppearGlowing(entity)。
 			net.minecraft.client.renderer.rendertype.RenderType renderType = flag
 				? RenderTypes.outline(this.getTextureLocation())
@@ -37,7 +36,7 @@ public class LayerSlimeTitanOuter extends RenderLayer<TitanRenderState, ModelSli
 		}
 	}
 
-	protected Identifier getTextureLocation() {
+	public Identifier getTextureLocation() {
 		return SLIME_LOCATION;
 	}
 }

@@ -32,14 +32,11 @@ public class LayerSkeletonTitanArmor extends RenderLayer<TitanRenderState, Model
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, TitanRenderState state, float yRot, float xRot) {
 		if (state.isArmored) {
-			float f = state.state.ageInTicks;
-			this.model.prepareMobModel(entity, state.walkAnimationPos, state.walkAnimationPosAmount, state.partialTick);
-			this.getParentModel().copyPropertiesTo(this.model);
-			VertexConsumer vertexconsumer = multiBufferSource.getBuffer(RenderTypes.energySwirl(DISINTIGRATION, this.xOffset(f) % 1.0F, f * 0.01F % 1.0F));
-			this.model.setupAnim(entity, state.walkAnimationPos, state.walkAnimationPosAmount, state.ageInTicks, state.yRot, state.xRot);
+			float f = state.ageInTicks;
+			RenderType renderType = RenderTypes.energySwirl(DISINTIGRATION, this.xOffset(f) % 1.0F, f * 0.01F % 1.0F);
 			this.model.heldItem.visible = false;
 			this.model.heldItem2.visible = false;
-			this.model.renderToBuffer(poseStack, vertexconsumer, packedLight, OverlayTexture.NO_OVERLAY, new Color((state.skeletonType == 1) ? 0.1F : 0.0F, (state.skeletonType == 1) ? 0.1F : (float) (0.6F + Math.cos(f * 0.05F) * 0.1F), (state.skeletonType == 1) ? 0.1F : (float) (0.7F + Math.cos(f * 0.05F) * 0.1F), 1.0F).getRGB());
+			submitNodeCollector.submitModel(this.model, state, poseStack, renderType, packedLight, OverlayTexture.NO_OVERLAY, color(state, f), null, state.outlineColor, null);
 		}
 	}
 

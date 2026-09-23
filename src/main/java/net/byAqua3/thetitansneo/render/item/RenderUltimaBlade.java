@@ -24,7 +24,7 @@ import org.joml.Vector3fc;
  * the model is submitted through the deferred node collector instead of drawing into a {@code MultiBufferSource}
  * directly, and the texture is resolved through the atlas {@link SpriteGetter}.
  */
-public class RenderUltimaBlade implements IItemRenderer {
+public class RenderUltimaBlade implements net.minecraft.client.renderer.special.SpecialModelRenderer<ItemStack> {
 
 	public ModelUltimaBlade model = new ModelUltimaBlade();
 
@@ -38,7 +38,7 @@ public class RenderUltimaBlade implements IItemRenderer {
 	public void submit(ItemStack stack, ItemDisplayContext context, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
 		Identifier texture = Identifier.tryBuild(TheTitansNeo.MODID, "entity/items/ultima_blade");
 		// 26.1.2: Material.buffer(MultiBufferSource, ...) is gone; this is replaced by a submitted model.
-		final SpriteId spriteId = new SpriteId(InventoryMenu.BLOCK_ATLAS, texture);
+		final SpriteId spriteId = new SpriteId(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS, texture);
 		final ModelUltimaBlade bladeModel = this.model;
 
 		switch (context) {
@@ -126,8 +126,17 @@ public class RenderUltimaBlade implements IItemRenderer {
 		}
 
 		@Override
-		public RenderUltimaBlade bake(SpecialModelRenderer.BakingContext context) {
+		public net.minecraft.client.renderer.special.SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
 			return new RenderUltimaBlade(context.sprites());
 		}
+	}
+	@Override
+	public net.minecraft.world.item.ItemStack extractArgument(ItemStack stack) {
+		return stack;
+	}
+
+	@Override
+	public void submit(ItemStack stack, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
+		this.submit(stack, net.minecraft.world.item.ItemDisplayContext.NONE, poseStack, submitNodeCollector, packedLight, packedOverlay, hasFoil, outlineColor);
 	}
 }

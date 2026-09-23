@@ -126,8 +126,8 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 
 		for (LivingEntity entity : entities) {
 			if (entity != null && entity != this && entity.isAlive() && !(entity instanceof EntityZombieTitan) && !(entity instanceof EntityZombieTitanMinion) && !(entity instanceof EntityZombieTitanGiantMinion)) {
-				entity.hurtServer((ServerLevel) doJumpDamage.level(), this.damageSources().explosion(null), (float) damage);
-				entity.hurtServer((ServerLevel) doJumpDamage.level(), this.damageSources().fall(), (float) damage / 4.0F);
+				entity.hurtServer((ServerLevel) this.level(), this.damageSources().explosion(null), (float) damage);
+				entity.hurtServer((ServerLevel) this.level(), this.damageSources().fall(), (float) damage / 4.0F);
 				this.level().playSound(entity, entity.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.MASTER, 0.85F, 1.0F + (this.getRandom().nextFloat() - this.getRandom().nextFloat()) * 0.5F);
 				if (knockback != 0) {
 					double ks = 0.75D + this.getRandom().nextDouble() + this.getRandom().nextDouble();
@@ -288,7 +288,7 @@ public class EntityZombieTitanGiantMinion extends Giant implements IMinion {
 			if (villager.isPassenger()) {
 				Entity vehicle = villager.getVehicle();
 				villager.stopRiding();
-				zombieVillager.startRiding(vehicle, true);
+				zombieVillager.startRiding(vehicle);
 			}
 
 			if (!villager.isRemoved()) {

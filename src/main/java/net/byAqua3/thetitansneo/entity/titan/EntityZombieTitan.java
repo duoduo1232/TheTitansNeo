@@ -233,7 +233,7 @@ public class EntityZombieTitan extends EntityTitan implements IEntityMultiPartTi
 
 	protected void dropSword() {
 		if (this.isArmed()) {
-			this.playSound(SoundEvents.ITEM_BREAK, 100.0F, 0.5F);
+			this.playSound(SoundEvents.ITEM_BREAK.value(), 100.0F, 0.5F);
 			Map<ItemStack, Integer> drops = new HashMap<>();
 			drops.put(new ItemStack(Items.STICK), 16);
 			drops.put(new ItemStack(Items.IRON_INGOT), 32);

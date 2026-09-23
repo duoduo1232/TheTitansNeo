@@ -86,7 +86,7 @@ public class RenderEnderColossus extends LivingEntityRenderer<EntityEnderColossu
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return (state.animationID == 10 && state.deathTicks > 200) ? ENDER_COLOSSUS_DEAD : ENDER_COLOSSUS;
 	}
 }

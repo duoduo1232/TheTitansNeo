@@ -70,7 +70,7 @@ public class RenderGhastTitan extends LivingEntityRenderer<EntityGhastTitan, Tit
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return state.isCharging ? GHAST_TITAN_SHOOTING : GHAST_TITAN;
 	}
 }

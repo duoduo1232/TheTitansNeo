@@ -76,7 +76,7 @@ public class RenderSlimeTitan extends LivingEntityRenderer<EntitySlimeTitan, Tit
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return SLIME_TITAN;
 	}
 }

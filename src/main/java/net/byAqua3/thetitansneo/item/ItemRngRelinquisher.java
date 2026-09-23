@@ -38,7 +38,7 @@ public class ItemRngRelinquisher extends Item {
 					MinecraftServer server = serverLevel.getServer();
 					ServerLevel voidLevel = server.getLevel(TheTitansNeoDimensions.THE_NOWHERE);
 					BlockPos spawnPos = voidLevel.getRespawnData().pos();
-					player.teleport(new TeleportTransition(voidLevel, new Vec3(spawnPos.getX(), 128.0D, spawnPos.getZ()), Vec3.ZERO, 0.0F, 0.0F, false, TeleportTransition.DO_NOTHING));
+					player.teleport(new TeleportTransition(voidLevel, new Vec3(spawnPos.getX(), 128.0D, spawnPos.getZ()), Vec3.ZERO, 0.0F, 0.0F, java.util.Set.of(), TeleportTransition.DO_NOTHING));
 					return InteractionResult.SUCCESS;
 				} else {
 					player.sendSystemMessage(Component.translatable("item.thetitansneo.rng_relinquisher.end.pos"));

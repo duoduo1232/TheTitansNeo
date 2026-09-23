@@ -43,7 +43,7 @@ public class RenderWitherTurret extends LivingEntityRenderer<EntityWitherTurret,
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return WITHER;
 	}
 }

@@ -36,7 +36,7 @@ public class LayerZombifiedPiglinTitanItemInHand extends RenderLayer<TitanRender
 
 		this.getParentModel().heldItem.visible = false;
 		poseStack.pushPose();
-		if (this.getParentModel().young) {
+		if (state.isBaby) {
 			poseStack.translate(0.0F, 0.75F, 0.0F);
 			poseStack.scale(0.5F, 0.5F, 0.5F);
 		}

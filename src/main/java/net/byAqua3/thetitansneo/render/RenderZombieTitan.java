@@ -64,7 +64,7 @@ public class RenderZombieTitan extends LivingEntityRenderer<EntityZombieTitan, T
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		if (state.isArmed) {
 			return !state.isVillager ? ZOMBIE_TITAN_ARMED : ZOMBIE_VILLAGER_TITAN_ARMED;
 		}

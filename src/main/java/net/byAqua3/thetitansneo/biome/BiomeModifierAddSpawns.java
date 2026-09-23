@@ -33,7 +33,7 @@ public record BiomeModifierAddSpawns(HolderSet<Biome> biomes, MobCategory catego
 	public static final MapCodec<BiomeModifierAddSpawns> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
 			Biome.LIST_CODEC.fieldOf("biomes").forGetter(BiomeModifierAddSpawns::biomes),
 			MobCategory.CODEC.fieldOf("category").forGetter(BiomeModifierAddSpawns::category),
-			Codec.either(SpawnerData.CODEC.listOf(), SpawnerData.CODEC)
+			Codec.either(SpawnerData.CODEC.codec().listOf(), SpawnerData.CODEC.codec())
 					.xmap(
 							either -> either.map(Function.identity(), List::of),
 							list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list))

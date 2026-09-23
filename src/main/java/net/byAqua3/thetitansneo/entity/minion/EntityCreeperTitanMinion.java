@@ -630,7 +630,7 @@ public class EntityCreeperTitanMinion extends Creeper implements RangedAttackMob
 			}
 			this.dead = true;
 			this.level().explode(this, this.getX(), this.getY(), this.getZ(), this.explosionRadius * f, Level.ExplosionInteraction.MOB);
-			triggerOnDeathMobEffects(level, Entity.RemovalReason.KILLED);
+			triggerOnDeathMobEffects((ServerLevel) this.level(), Entity.RemovalReason.KILLED);
 			this.discard();
 		}
 	}

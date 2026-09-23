@@ -10,9 +10,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.monster.Blaze;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderBlazeTitanMinion extends BlazeRenderer {
+
+	private Identifier currentTexture;
+
 
 	public static final Identifier BLAZE = Identifier.withDefaultNamespace("textures/entity/blaze/blaze.png");
 	public static final Identifier BLAZE_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/blaze/blaze_priest.png");
@@ -24,16 +28,13 @@ public class RenderBlazeTitanMinion extends BlazeRenderer {
 		super(context);
 	}
 
-	@Override
-	public TitanRenderState createRenderState() {
-		return new TitanRenderState();
-	}
+
 
 	@Override
-	public void extractRenderState(Blaze entity, TitanRenderState state, float partialTicks) {
+	public void extractRenderState(Blaze entity, LivingEntityRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		// 26.1.2: getTextureLocation 改为按 RenderState 取，所以纹理在这里选定。
-		state.texture = getMinionTexture(entity);
+		this.currentTexture = getMinionTexture(entity);
 	}
 
 	private static Identifier getMinionTexture(Blaze entity) {
@@ -56,7 +57,7 @@ public class RenderBlazeTitanMinion extends BlazeRenderer {
 	}
 
 	@Override
-	public Identifier getTextureLocation(TitanRenderState state) {
-		return state.texture;
+	public Identifier getTextureLocation(LivingEntityRenderState state) {
+		return this.currentTexture == null ? BLAZE : this.currentTexture;
 	}
 }

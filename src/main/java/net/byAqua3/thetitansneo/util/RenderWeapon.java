@@ -22,7 +22,7 @@ public class RenderWeapon {
 	private static final float SIZE = 16.0F;
 
 	public static void submitItemSprite(Identifier texture, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords) {
-		TextureAtlas textureAtlas = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
+		TextureAtlas textureAtlas = Minecraft.getInstance().getModelManager().getAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
 		TextureAtlasSprite sprite = textureAtlas.getSprite(texture);
 		float u0 = sprite.getU0();
 		float u1 = sprite.getU1();

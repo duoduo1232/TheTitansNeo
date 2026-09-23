@@ -27,9 +27,7 @@ public class MixinItemStack {
 	public void canBeHurtBy(DamageSource damageSource, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
 		if (this.item != null) {
 			ItemStack itemStack = (ItemStack) (Object) this;
-			List<TagKey<Item>> tags = itemStack.getTags().toList();
-
-			if (tags.contains(TheTitansNeoItemTags.IMMORTAL)) {
+if (itemStack.is(TheTitansNeoItemTags.IMMORTAL)) {
 				if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 					callbackInfoReturnable.setReturnValue(false);
 					callbackInfoReturnable.cancel();

@@ -60,7 +60,7 @@ public class RenderOmegafish extends LivingEntityRenderer<EntityOmegafish, Titan
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return OMEGAFISH_TITAN;
 	}
 }

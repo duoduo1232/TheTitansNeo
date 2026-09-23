@@ -26,7 +26,7 @@ public class RenderZombifiedPiglinTitanMinion extends HumanoidMobRenderer<Zombif
 	public static final Identifier ZOMBIFIED_PIGLIN_TEMPLAR = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/zombie/zombie_pigman_templar.png");
 
 	public RenderZombifiedPiglinTitanMinion(EntityRendererProvider.Context context, ModelLayerLocation layer, ArmorModelSet<ModelLayerLocation> armorSet, boolean noRightEar) {
-		super(context, createModel(context.getModelSet(), layer, noRightEar), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
+		super(context, createModel(context.getModelSet(), layer, noRightEar), 0.5F);
 		this.addLayer(
 			new HumanoidArmorLayer<>(
 				this,

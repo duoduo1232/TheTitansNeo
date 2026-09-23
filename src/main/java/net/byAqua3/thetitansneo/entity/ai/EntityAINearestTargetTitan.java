@@ -40,7 +40,7 @@ public class EntityAINearestTargetTitan<T extends LivingEntity> extends TargetGo
 		this.targetType = targetType;
 		this.randomInterval = reducedTickDelay(randomInterval);
 		this.setFlags(EnumSet.of(Goal.Flag.TARGET));
-		this.targetConditions = TargetingConditions.forNonCombat().ignoreLineOfSight().ignoreInvisibilityTesting().range(this.getFollowDistance()).selector(targetPredicate);
+		this.targetConditions = TargetingConditions.forNonCombat().ignoreLineOfSight().ignoreInvisibilityTesting().range(this.getFollowDistance()).selector((e, lv) -> targetPredicate.test(e));
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class EntityAINearestTargetTitan<T extends LivingEntity> extends TargetGo
 				this.target = target;
 			}
 		} else {
-			this.target = this.mob.level().getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+			this.target = ((ServerLevel) this.mob.level()).getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 		}
 	}
 

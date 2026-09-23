@@ -54,7 +54,7 @@ public class RenderIronGolemTitan extends LivingEntityRenderer<EntityIronGolemTi
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return IRON_GOLEM_TITAN;
 	}
 }

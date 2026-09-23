@@ -57,7 +57,7 @@ public class RenderCreeperTitan extends LivingEntityRenderer<EntityCreeperTitan,
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return CREEPER_TITAN;
 	}
 }

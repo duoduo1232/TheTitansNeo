@@ -69,7 +69,7 @@ public class EntityGrowthSerum extends ThrowableItemProjectile {
 				titan.heal(50.0F);
 				titan.setInvulTime(titan.getInvulTime() - 50);
 			} else if (result.getEntity() instanceof SnowGolem) {
-				this.playSound(SoundEvents.ITEM_BREAK, 10000.0F, 0.5F);
+				this.playSound(SoundEvents.ITEM_BREAK.value(), 10000.0F, 0.5F);
 
 				EntitySnowGolemTitan snowGolemTitan = new EntitySnowGolemTitan(this.level());
 				snowGolemTitan.setPos(result.getEntity().getX(), result.getEntity().getY(), result.getEntity().getZ());
@@ -303,7 +303,7 @@ public class EntityGrowthSerum extends ThrowableItemProjectile {
 					this.level().addFreshEntity(ghastTitan);
 				}
 			} else if (result.getEntity() instanceof IronGolem) {
-				this.playSound(SoundEvents.ITEM_BREAK, 10000.0F, 0.5F);
+				this.playSound(SoundEvents.ITEM_BREAK.value(), 10000.0F, 0.5F);
 
 				EntityIronGolemTitan titan = new EntityIronGolemTitan(this.level());
 				titan.setPos(result.getEntity().getX(), result.getEntity().getY(), result.getEntity().getZ());

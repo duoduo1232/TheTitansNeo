@@ -39,7 +39,7 @@ public class ItemTitanSpawnEgg extends Item {
 	}
 
 	public EntityType<?> getEntityType() {
-		return BuiltInRegistries.ENTITY_TYPE.get(this.entityId);
+		return BuiltInRegistries.ENTITY_TYPE.get(this.entityId).map(net.minecraft.core.Holder.Reference::value).orElse(null);
 	}
 
 	public int getSpecialId() {
@@ -62,7 +62,7 @@ public class ItemTitanSpawnEgg extends Item {
 				pos = blockPos.relative(direction);
 			}
 
-			Entity entity = entityType.spawn((ServerLevel) level, itemStack, context.getPlayer(), pos, EntitySpawnReason.SPAWN_EGG, true, !Objects.equals(blockPos, pos) && direction == Direction.UP);
+			Entity entity = entityType.spawn((ServerLevel) level, itemStack, context.getPlayer(), pos, EntitySpawnReason.SPAWN_ITEM_USE, true, !Objects.equals(blockPos, pos) && direction == Direction.UP);
 
 			if (entity != null) {
 				if (entity instanceof EntityTitan) {

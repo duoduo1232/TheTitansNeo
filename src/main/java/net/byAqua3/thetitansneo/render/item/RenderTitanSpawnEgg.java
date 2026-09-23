@@ -39,7 +39,7 @@ import org.joml.Vector3fc;
  * pipeline. The per-context {@code PoseStack} transforms below are carried over verbatim; what changed is how
  * the geometry reaches the GPU and how the egg texture is resolved.
  */
-public class RenderTitanSpawnEgg implements IItemRenderer {
+public class RenderTitanSpawnEgg implements net.minecraft.client.renderer.special.SpecialModelRenderer<ItemStack> {
 
 	public ModelTitanSpawnEgg model = new ModelTitanSpawnEgg();
 
@@ -51,7 +51,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 
 	/** 26.1.2: atlases are addressed by {@link SpriteId} instead of a hand-built {@code TextureAtlasSprite}. */
 	public TextureAtlasSprite sprite(Identifier texture) {
-		return this.sprites.get(new SpriteId(InventoryMenu.BLOCK_ATLAS, texture));
+		return this.sprites.get(new SpriteId(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS, texture));
 	}
 
 	/** 26.1.2: {@code RenderType::entityTranslucentCull} no longer exists as a method reference. */
@@ -61,7 +61,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 
 	/** 26.1.2: {@code RenderType::entityTranslucentCull} no longer exists as a method reference. */
 	public static RenderType translucentItemSheet() {
-		return RenderTypes.itemTranslucent(InventoryMenu.BLOCK_ATLAS);
+		return RenderTypes.itemTranslucent(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
 	}
 
 	public void renderItem(Identifier itemTexture, boolean itemFlipped, PoseStack poseStack, int packedLight, int packedOverlay, SubmitNodeCollector submitNodeCollector) {
@@ -279,7 +279,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 		}
 
 		if (this.model.eggType == 2) {
-			final RenderType fireType = entityTranslucentCull(InventoryMenu.BLOCK_ATLAS);
+			final RenderType fireType = entityTranslucentCull(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
 
 			this.model.fire.visible = false;
 
@@ -353,7 +353,7 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 		if (texture != null) {
 			// 26.1.2: Material.buffer(MultiBufferSource, ...) is gone; the model is now submitted through
 			// submitModelPart, which resolves the sprite and render type for us.
-			final Material material = new Material(InventoryMenu.BLOCK_ATLAS, texture);
+			final Material material = new Material(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS, texture);
 			final SpriteId spriteId = new SpriteId(material.sprite(), material.sprite());
 			final ModelTitanSpawnEgg eggModel = this.model;
 
@@ -442,8 +442,17 @@ public class RenderTitanSpawnEgg implements IItemRenderer {
 		}
 
 		@Override
-		public RenderTitanSpawnEgg bake(SpecialModelRenderer.BakingContext context) {
+		public net.minecraft.client.renderer.special.SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
 			return new RenderTitanSpawnEgg(context.sprites());
 		}
+	}
+	@Override
+	public net.minecraft.world.item.ItemStack extractArgument(ItemStack stack) {
+		return stack;
+	}
+
+	@Override
+	public void submit(ItemStack stack, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
+		this.submit(stack, net.minecraft.world.item.ItemDisplayContext.NONE, poseStack, submitNodeCollector, packedLight, packedOverlay, hasFoil, outlineColor);
 	}
 }

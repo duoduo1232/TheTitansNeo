@@ -67,7 +67,7 @@ public class RenderSpiderTitan extends LivingEntityRenderer<EntitySpiderTitan, T
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return SPIDER_TITAN;
 	}
 }

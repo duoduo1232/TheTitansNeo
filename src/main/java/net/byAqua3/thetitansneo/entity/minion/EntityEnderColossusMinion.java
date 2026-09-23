@@ -626,7 +626,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 			this.playSound(SoundEvents.ENDERMAN_SCREAM, this.getSoundVolume(), this.getVoicePitch() + 0.25F);
 		}
 
-		if (this.isSensitiveToWater() && this.isInWaterRainOrBubble()) {
+		if (this.isSensitiveToWater() && this.isInWaterOrRain()) {
 			this.teleport();
 			this.hurtServer((ServerLevel) this.level(), this.damageSources().onFire(), 4.0F);
 			this.hurtTime = 1;

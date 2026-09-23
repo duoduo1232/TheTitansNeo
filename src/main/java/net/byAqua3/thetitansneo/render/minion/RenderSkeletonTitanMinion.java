@@ -10,9 +10,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.renderer.entity.state.SkeletonRenderState;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderSkeletonTitanMinion extends SkeletonRenderer {
+
+	private Identifier currentTexture;
+
 
 	public static final Identifier SKELETON = Identifier.withDefaultNamespace("textures/entity/skeleton/skeleton.png");
 	public static final Identifier SKELETON_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/skeleton/skeleton_priest.png");
@@ -24,16 +28,13 @@ public class RenderSkeletonTitanMinion extends SkeletonRenderer {
 		super(context);
 	}
 
-	@Override
-	public TitanRenderState createRenderState() {
-		return new TitanRenderState();
-	}
+
 
 	@Override
-	public void extractRenderState(Skeleton entity, TitanRenderState state, float partialTicks) {
+	public void extractRenderState(Skeleton entity, SkeletonRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		// 26.1.2: getTextureLocation 改为按 RenderState 取，所以纹理在这里选定。
-		state.texture = getMinionTexture(entity);
+		this.currentTexture = getMinionTexture(entity);
 	}
 
 	private static Identifier getMinionTexture(Skeleton entity) {
@@ -56,7 +57,7 @@ public class RenderSkeletonTitanMinion extends SkeletonRenderer {
 	}
 
 	@Override
-	public Identifier getTextureLocation(TitanRenderState state) {
-		return state.texture;
+	public Identifier getTextureLocation(SkeletonRenderState state) {
+		return this.currentTexture == null ? SKELETON : this.currentTexture;
 	}
 }

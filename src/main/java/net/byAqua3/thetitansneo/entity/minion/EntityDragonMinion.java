@@ -237,7 +237,7 @@ public class EntityDragonMinion extends EnderDragon implements IMinion {
 			int y = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
 			BlockPos blockPos = new BlockPos(x, y, z);
 
-			this.setDragonFight(new EnderDragonFight(serverLevel, serverLevel.getServer().getWorldGenSettings().options().seed(), new EnderDragonFight.Data(true, false, false, false, Optional.of(this.getUUID()), Optional.of(blockPos), Optional.empty()), blockPos));
+			this.setDragonFight(new EnderDragonFight(true, false, false, java.util.Optional.empty(), 0, java.util.Optional.of(this.getUUID()), java.util.Optional.of(blockPos), new java.util.ArrayList<Integer>(), java.util.List.of()));
 		}
 		super.tickDeath();
 	}

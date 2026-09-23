@@ -10,9 +10,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.monster.spider.CaveSpider;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderCaveSpiderTitanMinion extends CaveSpiderRenderer {
+
+	private Identifier currentTexture;
+
 
 	public static final Identifier CAVE_SPIDER = Identifier.withDefaultNamespace("textures/entity/spider/cave_spider.png");
 	public static final Identifier CAVE_SPIDER_PRIEST = Identifier.tryBuild(TheTitansNeo.MODID, "textures/entity/minions/spider/cave_spider_priest.png");
@@ -24,16 +28,13 @@ public class RenderCaveSpiderTitanMinion extends CaveSpiderRenderer {
 		super(context);
 	}
 
-	@Override
-	public TitanRenderState createRenderState() {
-		return new TitanRenderState();
-	}
+
 
 	@Override
-	public void extractRenderState(CaveSpider entity, TitanRenderState state, float partialTicks) {
+	public void extractRenderState(CaveSpider entity, LivingEntityRenderState state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);
 		// 26.1.2: getTextureLocation 改为按 RenderState 取，所以纹理在这里选定。
-		state.texture = getMinionTexture(entity);
+		this.currentTexture = getMinionTexture(entity);
 	}
 
 	private static Identifier getMinionTexture(CaveSpider entity) {
@@ -56,7 +57,7 @@ public class RenderCaveSpiderTitanMinion extends CaveSpiderRenderer {
 	}
 
 	@Override
-	public Identifier getTextureLocation(TitanRenderState state) {
-		return state.texture;
+	public Identifier getTextureLocation(LivingEntityRenderState state) {
+		return this.currentTexture == null ? CAVE_SPIDER : this.currentTexture;
 	}
 }

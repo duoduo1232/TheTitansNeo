@@ -38,7 +38,7 @@ public class ItemCreepyWitherDoll extends Item {
 					MinecraftServer server = serverLevel.getServer();
 					ServerLevel voidLevel = server.getLevel(TheTitansNeoDimensions.THE_VOID);
 					BlockPos spawnPos = voidLevel.getRespawnData().pos();
-					player.teleport(new TeleportTransition(voidLevel, new Vec3(spawnPos.getX(), 85.0D, spawnPos.getZ()), Vec3.ZERO, 0.0F, 0.0F, false, TeleportTransition.DO_NOTHING));
+					player.teleport(new TeleportTransition(voidLevel, new Vec3(spawnPos.getX(), 85.0D, spawnPos.getZ()), Vec3.ZERO, 0.0F, 0.0F, java.util.Set.of(), TeleportTransition.DO_NOTHING));
 					return InteractionResult.SUCCESS;
 				} else {
 					player.sendSystemMessage(Component.translatable("item.thetitansneo.creepy_wither_doll.end.pos"));

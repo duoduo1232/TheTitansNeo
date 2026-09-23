@@ -31,7 +31,7 @@ public class TheTitansNeoSpawns {
 			skeletonTitan.setPos(spiderTitan.getX(), spiderTitan.getY(), spiderTitan.getZ());
 			skeletonTitan.setXRot(spiderTitan.getXRot());
 			skeletonTitan.setYRot(spiderTitan.getYRot());
-			skeletonTitan.finalizeSpawn(level, level.getCurrentDifficultyAt(spiderTitan.blockPosition()), EntitySpawnReason.SPAWN_EGG, null);
+			skeletonTitan.finalizeSpawn(level, level.getCurrentDifficultyAt(spiderTitan.blockPosition()), EntitySpawnReason.SPAWN_ITEM_USE, null);
 			skeletonTitan.setTitanHealth(skeletonTitan.getMaxHealth());
 			level.addFreshEntity(skeletonTitan);
 			skeletonTitan.startRiding(spiderTitan);

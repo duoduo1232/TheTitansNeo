@@ -61,7 +61,7 @@ public class EntityExperienceOrbTitan extends Entity {
 		Optional<EnchantedItemInUse> optional = EnchantmentHelper.getRandomItemWith(EnchantmentEffectComponents.REPAIR_WITH_XP, player, ItemStack::isDamaged);
 		if (optional.isPresent()) {
 			ItemStack itemstack = optional.get().itemStack();
-			int i = EnchantmentHelper.modifyDurabilityToRepairFromXp(player.serverLevel(), itemstack, (int) (value * itemstack.getXpRepairRatio()));
+			int i = EnchantmentHelper.modifyDurabilityToRepairFromXp(player.level(), itemstack, (int) (value * itemstack.getXpRepairRatio()));
 			int j = Math.min(i, itemstack.getDamageValue());
 			itemstack.setDamageValue(itemstack.getDamageValue() - j);
 			if (j > 0) {

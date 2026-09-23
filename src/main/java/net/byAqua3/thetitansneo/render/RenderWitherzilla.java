@@ -65,7 +65,7 @@ public class RenderWitherzilla extends LivingEntityRenderer<EntityWitherzilla, T
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return WITHERZILLA;
 	}
 }

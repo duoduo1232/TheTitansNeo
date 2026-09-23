@@ -239,7 +239,7 @@ public class ChunkGeneratorVoid extends NoiseBasedChunkGenerator implements IChu
 
 	@Override
 	public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
-		BlockState[] blockStates = this.getBaseColumn(chunk.getPos().x, chunk.getPos().z, randomState);
+		BlockState[] blockStates = this.getBaseColumn(chunk.getPos().x(), chunk.getPos().z(), randomState);
 		BlockPos.MutableBlockPos blockPos$mutableBlockPos = new BlockPos.MutableBlockPos();
 		Heightmap heightmap = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
 		Heightmap heightmap1 = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
@@ -252,7 +252,7 @@ public class ChunkGeneratorVoid extends NoiseBasedChunkGenerator implements IChu
 				for (int l = 0; l < 16; l++) {
 					BlockState blockState = blockStates[k << 11 | l << 7 | i];
 					if (blockState != null) {
-						chunk.setBlockState(blockPos$mutableBlockPos.set(k, j, l), blockState, false);
+						chunk.setBlockState(blockPos$mutableBlockPos.set(k, j, l), blockState, 0);
 						heightmap.update(k, j, l, blockState);
 						heightmap1.update(k, j, l, blockState);
 					}
@@ -260,4 +260,5 @@ public class ChunkGeneratorVoid extends NoiseBasedChunkGenerator implements IChu
 			}
 		}
 		return CompletableFuture.completedFuture(chunk);
-	}}
+	}
+}

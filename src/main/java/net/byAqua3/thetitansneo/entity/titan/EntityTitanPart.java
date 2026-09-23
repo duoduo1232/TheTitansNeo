@@ -168,7 +168,7 @@ public class EntityTitanPart extends PartEntity<EntityTitan> {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
-		if (!this.isInvulnerableTo(level, damageSource)) {
+		if (!this.isInvulnerableToBase(damageSource)) {
 			if (this.getOwner() != null && this.getOwner() instanceof IEntityMultiPartTitan) {
 				IEntityMultiPartTitan multiPartTitan = (IEntityMultiPartTitan) this.getOwner();
 				return multiPartTitan.attackEntityFromPart(this, damageSource, amount);

@@ -74,7 +74,7 @@ public class RenderMagmaCubeTitan extends LivingEntityRenderer<EntityMagmaCubeTi
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return MAGMACUBE_TITAN;
 	}
 }

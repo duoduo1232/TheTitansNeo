@@ -56,7 +56,7 @@ public class RenderZombifiedPiglinTitan extends LivingEntityRenderer<EntityZombi
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return ZOMBIFIED_PIGLIN_TITAN;
 	}
 }

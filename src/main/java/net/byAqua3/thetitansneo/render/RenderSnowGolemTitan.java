@@ -83,7 +83,7 @@ public class RenderSnowGolemTitan extends LivingEntityRenderer<EntitySnowGolemTi
 	}
 
 	@Override
-	protected Identifier getTextureLocation(TitanRenderState state) {
+	public Identifier getTextureLocation(TitanRenderState state) {
 		return SNOW_GOLEM_TTIAN;
 	}
 }

@@ -103,14 +103,14 @@ public class ChunkGeneratorNowhere extends NoiseBasedChunkGenerator implements I
 				}
 			}
 
-			if (structurePlacement.isStructureChunk(newStructureState, chunkpos.x, chunkpos.z)) {
+			if (structurePlacement.isStructureChunk(newStructureState, chunkpos.x(), chunkpos.z())) {
 				if (list.size() == 1) {
 					this.tryGenerateStructure(list.get(0), structureManager, registryAccess, randomState, structureTemplateManager, newStructureState.getLevelSeed(), chunk, chunkpos, sectionPos);
 				} else {
 					ArrayList<StructureSet.StructureSelectionEntry> arraylist = new ArrayList<>(list.size());
 					arraylist.addAll(list);
 					WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(0L));
-					worldgenRandom.setLargeFeatureSeed(newStructureState.getLevelSeed(), chunkpos.x, chunkpos.z);
+					worldgenRandom.setLargeFeatureSeed(newStructureState.getLevelSeed(), chunkpos.x(), chunkpos.z());
 					int i = 0;
 
 					for (StructureSet.StructureSelectionEntry structureSet$structureSelectionEntry1 : arraylist) {

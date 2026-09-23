@@ -90,7 +90,7 @@ public class ModelIronGolemTitan extends EntityModel<TitanRenderState> {
 
 
 	public void setAngles() {
-		this.body.setRotation(attackTime, attackTime, attackTime);
+		this.body.setRotation(0.0F, 0.0F, 0.0F);
 		this.body.setRotation(0.0F, 0.0F, 0.0F);
 		this.torso.setRotation(0.0F, 0.0F, 0.0F);
 		this.leftLeg1.setRotation(0.0F, 0.0F, 0.0F);

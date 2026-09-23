@@ -841,7 +841,7 @@ public class EntitySkeletonTitan extends EntityTitan implements IEntityMultiPart
 							@Override
 							public void tick() {
 								super.tick();
-								if ((this.inGround || this.onGround()) && !this.level().isClientSide()) {
+								if ((this.inGroundTime > 0 || this.onGround()) && !this.level().isClientSide()) {
 									this.discard();
 								}
 							}
