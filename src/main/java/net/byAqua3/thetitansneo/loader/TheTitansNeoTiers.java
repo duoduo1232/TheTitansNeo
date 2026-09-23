@@ -40,7 +40,7 @@ public final class TheTitansNeoTiers {
 	public static final ToolMaterial ADMINIUM = new ToolMaterial(
 			TheTitansNeoTags.INCORRECT_FOR_HARCADIUM_TOOL, 2147483647, 1000000000.0F, -1.0F, 60, NO_REPAIR);
 	public static final ToolMaterial ULTIMA = new ToolMaterial(
-			TheTitansNeoTags.INCORRECT_FOR_ULTIMA_TOOL, 2147483647, 9999.0F, -1.0F, 0, NO_REPAIR);
+			TheTitansNeoTags.INCORRECT_FOR_ULTIMA_TOOL, 2147483647, 9999.0F, -1.0F, 1, NO_REPAIR);
 
 	private TheTitansNeoTiers() {
 	}
