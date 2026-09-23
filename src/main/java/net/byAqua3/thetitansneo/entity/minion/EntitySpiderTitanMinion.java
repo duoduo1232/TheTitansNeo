@@ -571,7 +571,7 @@ public class EntitySpiderTitanMinion extends Spider implements RangedAttackMob, 
 				int k = Mth.floor(target.getZ() + this.getRandom().nextDouble() * 2.0D);
 				BlockPos blockPos = new BlockPos(i, j, k);
 				BlockState blockState = this.level().getBlockState(blockPos);
-				if (blockState.isAir() && ((ServerLevel) this.level()).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
+				if (blockState.isAir() && ServerSafe.mobGriefing(this.level())) {
 					this.level().setBlockAndUpdate(blockPos, Blocks.COBWEB.defaultBlockState());
 				}
 				if (!this.level().isClientSide()) {

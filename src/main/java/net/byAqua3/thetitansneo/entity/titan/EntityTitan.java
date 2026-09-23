@@ -1527,7 +1527,8 @@ public class EntityTitan extends AmbientCreature implements IAnimatedEntity, IEn
 			// 格挡流程整体搬进 LivingEntity.applyItemBlocking(ServerLevel, DamageSource, float)。
 			// 此处对齐原版 LivingEntity.hurtServer 的写法：由 applyItemBlocking 内部触发
 			// onDamageBlock 事件、扣盾牌耐久（BlocksAttacks.hurtBlockingItem）以及 blockUsingItem。
-			ServerLevel blockLevel = (ServerLevel) this.level();
+			// 26.1.2: baseHurt 已带 ServerLevel 形参，直接用形参而不是强转 this.level()
+			ServerLevel blockLevel = level;
 			float damageBlocked = this.applyItemBlocking(blockLevel, damageSource, amount);
 			amount -= damageBlocked;
 			flag = damageBlocked > 0.0F;

@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.byAqua3.thetitansneo.util.ServerSafe;
 
 public class EntityWitherTurretMortar extends EntityWitherTurret {
 
@@ -133,7 +134,7 @@ public class EntityWitherTurretMortar extends EntityWitherTurret {
 			this.level().explode(this, this.getX(), this.getY() - 1.0D, this.getZ(), 2.0F, true, ExplosionInteraction.MOB);
 		}
 
-		if (((ServerLevel) this.level()).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_DROPS)) {
+		if (ServerSafe.mobDrops(this.level())) {
 			List<ItemStack> drops = new ArrayList<>();
 			ItemStack itemStack = ItemStack.EMPTY;
 			if (this.isPlayerCreated()) {
