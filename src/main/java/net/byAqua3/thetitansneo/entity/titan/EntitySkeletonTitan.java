@@ -794,11 +794,12 @@ public class EntitySkeletonTitan extends EntityTitan implements IEntityMultiPart
 					float amount = (float) this.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
 					int knockbackAmount = this.getKnockbackAmount();
 
-					this.attackEntity(this.getTarget(), amount * 3.0F);
-					this.knockbackEntity(this.getTarget(), knockbackAmount);
-					this.getTarget().push(0.0D, 2.0D + this.getRandom().nextDouble(), 0.0D);
+					LivingEntity attackTarget = this.getTarget();
+					this.attackEntity(attackTarget, amount * 3.0F);
+					this.knockbackEntity(attackTarget, knockbackAmount);
+					attackTarget.push(0.0D, 2.0D + this.getRandom().nextDouble(), 0.0D);
 
-					List<Entity> entities = this.level().getEntities(this.getTarget(), this.getTarget().getBoundingBox().inflate(16.0D, 16.0D, 16.0D));
+					List<Entity> entities = this.level().getEntities(attackTarget, attackTarget.getBoundingBox().inflate(16.0D, 16.0D, 16.0D));
 					for (Entity entity : entities) {
 						if (entity != null && entity != this && entity instanceof LivingEntity && this.canAttackEntity(entity)) {
 							LivingEntity livingEntity = (LivingEntity) entity;
@@ -1010,11 +1011,12 @@ public class EntitySkeletonTitan extends EntityTitan implements IEntityMultiPart
 					float amount = (float) this.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
 					int knockbackAmount = this.getKnockbackAmount();
 
-					this.attackEntity(this.getTarget(), amount * 3.0F);
-					this.knockbackEntity(this.getTarget(), knockbackAmount);
-					this.getTarget().push(0.0D, 2.0D + this.getRandom().nextDouble(), 0.0D);
+					LivingEntity attackTarget = this.getTarget();
+					this.attackEntity(attackTarget, amount * 3.0F);
+					this.knockbackEntity(attackTarget, knockbackAmount);
+					attackTarget.push(0.0D, 2.0D + this.getRandom().nextDouble(), 0.0D);
 
-					List<Entity> entities = this.level().getEntities(this.getTarget(), this.getTarget().getBoundingBox().inflate(16.0D, 16.0D, 16.0D));
+					List<Entity> entities = this.level().getEntities(attackTarget, attackTarget.getBoundingBox().inflate(16.0D, 16.0D, 16.0D));
 					for (Entity entity : entities) {
 						if (entity != null && entity != this && entity instanceof LivingEntity && this.canAttackEntity(entity)) {
 							LivingEntity livingEntity = (LivingEntity) entity;

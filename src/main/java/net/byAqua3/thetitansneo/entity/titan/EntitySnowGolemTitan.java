@@ -164,9 +164,10 @@ public class EntitySnowGolemTitan extends EntityTitan implements RangedAttackMob
 		double d0 = this.getX();
 		double d1 = this.getEyeY() - 5.0D;
 		double d2 = this.getZ();
-		double d3 = this.getTarget().getX() - d0;
-		double d4 = this.getTarget().getEyeY() - d1;
-		double d5 = this.getTarget().getZ() - d2;
+		// 26.1.2 修复：方法已经收了 target 参数，这里不该再用 this.getTarget()（可能为 null / 不同对象）
+		double d3 = target.getX() - d0;
+		double d4 = target.getEyeY() - d1;
+		double d5 = target.getZ() - d2;
 		
 		EntitySnowballTitan snowballTitan = new EntitySnowballTitan(this.level(), this);
 		snowballTitan.setPos(d0, d1, d2);

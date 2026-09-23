@@ -1,22 +1,16 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:adminium_chestplate"
-	},
-	"pattern": [
-		"H H",
-		"BVB",
-		"BBB"
-	],
-	"key": {
-		"B": {
-			"item": "thetitansneo:bedrock_compact"
-		},
-		"H": {
-			"item": "thetitansneo:harcadium_block"
-		},
-		"V": {
-			"item": "thetitansneo:void_block"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:adminium_chestplate"
+  },
+  "pattern": [
+    "H H",
+    "BVB",
+    "BBB"
+  ],
+  "key": {
+    "B": "thetitansneo:bedrock_compact",
+    "H": "thetitansneo:harcadium_block",
+    "V": "thetitansneo:void_block"
+  }
 }

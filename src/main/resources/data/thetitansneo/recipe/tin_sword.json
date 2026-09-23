@@ -1,19 +1,15 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:tin_sword"
-	},
-	"pattern": [
-		"T",
-		"T",
-		"S"
-	],
-	"key": {
-		"T": {
-			"item": "thetitansneo:tin_ingot"
-		},
-		"S": {
-			"tag": "c:rods/wooden"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:tin_sword"
+  },
+  "pattern": [
+    "T",
+    "T",
+    "S"
+  ],
+  "key": {
+    "T": "thetitansneo:tin_ingot",
+    "S": "#c:rods/wooden"
+  }
 }

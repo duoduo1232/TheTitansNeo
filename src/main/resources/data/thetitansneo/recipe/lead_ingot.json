@@ -1,11 +1,9 @@
 {
-	"type": "minecraft:smelting",
-	"cookingtime": 200,
-	"experience": 3.0,
-	"ingredient": {
-		"item": "thetitansneo:lead_ore"
-	},
-	"result": {
-		"id": "thetitansneo:lead_ingot"
-	}
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "experience": 3.0,
+  "ingredient": "thetitansneo:lead_ore",
+  "result": {
+    "id": "thetitansneo:lead_ingot"
+  }
 }

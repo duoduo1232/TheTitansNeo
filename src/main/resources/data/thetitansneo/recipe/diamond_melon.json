@@ -1,19 +1,15 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:diamond_melon"
-	},
-	"pattern": [
-		"DDD",
-		"DFD",
-		"DDD"
-	],
-	"key": {
-		"D": {
-			"tag": "c:gems/diamond"
-		},
-		"F": {
-			"item": "minecraft:melon_slice"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:diamond_melon"
+  },
+  "pattern": [
+    "DDD",
+    "DFD",
+    "DDD"
+  ],
+  "key": {
+    "D": "#c:gems/diamond",
+    "F": "minecraft:melon_slice"
+  }
 }

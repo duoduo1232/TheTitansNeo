@@ -1,15 +1,13 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:adminium_helmet"
-	},
-	"pattern": [
-		"BBB",
-		"B B"
-	],
-	"key": {
-		"B": {
-			"item": "thetitansneo:bedrock_compact"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:adminium_helmet"
+  },
+  "pattern": [
+    "BBB",
+    "B B"
+  ],
+  "key": {
+    "B": "thetitansneo:bedrock_compact"
+  }
 }

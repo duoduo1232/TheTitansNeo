@@ -1,15 +1,13 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:void_helmet"
-	},
-	"pattern": [
-		"VVV",
-		"V V"
-	],
-	"key": {
-		"V": {
-			"item": "thetitansneo:void"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:void_helmet"
+  },
+  "pattern": [
+    "VVV",
+    "V V"
+  ],
+  "key": {
+    "V": "thetitansneo:void"
+  }
 }

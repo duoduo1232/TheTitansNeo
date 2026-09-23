@@ -1,11 +1,9 @@
 {
-	"type": "minecraft:smelting",
-	"cookingtime": 200,
-	"experience": 100.0,
-	"ingredient": {
-		"item": "thetitansneo:adamantium_ore"
-	},
-	"result": {
-		"id": "thetitansneo:adamantium"
-	}
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "experience": 100.0,
+  "ingredient": "thetitansneo:adamantium_ore",
+  "result": {
+    "id": "thetitansneo:adamantium"
+  }
 }

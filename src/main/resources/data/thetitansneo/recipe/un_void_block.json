@@ -1,12 +1,10 @@
 {
-	"type": "minecraft:crafting_shapeless",
-	"result": {
-		"id": "thetitansneo:void",
-		"count": 9
-	},
-	"ingredients": [
-		{
-			"item": "thetitansneo:void_block"
-		}
-	]
+  "type": "minecraft:crafting_shapeless",
+  "result": {
+    "id": "thetitansneo:void",
+    "count": 9
+  },
+  "ingredients": [
+    "thetitansneo:void_block"
+  ]
 }

@@ -1,11 +1,9 @@
 {
-	"type": "minecraft:smelting",
-	"cookingtime": 200,
-	"experience": 2.0,
-	"ingredient": {
-		"item": "thetitansneo:copper_ore"
-	},
-	"result": {
-		"id": "thetitansneo:copper_ingot"
-	}
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "experience": 2.0,
+  "ingredient": "thetitansneo:copper_ore",
+  "result": {
+    "id": "thetitansneo:copper_ingot"
+  }
 }

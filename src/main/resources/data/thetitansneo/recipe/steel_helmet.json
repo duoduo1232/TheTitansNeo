@@ -1,15 +1,13 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:steel_helmet"
-	},
-	"pattern": [
-		"SSS",
-		"S S"
-	],
-	"key": {
-		"S": {
-			"item": "thetitansneo:steel_ingot"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:steel_helmet"
+  },
+  "pattern": [
+    "SSS",
+    "S S"
+  ],
+  "key": {
+    "S": "thetitansneo:steel_ingot"
+  }
 }

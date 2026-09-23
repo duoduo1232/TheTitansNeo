@@ -1,19 +1,15 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:diamond_pumpkin_pie"
-	},
-	"pattern": [
-		"DDD",
-		"DFD",
-		"DDD"
-	],
-	"key": {
-		"D": {
-			"tag": "c:gems/diamond"
-		},
-		"F": {
-			"item": "minecraft:pumpkin_pie"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:diamond_pumpkin_pie"
+  },
+  "pattern": [
+    "DDD",
+    "DFD",
+    "DDD"
+  ],
+  "key": {
+    "D": "#c:gems/diamond",
+    "F": "minecraft:pumpkin_pie"
+  }
 }

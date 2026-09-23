@@ -816,7 +816,7 @@ public class EntityEnderColossusMinion extends EnderMan implements RangedAttackM
 				if (d0 < 4.0D) {
 					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
 				}
-				if (this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
+				if (this.getTarget() != null && this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.teleportTowards(this.getTarget());
 					this.teleport();
 					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());

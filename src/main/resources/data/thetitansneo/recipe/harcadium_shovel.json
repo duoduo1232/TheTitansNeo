@@ -1,19 +1,15 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:harcadium_shovel"
-	},
-	"pattern": [
-		"H",
-		"D",
-		"D"
-	],
-	"key": {
-		"H": {
-			"item": "thetitansneo:harcadium"
-		},
-		"D": {
-			"tag": "c:gems/diamond"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:harcadium_shovel"
+  },
+  "pattern": [
+    "H",
+    "D",
+    "D"
+  ],
+  "key": {
+    "H": "thetitansneo:harcadium",
+    "D": "#c:gems/diamond"
+  }
 }

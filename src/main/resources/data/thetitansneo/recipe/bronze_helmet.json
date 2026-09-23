@@ -1,15 +1,13 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:bronze_helmet"
-	},
-	"pattern": [
-		"BBB",
-		"B B"
-	],
-	"key": {
-		"B": {
-			"item": "thetitansneo:bronze_ingot"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:bronze_helmet"
+  },
+  "pattern": [
+    "BBB",
+    "B B"
+  ],
+  "key": {
+    "B": "thetitansneo:bronze_ingot"
+  }
 }

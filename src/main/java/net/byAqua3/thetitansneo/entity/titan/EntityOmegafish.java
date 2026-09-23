@@ -885,11 +885,12 @@ public class EntityOmegafish extends EntityTitan implements IEntityMultiPartTita
 						this.level().addFreshEntity(colorLightningBolt2);
 					}
 
-					this.attackEntity(this.getTarget(), amount);
-					this.knockbackEntity(this.getTarget(), knockbackAmount);
-					this.getTarget().push(0.0D, 2.0D, 0.0D);
+					LivingEntity attackTarget = this.getTarget();
+					this.attackEntity(attackTarget, amount);
+					this.knockbackEntity(attackTarget, knockbackAmount);
+					attackTarget.push(0.0D, 2.0D, 0.0D);
 
-					List<Entity> entities = this.level().getEntities(this.getTarget(), this.getTarget().getBoundingBox().inflate(2.0D, 2.0D, 2.0D));
+					List<Entity> entities = this.level().getEntities(attackTarget, attackTarget.getBoundingBox().inflate(2.0D, 2.0D, 2.0D));
 					for (Entity entity : entities) {
 						if (entity != null && entity != this && entity instanceof LivingEntity && this.canAttackEntity(entity)) {
 							LivingEntity livingEntity = (LivingEntity) entity;

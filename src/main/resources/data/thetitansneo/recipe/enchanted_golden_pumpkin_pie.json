@@ -1,19 +1,15 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:enchanted_golden_pumpkin_pie"
-	},
-	"pattern": [
-		"GGG",
-		"GFG",
-		"GGG"
-	],
-	"key": {
-		"G": {
-			"tag": "c:storage_blocks/gold"
-		},
-		"F": {
-			"item": "thetitansneo:golden_pumpkin_pie"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:enchanted_golden_pumpkin_pie"
+  },
+  "pattern": [
+    "GGG",
+    "GFG",
+    "GGG"
+  ],
+  "key": {
+    "G": "#c:storage_blocks/gold",
+    "F": "thetitansneo:golden_pumpkin_pie"
+  }
 }

@@ -740,7 +740,7 @@ public class EntityZombifiedPiglinTitanMinion extends ZombifiedPiglin implements
 				if (d0 < 0.8D) {
 					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
 				}
-				if (this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
+				if (this.getTarget() != null && this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
 					this.lookAt(this.getTarget(), 180.0F, 180.0F);
 					this.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, 7));
 					double d01 = this.getTarget().getX() - this.getX();

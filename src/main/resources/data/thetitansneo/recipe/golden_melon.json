@@ -1,19 +1,15 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:golden_melon"
-	},
-	"pattern": [
-		"GGG",
-		"GFG",
-		"GGG"
-	],
-	"key": {
-		"G": {
-			"tag": "c:ingots/gold"
-		},
-		"F": {
-			"item": "minecraft:melon_slice"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:golden_melon"
+  },
+  "pattern": [
+    "GGG",
+    "GFG",
+    "GGG"
+  ],
+  "key": {
+    "G": "#c:ingots/gold",
+    "F": "minecraft:melon_slice"
+  }
 }

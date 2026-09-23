@@ -1,16 +1,14 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:steel_chestplate"
-	},
-	"pattern": [
-		"S S",
-		"SSS",
-		"SSS"
-	],
-	"key": {
-		"S": {
-			"item": "thetitansneo:steel_ingot"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:steel_chestplate"
+  },
+  "pattern": [
+    "S S",
+    "SSS",
+    "SSS"
+  ],
+  "key": {
+    "S": "thetitansneo:steel_ingot"
+  }
 }

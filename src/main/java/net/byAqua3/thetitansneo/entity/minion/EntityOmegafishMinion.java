@@ -732,19 +732,23 @@ public class EntityOmegafishMinion extends Silverfish implements RangedAttackMob
 				}
 			}
 		} else if (this.getMinionType() == EnumMinionType.ZEALOT) {
-			if (this.getTarget() != null) {
-				double d0 = this.distanceToSqr(this.getTarget());
+			// 26.1.2 修复：doHurtTarget 可能击杀目标并让 getTarget() 变回 null，
+			// 因此把目标缓存在局部变量里并每次重新判空，避免 NPE。
+			LivingEntity zealousTarget = this.getTarget();
+			if (zealousTarget != null) {
+				double d0 = this.distanceToSqr(zealousTarget);
 				if (d0 < 4.0D) {
-					this.doHurtTarget((ServerLevel) this.level(), this.getTarget());
+					this.doHurtTarget((ServerLevel) this.level(), zealousTarget);
+					zealousTarget = this.getTarget();
 				}
-				if (this.onGround() && d0 < 256.0D && this.getTarget().getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
-					this.lookAt(this.getTarget(), 180.0F, 180.0F);
+				if (zealousTarget != null && this.onGround() && d0 < 256.0D && zealousTarget.getY() > this.getY() + 3.0D && this.getRandom().nextInt(40) == 0) {
+					this.lookAt(zealousTarget, 180.0F, 180.0F);
 					if (!this.level().isClientSide()) {
 						this.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, 7));
 					}
 
-					double d01 = this.getTarget().getX() - this.getX();
-					double d1 = this.getTarget().getZ() - this.getZ();
+					double d01 = zealousTarget.getX() - this.getX();
+					double d1 = zealousTarget.getZ() - this.getZ();
 					float f2 = (float) Math.sqrt(d01 * d01 + d1 * d1);
 					this.jumpFromGround();
 					this.setDeltaMovement(d01 / f2 * 0.75D * 0.75D + this.getDeltaMovement().x * 0.75D, this.getDeltaMovement().y, d1 / f2 * 0.75D * 0.75D + this.getDeltaMovement().z * 0.75D);

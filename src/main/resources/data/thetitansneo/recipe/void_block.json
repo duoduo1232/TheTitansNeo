@@ -1,16 +1,14 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:void_block"
-	},
-	"pattern": [
-		"VVV",
-		"VVV",
-		"VVV"
-	],
-	"key": {
-		"V": {
-			"item": "thetitansneo:void"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:void_block"
+  },
+  "pattern": [
+    "VVV",
+    "VVV",
+    "VVV"
+  ],
+  "key": {
+    "V": "thetitansneo:void"
+  }
 }

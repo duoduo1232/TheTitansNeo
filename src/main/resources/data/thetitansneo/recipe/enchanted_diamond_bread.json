@@ -1,19 +1,15 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:enchanted_diamond_bread"
-	},
-	"pattern": [
-		"DDD",
-		"DFD",
-		"DDD"
-	],
-	"key": {
-		"D": {
-			"tag": "c:storage_blocks/diamond"
-		},
-		"F": {
-			"item": "thetitansneo:diamond_bread"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:enchanted_diamond_bread"
+  },
+  "pattern": [
+    "DDD",
+    "DFD",
+    "DDD"
+  ],
+  "key": {
+    "D": "#c:storage_blocks/diamond",
+    "F": "thetitansneo:diamond_bread"
+  }
 }

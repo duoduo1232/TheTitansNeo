@@ -1,16 +1,14 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:copper_chestplate"
-	},
-	"pattern": [
-		"C C",
-		"CCC",
-		"CCC"
-	],
-	"key": {
-		"C": {
-			"tag": "c:ingots/copper"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:copper_chestplate"
+  },
+  "pattern": [
+    "C C",
+    "CCC",
+    "CCC"
+  ],
+  "key": {
+    "C": "#c:ingots/copper"
+  }
 }

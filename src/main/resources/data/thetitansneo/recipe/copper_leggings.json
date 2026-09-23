@@ -1,16 +1,14 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:copper_leggings"
-	},
-	"pattern": [
-		"CCC",
-		"C C",
-		"C C"
-	],
-	"key": {
-		"C": {
-			"tag": "c:ingots/copper"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:copper_leggings"
+  },
+  "pattern": [
+    "CCC",
+    "C C",
+    "C C"
+  ],
+  "key": {
+    "C": "#c:ingots/copper"
+  }
 }

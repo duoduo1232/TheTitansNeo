@@ -1,11 +1,9 @@
 {
-	"type": "minecraft:smelting",
-	"cookingtime": 200,
-	"experience": 3.0,
-	"ingredient": {
-		"item": "thetitansneo:chromium_ore"
-	},
-	"result": {
-		"id": "thetitansneo:chromium_ingot"
-	}
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "experience": 3.0,
+  "ingredient": "thetitansneo:chromium_ore",
+  "result": {
+    "id": "thetitansneo:chromium_ingot"
+  }
 }

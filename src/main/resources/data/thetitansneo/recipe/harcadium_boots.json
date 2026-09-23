@@ -1,15 +1,13 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"result": {
-		"id": "thetitansneo:harcadium_boots"
-	},
-	"pattern": [
-		"H H",
-		"H H"
-	],
-	"key": {
-		"H": {
-			"item": "thetitansneo:harcadium"
-		}
-	}
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "id": "thetitansneo:harcadium_boots"
+  },
+  "pattern": [
+    "H H",
+    "H H"
+  ],
+  "key": {
+    "H": "thetitansneo:harcadium"
+  }
 }

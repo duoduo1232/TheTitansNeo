@@ -1,12 +1,10 @@
 {
-	"type": "minecraft:crafting_shapeless",
-	"result": {
-		"id": "thetitansneo:harcadium_nugget",
-		"count": 9
-	},
-	"ingredients": [
-		{
-			"item": "thetitansneo:harcadium"
-		}
-	]
+  "type": "minecraft:crafting_shapeless",
+  "result": {
+    "id": "thetitansneo:harcadium_nugget",
+    "count": 9
+  },
+  "ingredients": [
+    "thetitansneo:harcadium"
+  ]
 }

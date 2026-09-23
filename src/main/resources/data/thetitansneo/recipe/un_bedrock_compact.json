@@ -1,12 +1,10 @@
 {
-	"type": "minecraft:crafting_shapeless",
-	"result": {
-		"id": "minecraft:bedrock",
-		"count": 9
-	},
-	"ingredients": [
-		{
-			"item": "thetitansneo:bedrock_compact"
-		}
-	]
+  "type": "minecraft:crafting_shapeless",
+  "result": {
+    "id": "minecraft:bedrock",
+    "count": 9
+  },
+  "ingredients": [
+    "thetitansneo:bedrock_compact"
+  ]
 }
