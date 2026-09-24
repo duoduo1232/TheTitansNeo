@@ -104,6 +104,12 @@ public class EntityEnderColossusCrystal extends EntityFlying {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource damageSource, float amount) {
+
+		// 26.1.2: NeoForge 会在 LivingDamageEvent.Pre 后断言实体未被杀死；
+		// 泰坦/仆从有很长的死亡动画，期间仍会被选中攻击，必须在这里拦掉。
+		if (this.isDeadOrDying() || this.isRemoved()) {
+			return false;
+		}
 		if (this.isInvulnerable()) {
 			return false;
 		}
